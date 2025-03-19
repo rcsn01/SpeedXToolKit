@@ -35,24 +35,21 @@ class MainView(tk.Frame):
         self.preview_text = tk.Text(self, height=40, width=150)
         self.preview_text.grid(row=3, column=1, columnspan=2, padx=10, pady=5)
 
-        self.button_frame = tk.Frame(self, padx=10, pady=10)
-        self.button_frame.grid(row=3, column = 0, padx=20, pady=20)
-
         # Additional buttons
-        self.drop_column_button = tk.Button(self.button_frame, text="Drop Column", command=self.drop_column)
-        self.drop_column_button.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        self.drop_column_button = tk.Button(self, text="Drop Column", command=self.drop_column)
+        self.drop_column_button.grid(row=4, column=0, padx=10, pady=5, sticky="w")
 
-        self.rename_target_button = tk.Button(self.button_frame, text="Rename Target", command=self.rename_target)
-        self.rename_target_button.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        self.rename_target_button = tk.Button(self, text="Rename Target", command=self.rename_target)
+        self.rename_target_button.grid(row=4, column=1, padx=10, pady=5, sticky="w")
 
-        self.pivot_table_button = tk.Button(self.button_frame, text="Pivot Table", command=self.pivot_table)
-        self.pivot_table_button.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        self.pivot_table_button = tk.Button(self, text="Pivot Table", command=self.pivot_table)
+        self.pivot_table_button.grid(row=5, column=0, padx=10, pady=5, sticky="w")
 
-        self.delta_calculation_button = tk.Button(self.button_frame, text="Delta Calculation", command=self.delta_calculation)
-        self.delta_calculation_button.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        self.delta_calculation_button = tk.Button(self, text="Delta Calculation", command=self.delta_calculation)
+        self.delta_calculation_button.grid(row=5, column=1, padx=10, pady=5, sticky="w")
 
-        self.combine_file_button = tk.Button(self.button_frame, text="Combine File", command=self.combine_file)
-        self.combine_file_button.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        self.combine_file_button = tk.Button(self, text="Combine File", command=self.combine_file)
+        self.combine_file_button.grid(row=6, column=0, padx=10, pady=5, sticky="w")
 
     def load_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx")])
