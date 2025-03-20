@@ -5,9 +5,7 @@ from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
 
-
 def _process_input(df, target_name, new_name):
-    print(target_name)
     """Renames the target column in the given DataFrame."""
     if target_name not in df.columns:
         messagebox.showerror("Error", f"Column '{target_name}' not found in DataFrame.")
@@ -15,7 +13,6 @@ def _process_input(df, target_name, new_name):
     df = df.rename(columns={target_name: new_name})
     #print(df)
     return df
-
 
 def rename_target_window(root):
     # Create the main frame
