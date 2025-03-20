@@ -4,6 +4,8 @@ from controllers.file_controller import *
 from controllers.save_controller import *
 import pandas as pd
 from models.dataframe_model import *
+from models.drop_column import *
+from models.rename_target import *
 
 class MainView(tk.Frame):
     def __init__(self, master):
@@ -32,7 +34,7 @@ class MainView(tk.Frame):
         self.preview_label.grid(row=2, column=1, padx=10, pady=5, columnspan=2, sticky="w")
 
         # Text widget for displaying the DataFrame preview
-        self.preview_text = tk.Text(self, height=40, width=150)
+        self.preview_text = tk.Text(self, height=40, width=140)
         self.preview_text.grid(row=3, column=1, columnspan=2, padx=10, pady=5)
 
         self.button_frame = tk.Frame(self, padx=10, pady=10)
@@ -80,28 +82,13 @@ class MainView(tk.Frame):
 
     def drop_column(self):
         if self.df is not None:
-            column_name = simpledialog.askstring("Input", "Enter the column name to drop:")
-            if column_name in self.df.columns:
-                self.df = self.df.drop(columns=[column_name])
-                messagebox.showinfo("Success", f"Column '{column_name}' dropped.")
-                self.display_dataframe_preview()
-            else:
-                messagebox.showerror("Error", "Column not found!")
-        else:
-            messagebox.showwarning("Warning", "No data loaded!")
+            self.df = drop_column(self.df)
+            self.display_dataframe_preview()
 
     def rename_target(self):
         if self.df is not None:
-            old_name = simpledialog.askstring("Input", "Enter the current column name:")
-            if old_name in self.df.columns:
-                new_name = simpledialog.askstring("Input", "Enter the new column name:")
-                self.df = self.df.rename(columns={old_name: new_name})
-                messagebox.showinfo("Success", f"Column '{old_name}' renamed to '{new_name}'.")
-                self.display_dataframe_preview()
-            else:
-                messagebox.showerror("Error", "Column not found!")
-        else:
-            messagebox.showwarning("Warning", "No data loaded!")
+            self.df = rename_target(self.df)
+            self.display_dataframe_preview()
 
     def pivot_table(self):
         if self.df is not None:
