@@ -151,7 +151,7 @@ class MainView(tk.Frame):
         self.preview_frame.pack(side="left", fill="both", expand=True, anchor="nw")
 
         # DataFrame Preview (Center over gradient)
-        self.preview_text = tk.Text(self.preview_frame, height=45, width=125, bg=white_hex, highlightthickness=0)
+        self.preview_text = tk.Text(self.preview_frame, height=45, width=125, bg=white_hex, fg="black", highlightthickness=0)
         self.preview_text.place(relx=0.5, rely=0.5, anchor="center")  # Center preview inside the frame
 
 
