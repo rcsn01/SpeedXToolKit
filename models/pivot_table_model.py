@@ -1,4 +1,4 @@
-def pivot_table(df, target, value):
+def pivot_table_model(df, target, value):
     # If target or value is missing, return the original DataFrame
     if not target or not value:
         return df, None

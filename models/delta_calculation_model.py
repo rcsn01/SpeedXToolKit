@@ -1,5 +1,5 @@
 import pandas as pd
-def delta_calculation(df, column1, column2, delta):
+def delta_calculation_model(df, column1, column2, delta):
     """
     Calculate the difference between two columns and append the result as a new column.
     

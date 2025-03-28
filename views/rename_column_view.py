@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox
 from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
-from models.rename_column import *
+from models.rename_column_model import *
 
 def rename_column_view(df):
     """Load Excel file and allow the user to confirm the header row."""
@@ -61,8 +61,7 @@ def rename_column_view(df):
         # Run the window
         root.mainloop()
         target_name, new_name = result["target_name"], result["new_name"]
-        processed_df = rename_column(df, target_name, new_name)
-        return processed_df
+        return df, target_name, new_name
 
     except Exception as e:
         print(f"Error: {e}")

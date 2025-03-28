@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox
 from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
-from models.drop_column import *
+from models.drop_column_model import *
 
 def drop_column_view(df):
     """Load Excel file and allow the user to confirm the header row."""
@@ -52,8 +52,7 @@ def drop_column_view(df):
         root.mainloop()
         input = result["keep_input"]
 
-        processed_df = drop_column(df, input)
-        return processed_df
+        return df, input
 
     except Exception as e:
         print(f"Error: {e}")

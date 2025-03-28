@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox
 from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
-from models.pivot_table import *
+from models.pivot_table_model import *
 
 def pivot_table_view(df):
     """Load Excel file and allow the user to confirm the header row."""
@@ -60,8 +60,7 @@ def pivot_table_view(df):
         # Run the window
         root.mainloop()
         target_name, new_name = result["target_name"], result["new_name"]
-        processed_df = pivot_table(df, target_name, new_name)
-        return processed_df
+        return df, target_name, new_name
 
     except Exception as e:
         print("OHHH NOOOOOOOOO")

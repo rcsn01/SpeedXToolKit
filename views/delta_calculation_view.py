@@ -4,8 +4,8 @@ from tkinter import ttk, messagebox
 from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
-from models.pivot_table import *
-from models.delta_calculation import *
+from models.pivot_table_model import *
+from models.delta_calculation_model import *
 
 def delta_calculation_view(df):
     """Load Excel file and allow the user to confirm the header row."""
@@ -68,8 +68,7 @@ def delta_calculation_view(df):
         # Run the window
         root.mainloop()
         var1, var2, var3 = result["var1"], result["var2"], result["var3"]
-        processed_df = delta_calculation(df, var1, var2, var3)
-        return processed_df
+        return df, var1, var2, var3
 
     except Exception as e:
         print("OHHH NOOOOOOOOO")

@@ -4,11 +4,8 @@ from controllers.file_controller import *
 from controllers.save_controller import *
 import pandas as pd
 from models.dataframe_model import *
-from models.rename_column import *
-from views.drop_column_view import *
-from views.rename_column_view import *
-from views.pivot_table_view import *
-from views.delta_calculation_view import *
+from controllers.processing_controller import *
+
 class MainView(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
@@ -46,7 +43,7 @@ class MainView(tk.Frame):
         self.drop_column_button = tk.Button(self.button_frame, text="Drop Column", command=self.drop_column)
         self.drop_column_button.grid(row=0, column=0, padx=0, pady=5, sticky="w")
 
-        self.rename_target_button = tk.Button(self.button_frame, text="Rename Target", command=self.rename_target)
+        self.rename_target_button = tk.Button(self.button_frame, text="Rename Column", command=self.rename_column)
         self.rename_target_button.grid(row=1, column=0, padx=0, pady=5, sticky="w")
 
         self.pivot_table_button = tk.Button(self.button_frame, text="Pivot Table", command=self.pivot_table)
@@ -100,27 +97,27 @@ class MainView(tk.Frame):
 
     def drop_column(self):
         if self.df is not None:
-            self.df = drop_column_view(self.df)
+            self.df = drop_column(self.df)
             self.display_dataframe_preview()
 
-    def rename_target(self):
+    def rename_column(self):
         if self.df is not None:
-            self.df = rename_column_view(self.df)
+            self.df = rename_column(self.df)
             self.display_dataframe_preview()
 
     def pivot_table(self):
         if self.df is not None:
-            self.df = pivot_table_view(self.df)
+            self.df = pivot_table(self.df)
             self.display_dataframe_preview()
 
     def delta_calculation(self):
         if self.df is not None:
-            self.df = delta_calculation_view(self.df)
+            self.df = delta_calculation(self.df)
             self.display_dataframe_preview()
 
     def produce_output(self):
         if self.df is not None:
-            self.df = delta_calculation_view(self.df)
+            self.df = delta_calculation(self.df)
             self.display_dataframe_preview()
 
     def combine_file(self):

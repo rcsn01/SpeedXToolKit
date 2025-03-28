@@ -6,7 +6,7 @@ from models.dataframe_model import *
 import numpy as np
 
 
-def drop_column(df, keep_input):
+def drop_column_model(df, keep_input):
     to_drop = keep_input.strip()
     
     if not to_drop:
