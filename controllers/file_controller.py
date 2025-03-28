@@ -59,20 +59,6 @@ def file_preview(df, header_row, file_path, root):
     keep_input.insert(0, "Well, Well Position, Sample Name, Target Name, CT")
     keep_input.grid(row=0, column=1, padx=5, sticky="w")
 
-    # Pivot Target Name & Pivot Value Name - Side by Side
-    pivot_frame = tk.Frame(root)
-    pivot_frame.pack(pady=5)
-
-    tk.Label(pivot_frame, text="Pivot Target:").grid(row=0, column=0, padx=5, sticky="e")
-    target_name = tk.Entry(pivot_frame, width=12)
-    target_name.insert(0, "Target Name")
-    target_name.grid(row=0, column=1, padx=5)
-
-    tk.Label(pivot_frame, text="Pivot Value:").grid(row=0, column=2, padx=5, sticky="e")
-    value_name = tk.Entry(pivot_frame, width=12)
-    value_name.insert(0, "CT")
-    value_name.grid(row=0, column=3, padx=5)
-
     # Store result
     result = {"header_row": None}
 
@@ -82,8 +68,6 @@ def file_preview(df, header_row, file_path, root):
             user_header_row = int(header_input.get())
             result["header_row"] = user_header_row
             result["keep_input"] = keep_input.get()
-            result["target_name"] = target_name.get()
-            result["value_name"] = value_name.get()
             root.quit()
             root.destroy()
         except ValueError:
@@ -104,7 +88,7 @@ def file_preview(df, header_row, file_path, root):
     # Run the window
     root.mainloop()
 
-    return result["header_row"], result["keep_input"], result["target_name"], result["value_name"]
+    return result["header_row"], result["keep_input"]
 
 
 def load_xls(file_path):
@@ -114,34 +98,15 @@ def load_xls(file_path):
         header_row = find_header_row(df)
 
         if header_row is not None:
-            # Create a Tkinter window for preview and header selection
             root = tk.Tk()
             root.title("Header Row Preview")
             root.geometry("1000x700")
 
             #print("1AABBBBBABBAAA")
-            header_row, keep_input, target_name, value_name = file_preview(df, header_row, file_path, root)  # Show preview and input options
-            #print(header_row)
-            #print("2AAAAA")
-            # Main loop to keep the window open
-            #root.mainloop()
-
-            # Once confirmed, reload the dataframe with the chosen header
+            header_row, keep_input = file_preview(df, header_row, file_path, root)  # Show preview and input options
             df_with_header = pd.read_excel(file_path, engine="xlrd", header=header_row)
-            #print("Columns detected:", df_with_header.columns.tolist())
-
-            #print("returnhereee!!!!!!!!")
-            #print(df_with_header)
-            #print(keep_input)
             loaded_df = filter_columns(df_with_header, keep_input)
-            #print("aaaa")
-            #print(loaded_df)
-            if target_name:
-                id_df, target_df = pivot_dataframe(loaded_df, target_name, value_name)
-                #print("bbbb")
-                target_df = clear_undefined(target_df)
-                #print("cccc")
-                loaded_df = what_do_i_have(id_df, target_df)
+            loaded_df = clear_undefined(loaded_df)
             return loaded_df
 
     except Exception as e:

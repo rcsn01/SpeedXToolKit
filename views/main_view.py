@@ -4,7 +4,11 @@ from controllers.file_controller import *
 from controllers.save_controller import *
 import pandas as pd
 from models.dataframe_model import *
-
+from models.rename_column import *
+from views.drop_column_view import *
+from views.rename_column_view import *
+from views.pivot_table_view import *
+from views.delta_calculation_view import *
 class MainView(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
@@ -35,8 +39,30 @@ class MainView(tk.Frame):
         self.preview_text = tk.Text(self, height=40, width=150)
         self.preview_text.grid(row=3, column=1, columnspan=2, padx=10, pady=5)
 
+        self.button_frame = tk.Frame(self, padx=0, pady=10)
+        self.button_frame.grid(row=3, column = 0, padx=5, pady=10)
+
+        # Additional buttons
+        self.drop_column_button = tk.Button(self.button_frame, text="Drop Column", command=self.drop_column)
+        self.drop_column_button.grid(row=0, column=0, padx=0, pady=5, sticky="w")
+
+        self.rename_target_button = tk.Button(self.button_frame, text="Rename Target", command=self.rename_target)
+        self.rename_target_button.grid(row=1, column=0, padx=0, pady=5, sticky="w")
+
+        self.pivot_table_button = tk.Button(self.button_frame, text="Pivot Table", command=self.pivot_table)
+        self.pivot_table_button.grid(row=2, column=0, padx=0, pady=5, sticky="w")
+
+        self.delta_calculation_button = tk.Button(self.button_frame, text="Delta Calculation", command=self.delta_calculation)
+        self.delta_calculation_button.grid(row=3, column=0, padx=0, pady=5, sticky="w")
+
+        self.combine_file_button = tk.Button(self.button_frame, text="Combine File", command=self.combine_file)
+        self.combine_file_button.grid(row=4, column=0, padx=0, pady=5, sticky="w")
+
+        self.combine_file_button = tk.Button(self.button_frame, text="Produce Out Put", command=self.produce_output)
+        self.combine_file_button.grid(row=5, column=0, padx=0, pady=5, sticky="w")
+
     def load_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx")])
+        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
         if file_path:
             self.file_path = file_path
             self.df = load_xls(file_path)
@@ -71,3 +97,42 @@ class MainView(tk.Frame):
             save_dataframe(self.df)
         else:
             messagebox.showwarning("Warning", "No data to save!")
+
+    def drop_column(self):
+        if self.df is not None:
+            self.df = drop_column_view(self.df)
+            self.display_dataframe_preview()
+
+    def rename_target(self):
+        if self.df is not None:
+            self.df = rename_column_view(self.df)
+            self.display_dataframe_preview()
+
+    def pivot_table(self):
+        if self.df is not None:
+            self.df = pivot_table_view(self.df)
+            self.display_dataframe_preview()
+
+    def delta_calculation(self):
+        if self.df is not None:
+            self.df = delta_calculation_view(self.df)
+            self.display_dataframe_preview()
+
+    def produce_output(self):
+        if self.df is not None:
+            self.df = delta_calculation_view(self.df)
+            self.display_dataframe_preview()
+
+    def combine_file(self):
+        if self.df is not None:
+            file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx")])
+            if file_path:
+                df_to_combine = load_xls(file_path)
+                if df_to_combine is not None:
+                    self.df = pd.concat([self.df, df_to_combine], ignore_index=True)
+                    messagebox.showinfo("Success", "Files combined.")
+                    self.display_dataframe_preview()
+                else:
+                    messagebox.showerror("Error", "Failed to load second file.")
+        else:
+            messagebox.showwarning("Warning", "No data loaded!")
