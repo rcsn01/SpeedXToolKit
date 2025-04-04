@@ -1,9 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from controllers.file_controller import *
 from controllers.save_controller import *
 import pandas as pd
-from models.dataframe_model import *
 from controllers.processing_controller import *
 
 class MainView(tk.Frame):
@@ -24,9 +22,13 @@ class MainView(tk.Frame):
         self.load_button = tk.Button(self, text="Load XLS File", command=self.load_file)
         self.load_button.grid(row=1, column=0, padx=10, pady=5, sticky="w")
 
+        # Load File Button
+        self.load_preset_button = tk.Button(self, text="Load Presets", command=self.load_preset)
+        self.load_preset_button.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+
         # Save File Button
         self.save_button = tk.Button(self, text="Save Processed File", command=self.save_file, state=tk.DISABLED)
-        self.save_button.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        self.save_button.grid(row=1, column=2, padx=10, pady=5, sticky="w")
 
         # DataFrame Preview Label
         self.preview_label = tk.Label(self, text="DataFrame Preview:")
@@ -58,23 +60,18 @@ class MainView(tk.Frame):
         self.combine_file_button = tk.Button(self.button_frame, text="Produce Out Put", command=self.produce_output)
         self.combine_file_button.grid(row=5, column=0, padx=0, pady=5, sticky="w")
 
+        self.combine_file_button = tk.Button(self.button_frame, text="Keep Input", command=self.keep_column)
+        self.combine_file_button.grid(row=6, column=0, padx=0, pady=5, sticky="w")
+
     def load_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
         if file_path:
             self.file_path = file_path
-            self.df = load_xls(file_path)
+            self.df = import_files(file_path)
             if self.df is not None:
                 messagebox.showinfo("Success", "File loaded successfully!")
                 self.save_button.config(state=tk.NORMAL)
-                #print(self.df)
-                #self.df = filter_columns(self.df)
-                #print(self.df)
-                #id_df, target_df = pivot_dataframe(self.df)
-                #target_df = clear_undefined(target_df)
-                #self.df = what_do_i_have(id_df, target_df)
-                #print(self.df)
 
-                # Update the text widget with the DataFrame preview (first 5 rows)
                 self.display_dataframe_preview()
 
     def display_dataframe_preview(self):
@@ -88,6 +85,9 @@ class MainView(tk.Frame):
         
         # Insert the preview into the text widget
         self.preview_text.insert(tk.END, preview)
+
+    def load_preset(self):
+        pass
 
     def save_file(self):
         if self.df is not None:
@@ -118,6 +118,11 @@ class MainView(tk.Frame):
     def produce_output(self):
         if self.df is not None:
             self.df = delta_calculation(self.df)
+            self.display_dataframe_preview()
+
+    def keep_column(self):
+        if self.df is not None:
+            self.df = keep_column(self.df)
             self.display_dataframe_preview()
 
     def combine_file(self):
