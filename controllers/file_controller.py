@@ -110,7 +110,7 @@ def file_preview(df, header_row, file_path, root):
 def load_xls(file_path):
     """Load Excel file and allow the user to confirm the header row."""
     try:
-        df = pd.read_excel(file_path, engine="xlrd", header=None)
+        df = pd.read_excel(file_path, engine="openpyxl", header=None)
         header_row = find_header_row(df)
 
         if header_row is not None:
@@ -127,7 +127,7 @@ def load_xls(file_path):
             #root.mainloop()
 
             # Once confirmed, reload the dataframe with the chosen header
-            df_with_header = pd.read_excel(file_path, engine="xlrd", header=header_row)
+            df_with_header = pd.read_excel(file_path, engine="openpyxl", header=header_row)
             #print("Columns detected:", df_with_header.columns.tolist())
 
             #print("returnhereee!!!!!!!!")
