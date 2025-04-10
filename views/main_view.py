@@ -10,6 +10,8 @@ class MainView(tk.Frame):
 
         self.file_path = None
         self.df = None  # Store the loaded DataFrame
+        self.store = []
+        self.current_essay = None
 
         self.grid(row=0, column=0, sticky="nsew")  # Make the frame expand to the entire window
         master.grid_rowconfigure(0, weight=1)  # Allow the row to expand
@@ -63,11 +65,14 @@ class MainView(tk.Frame):
         self.combine_file_button = tk.Button(self.button_frame, text="Keep Input", command=self.keep_column)
         self.combine_file_button.grid(row=6, column=0, padx=0, pady=5, sticky="w")
 
+        self.combine_file_button = tk.Button(self.button_frame, text="Load Preset", command=self.load_preset)
+        self.combine_file_button.grid(row=7, column=0, padx=0, pady=5, sticky="w")
+
     def load_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
         if file_path:
             self.file_path = file_path
-            self.df = import_files(file_path)
+            self.df, self.current_essay = import_files(file_path)
             if self.df is not None:
                 messagebox.showinfo("Success", "File loaded successfully!")
                 self.save_button.config(state=tk.NORMAL)
@@ -86,43 +91,46 @@ class MainView(tk.Frame):
         # Insert the preview into the text widget
         self.preview_text.insert(tk.END, preview)
 
-    def load_preset(self):
-        pass
-
     def save_file(self):
         if self.df is not None:
-            save_dataframe(self.df)
+            self.store = save_file(self.df, self.current_essay, self.store)
+            self.current_essay = None
         else:
             messagebox.showwarning("Warning", "No data to save!")
 
     def drop_column(self):
         if self.df is not None:
-            self.df = drop_column(self.df)
+            self.df, self.current_essay = drop_column(self.df, self.current_essay)
             self.display_dataframe_preview()
 
     def rename_column(self):
         if self.df is not None:
-            self.df = rename_column(self.df)
+            self.df, self.current_essay = rename_column(self.df, self.current_essay)
             self.display_dataframe_preview()
 
     def pivot_table(self):
         if self.df is not None:
-            self.df = pivot_table(self.df)
+            self.df, self.current_essay = pivot_table(self.df, self.current_essay)
             self.display_dataframe_preview()
 
     def delta_calculation(self):
         if self.df is not None:
-            self.df = delta_calculation(self.df)
+            self.df, self.current_essay = delta_calculation(self.df, self.current_essay)
             self.display_dataframe_preview()
 
     def produce_output(self):
         if self.df is not None:
-            self.df = delta_calculation(self.df)
+            self.df, self.current_essay = produce_output(self.df, self.current_essay)
             self.display_dataframe_preview()
 
     def keep_column(self):
         if self.df is not None:
-            self.df = keep_column(self.df)
+            self.df, self.current_essay = keep_column(self.df, self.current_essay)
+            self.display_dataframe_preview()
+
+    def load_preset(self):
+        if self.df is not None:
+            self.df, self.current_essay, self.store = load_preset(self.df, self.current_essay, self.store)
             self.display_dataframe_preview()
 
     def combine_file(self):
