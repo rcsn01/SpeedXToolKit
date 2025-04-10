@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog, Canvas
+from tkinter import filedialog, messagebox, Canvas
 from controllers.processing_controller import *
 from controllers.save_controller import *
 import pandas as pd
@@ -59,8 +59,6 @@ class MainView(tk.Frame):
 
         self.file_path = None
         self.df = None
-
-
 
         # Create a frame to hold the header content
         header_frame = tk.Frame(self, bg=COLOURS["white_hex"])
@@ -125,7 +123,7 @@ class MainView(tk.Frame):
         self.load_button = menu_button(self.side_menu, "Load XLS File", self.load_file)
         self.save_button = menu_button(self.side_menu, "Save Processed File", self.save_file)
         self.drop_column_button = menu_button(self.side_menu, "Drop Column", self.drop_column)
-        self.rename_target_button = menu_button(self.side_menu, "Rename Target", self.rename_target)
+        self.rename_target_button = menu_button(self.side_menu, "Rename Column", self.rename_column)
         self.pivot_table_button = menu_button(self.side_menu, "Pivot Table", self.pivot_table)
         self.delta_calculation_button = menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
         self.combine_file_button = menu_button(self.side_menu, "Combine File", self.combine_file)
@@ -217,55 +215,60 @@ class MainView(tk.Frame):
             self.df, self.current_essay = import_files(file_path)
             if self.df is not None:
                 messagebox.showinfo("Success", "File loaded successfully!")
-                self.save_button.config(state=tk.NORMAL)
-
                 self.display_dataframe_preview()
 
     def display_dataframe_preview(self):
+        # Clear any existing text in the text widget
         self.preview_text.delete(1.0, tk.END)
+        # Convert the entire DataFrame to a string (without the index)
+        #print(self.df)
+        #print("AAAAAFAGFK:GDKLFGDLKFAD:K")
         preview = self.df.to_string(index=False)
+        
+        # Insert the preview into the text widget
         self.preview_text.insert(tk.END, preview)
 
     def save_file(self):
         if self.df is not None:
-            save_dataframe(self.df)
+            self.store = save_file(self.df, self.current_essay, self.store)
+            self.current_essay = None
         else:
             messagebox.showwarning("Warning", "No data to save!")
 
     def drop_column(self):
         if self.df is not None:
-            self.df = drop_column(self.df)
+            self.df, self.current_essay = drop_column(self.df, self.current_essay)
             self.display_dataframe_preview()
 
-    def rename_target(self):
+    def rename_column(self):
         if self.df is not None:
-            self.df = rename_column_model(self.df)
+            self.df, self.current_essay = rename_column(self.df, self.current_essay)
             self.display_dataframe_preview()
 
     def pivot_table(self):
         if self.df is not None:
-            index_column = simpledialog.askstring("Input", "Enter the column to pivot:")
-            columns = simpledialog.askstring("Input", "Enter the columns for pivoting (comma separated):")
-            values = simpledialog.askstring("Input", "Enter the values column:")
-            columns = [col.strip() for col in columns.split(',')]
-            pivot_df = self.df.pivot_table(index=index_column, columns=columns, values=values, aggfunc='sum')
-            self.df = pivot_df
-            messagebox.showinfo("Success", "Pivot table created.")
+            self.df, self.current_essay = pivot_table(self.df, self.current_essay)
             self.display_dataframe_preview()
-        else:
-            messagebox.showwarning("Warning", "No data loaded!")
 
     def delta_calculation(self):
         if self.df is not None:
-            column_name = simpledialog.askstring("Input", "Enter the column for delta calculation:")
-            if column_name in self.df.columns:
-                self.df['Delta'] = self.df[column_name].diff()
-                messagebox.showinfo("Success", "Delta calculation added.")
-                self.display_dataframe_preview()
-            else:
-                messagebox.showerror("Error", "Column not found!")
-        else:
-            messagebox.showwarning("Warning", "No data loaded!")
+            self.df, self.current_essay = delta_calculation(self.df, self.current_essay)
+            self.display_dataframe_preview()
+
+    def produce_output(self):
+        if self.df is not None:
+            self.df, self.current_essay = produce_output(self.df, self.current_essay)
+            self.display_dataframe_preview()
+
+    def keep_column(self):
+        if self.df is not None:
+            self.df, self.current_essay = keep_column(self.df, self.current_essay)
+            self.display_dataframe_preview()
+
+    def load_preset(self):
+        if self.df is not None:
+            self.df, self.current_essay, self.store = load_preset(self.df, self.current_essay, self.store)
+            self.display_dataframe_preview()
 
     def combine_file(self):
         if self.df is not None:
