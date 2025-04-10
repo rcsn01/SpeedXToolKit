@@ -5,7 +5,7 @@ from views.main_view import MainView
 class XLSProcessorApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Universal Data Processor")
+        self.title("XLS Processor")
         self.geometry("1280x720")
 
         # Load the main view

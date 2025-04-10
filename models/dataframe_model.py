@@ -20,38 +20,6 @@ def filter_columns(df, input):
         print(f"Error: {e}")
         return None
 
-
-def pivot_dataframe(df, target, value):
-    """Pivot the DataFrame and return two DataFrames:
-       1. One with all columns except the target and value columns.
-       2. One with the target and value columns.
-       
-       If target or value is missing, return the original DataFrame unchanged.
-    """
-    
-    # If target or value is missing, return the original DataFrame
-    if not target or not value:
-        return df, None
-
-    # Determine index columns by excluding target and value columns
-    index_columns = [col for col in df.columns if col not in [target, value]]
-    
-    try:
-        # Pivot the dataframe
-        df_pivot = df.pivot_table(index=index_columns, 
-                                  columns=target, 
-                                  values=value, 
-                                  aggfunc="first").reset_index()
-        df_pivot.columns.name = None
-        id_df = df_pivot[index_columns]
-        target_df = df_pivot.drop(index_columns, axis=1)
-        return id_df, target_df
-
-    except Exception as e:
-        print(f"Error: {e}")
-        return df, None  # Return original DataFrame if pivoting fails
-
-
 def clear_undefined(df):
     """Replace 'undefined' and 'undetermined' values (case-insensitive and with possible spaces) in the DataFrame with NaN."""
     try:
