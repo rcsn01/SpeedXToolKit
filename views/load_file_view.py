@@ -2,7 +2,6 @@ import pandas as pd
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.simpledialog import askinteger, askstring
-import os
 
 def truncate_text(value, max_length=20):
     """Truncate text if it exceeds the max length, adding '...' at the end."""
@@ -24,12 +23,7 @@ def find_header_row(df):
 def load_file_view(file_path):
     """Load Excel file and allow the user to confirm the header row."""
     try:
-        file_ext = os.path.splitext(file_path)[-1].lower()
-        if file_ext == ".xls":
-            df = pd.read_excel(file_path, engine="xlrd", header=None)
-        if file_ext == ".csv":
-            df = pd.read_csv(file_path, delimiter=",", engine="python", keep_default_na=True, header=None)
-            print(df)
+        df = pd.read_excel(file_path, engine="xlrd", header=None)
         header_row = find_header_row(df)
 
         root = tk.Tk()
