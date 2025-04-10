@@ -80,15 +80,8 @@ class MainView(tk.Frame):
                 self.display_dataframe_preview()
 
     def display_dataframe_preview(self):
-        # Clear any existing text in the text widget
         self.preview_text.delete(1.0, tk.END)
-        
-        # Convert the entire DataFrame to a string (without the index)
-        #print(self.df)
-        #print("AAAAAFAGFK:GDKLFGDLKFAD:K")
         preview = self.df.to_string(index=False)
-        
-        # Insert the preview into the text widget
         self.preview_text.insert(tk.END, preview)
 
     def save_file(self):
