@@ -13,7 +13,6 @@ def drop_column_view(df):
         root.title("Drop column")
         root.geometry("1000x700")
 
-
         # Create the main frame
         columns_frame = tk.Frame(root)
         columns_frame.pack(pady=5)
