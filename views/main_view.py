@@ -22,15 +22,19 @@ class MainView(tk.Frame):
 
         # Load File Button
         self.load_button = tk.Button(self, text="Load XLS File", command=self.load_file)
-        self.load_button.grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        self.load_button.grid(row=1, column=0, padx=0, pady=5, sticky="w")
 
-        # Load File Button
+        # Load Preset Button
         self.load_preset_button = tk.Button(self, text="Load Presets", command=self.load_preset)
-        self.load_preset_button.grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        self.load_preset_button.grid(row=1, column=1, padx=0, pady=5, sticky="w")
+
+        # Save Preset Button
+        self.load_preset_button = tk.Button(self, text="Save Presets", command=self.save_preset)
+        self.load_preset_button.grid(row=1, column=2, padx=0, pady=5, sticky="w")
 
         # Save File Button
         self.save_button = tk.Button(self, text="Save Processed File", command=self.save_file, state=tk.DISABLED)
-        self.save_button.grid(row=1, column=2, padx=10, pady=5, sticky="w")
+        self.save_button.grid(row=1, column=3, padx=0, pady=5, sticky="w")
 
         # DataFrame Preview Label
         self.preview_label = tk.Label(self, text="DataFrame Preview:")
@@ -67,6 +71,7 @@ class MainView(tk.Frame):
 
         self.combine_file_button = tk.Button(self.button_frame, text="Load Preset", command=self.load_preset)
         self.combine_file_button.grid(row=7, column=0, padx=0, pady=5, sticky="w")
+
 
     def load_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
@@ -125,6 +130,10 @@ class MainView(tk.Frame):
         if self.df is not None:
             self.df, self.current_essay, self.store = load_preset(self.df, self.current_essay, self.store)
             self.display_dataframe_preview()
+
+    def save_preset(self):
+        if self.df is not None:
+            self.store = save_preset(self.current_essay, self.store)
 
     def combine_file(self):
         if self.df is not None:

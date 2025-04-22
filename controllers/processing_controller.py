@@ -2,12 +2,20 @@ from views import *
 from controllers.save_controller import *
 from models import *
 import pandas as pd
+import tkinter as tk
+from tkinter import messagebox
 
 def save_file(df, essay, store):
     if df is not None:
         save_dataframe(df)
     else:
         messagebox.showwarning("Warning", "No data to save!")
+    store = save_preset(essay, store)
+    return store
+
+def save_preset(essay, store):
+    name = save_preset_view()
+    essay = essay_to_pickle(name, essay)
     return store + [essay]
 
 def drop_column(df, essay):
@@ -92,28 +100,63 @@ def import_files(file_path):
 
 def find_essay(essay, store):
     for essays in store:
-        if essays[1] == essay[1]:
+        if essays[2] == essay[1]:
             return essays
 
 def load_preset(df, essay, store):
-    matching = find_essay(essay, store)
+    store = pickle_to_essay(store)
+    matching = None
+    for essays in store:
+        if essays[1] == essay[0]:
+            matching = essays
+    
+    response = None
+    if matching != None:
+        response = yes_no_gui("Preset found, type yes to apply, else no?")
+    if response == True:
+        if len(matching) >= 3:
+            function_call = matching[3:]  # Extracting the function call string
+            for individual_func in function_call:
+                func_parts = individual_func.strip("()").split(",")  # Remove parentheses and split by comma
+                
+                if len(func_parts) < 1:
+                    raise ValueError("Invalid function call format.")
 
-    if len(matching) >= 3:
-        function_call = matching[2:]  # Extracting the function call string
-        for individual_func in function_call:
-            func_parts = individual_func.strip("()").split(",")  # Remove parentheses and split by comma
-            
-            if len(func_parts) < 1:
-                raise ValueError("Invalid function call format.")
+                func_name = func_parts[0]  # Extract function name
+                params = func_parts[1:]  # Extract parameters (if any)
 
-            func_name = func_parts[0]  # Extract function name
-            params = func_parts[1:]  # Extract parameters (if any)
+                # Get the function from globals() or locals()
+                func = globals().get(func_name) or locals().get(func_name)
 
-            # Get the function from globals() or locals()
-            func = globals().get(func_name) or locals().get(func_name)
+                if callable(func):
+                    df = func(df, *params)  # Pass parameters dynamically
+                else:
+                    raise ValueError(f"Function '{func_name}' not found.")
+            return df, essay, store
+    elif response == False or response == None:
+        print("aaabaa")
+        matching = load_preset_view(store)
+        #print(store)
+        if len(matching) >= 3:
+            function_call = matching[3:]  # Extracting the function call string
+            print(function_call)
+            for individual_func in function_call:
+                func_parts = individual_func.strip("()").split(",")  # Remove parentheses and split by comma
+                
+                if len(func_parts) < 1:
+                    raise ValueError("Invalid function call format.")
 
-            if callable(func):
-                df = func(df, *params)  # Pass parameters dynamically
-            else:
-                raise ValueError(f"Function '{func_name}' not found.")
+                func_name = func_parts[0]  # Extract function name
+                params = func_parts[1:]  # Extract parameters (if any)
+
+                # Get the function from globals() or locals()
+                func = globals().get(func_name) or locals().get(func_name)
+
+                if callable(func):
+                    df = func(df, *params)  # Pass parameters dynamically
+                else:
+                    raise ValueError(f"Function '{func_name}' not found.")
+            return df, essay, store
+    else:
         return df, essay, store
+
