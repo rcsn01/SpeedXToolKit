@@ -21,7 +21,7 @@ def save_preset(essay, store):
 def drop_column(df, essay):
     df, input = drop_column_view(df)
     processed_df = drop_column_model(df, input)
-    essay = essay + (f"(drop_column_model,{input})",)
+    essay = essay + (f"(drop_column_model!$!{input})",)
     if isinstance(processed_df, pd.DataFrame):
         return processed_df, essay
     else:
@@ -30,7 +30,7 @@ def drop_column(df, essay):
 def rename_column(df, essay):
     df, target_name, new_name = rename_column_view(df)
     processed_df = rename_column_model(df, target_name, new_name)
-    essay = essay + (f"(rename_column_model,{target_name},{new_name})",)
+    essay = essay + (f"(rename_column_model!$!{target_name}!$!{new_name})",)
     if isinstance(processed_df, pd.DataFrame):
         return processed_df, essay
     else:
@@ -39,7 +39,7 @@ def rename_column(df, essay):
 def pivot_table(df, essay):
     df, target_name, new_name = pivot_table_view(df)
     processed_df = pivot_table_model(df, target_name, new_name)
-    essay = essay + (f"(pivot_table_model,{target_name},{new_name})",)
+    essay = essay + (f"(pivot_table_model!$!{target_name}!$!{new_name})",)
     if isinstance(processed_df, pd.DataFrame):
         return processed_df, essay
     else:
@@ -48,7 +48,7 @@ def pivot_table(df, essay):
 def delta_calculation(df, essay):
     df, var1, vaf2, delta= delta_calculation_view(df)
     processed_df = delta_calculation_model(df, var1, vaf2, delta)
-    essay = essay + (f"(delta_calculation_model,{var1},{vaf2},{delta})",)
+    essay = essay + (f"(delta_calculation_model!$!{var1}!$!{vaf2}!$!{delta})",)
     if isinstance(processed_df, pd.DataFrame):
         return processed_df, essay
     else:
@@ -57,7 +57,7 @@ def delta_calculation(df, essay):
 def produce_output(df, essay):
     df, var1 = produce_output_view(df)
     processed_df = produce_output_model(df, var1)
-    essay = essay + (f"(produce_output_model,{var1})",)
+    essay = essay + (f"(produce_output_model!$!{var1})",)
     if isinstance(processed_df, pd.DataFrame):
         return processed_df, essay
     else:
@@ -66,7 +66,7 @@ def produce_output(df, essay):
 def keep_column(df, essay):
     df, input = keep_column_view(df)
     processed_df = keep_column_model(df, input)
-    essay = essay + (f"(keep_column_model,{input})",)
+    essay = essay + (f"(keep_column_model!$!{input})",)
     if isinstance(processed_df, pd.DataFrame):
         return processed_df, essay
     else:
@@ -82,7 +82,7 @@ def df_to_tuple(df):
     return (first_col_tuple, second_col_tuple)
 
 
-def import_files(file_path):
+def import_files(file_path): 
     df, header_row, keep_input = load_file_view(file_path)
     df_with_format, df_with_header = essay_process_model(df, header_row)
     
@@ -117,7 +117,7 @@ def load_preset(df, essay, store):
         if len(matching) >= 3:
             function_call = matching[3:]  # Extracting the function call string
             for individual_func in function_call:
-                func_parts = individual_func.strip("()").split(",")  # Remove parentheses and split by comma
+                func_parts = individual_func.strip("()").split("!$!")  # Remove parentheses and split by comma
                 
                 if len(func_parts) < 1:
                     raise ValueError("Invalid function call format.")
@@ -134,14 +134,12 @@ def load_preset(df, essay, store):
                     raise ValueError(f"Function '{func_name}' not found.")
             return df, essay, store
     elif response == False or response == None:
-        print("aaabaa")
         matching = load_preset_view(store)
-        #print(store)
         if len(matching) >= 3:
             function_call = matching[3:]  # Extracting the function call string
             print(function_call)
             for individual_func in function_call:
-                func_parts = individual_func.strip("()").split(",")  # Remove parentheses and split by comma
+                func_parts = individual_func.strip("()").split("!$!")  # Remove parentheses and split by comma
                 
                 if len(func_parts) < 1:
                     raise ValueError("Invalid function call format.")
