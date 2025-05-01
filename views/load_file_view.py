@@ -59,27 +59,52 @@ def load_file_view(file_path):
         header_input.grid(row=0, column=1, padx=5, sticky="w")
 
         # Columns to keep
-        columns_frame = tk.Frame(root)
-        columns_frame.pack(pady=5)
+        columns_frame = tk.LabelFrame(root, text="Columns to Keep")
+        columns_frame.pack(pady=5, fill="x")
 
-        tk.Label(columns_frame, text="Columns to Keep:").grid(row=0, column=0, padx=5, sticky="w")
-        keep_input = tk.Entry(columns_frame, width=70)
-        keep_input.insert(0, "Well, Well Position, Sample Name, Target Name, CT")
-        keep_input.grid(row=0, column=1, padx=5, sticky="w")
+        check_vars = []
+
+        def update_checkboxes():
+            for widget in columns_frame.winfo_children():
+                widget.destroy()
+
+            try:
+                preselected_columns = {"Well", "Well Position", "Sample Name", "Target Name", "CT", "CQ"}
+                selected_row = int(header_input.get())
+                headers = df.iloc[selected_row].astype(str).tolist()
+                check_vars.clear()
+
+                for i, col_name in enumerate(headers):
+                    is_preselected = col_name in preselected_columns
+                    var = tk.BooleanVar(root, value=is_preselected) 
+                    cb = tk.Checkbutton(columns_frame, text=col_name, variable=var)
+                    cb.grid(row=i//5, column=i % 5, sticky="w", padx=5, pady=2)
+                    check_vars.append((col_name, var))
+
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to generate checkboxes: {e}")
+
+        update_checkboxes()
 
         # Store result
-        result = {"header_row": None}
+        result = {"header_row": None, "keep_input": []}
 
         def on_confirm():
-            """Confirm selection and close window."""
             try:
                 user_header_row = int(header_input.get())
+                selected_headers = [name for name, var in check_vars if var.get()]
+
+                if not selected_headers:
+                    messagebox.showwarning("No Selection", "Please select at least one column.")
+                    return  # Do not proceed
+
                 result["header_row"] = user_header_row
-                result["keep_input"] = keep_input.get()
+                result["keep_input"] = selected_headers
+                print("Kept headers:", result["keep_input"])
                 root.quit()
                 root.destroy()
             except ValueError:
-                messagebox.showerror("Invalid Input", "Please enter a valid integer for the header row.")
+                messagebox.showerror("Invalid Input", "Please select valid header.")
 
         def on_cancel():
             """Close window without confirming."""
