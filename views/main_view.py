@@ -51,8 +51,7 @@ class GradientFrame(tk.Canvas):
 
         self.lower("gradient")  # Ensure the gradient stays behind other elements
 
-
-
+# Main user interface class
 class MainView(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
@@ -63,69 +62,6 @@ class MainView(tk.Frame):
         self.store = []
         #current_essay is the meta data that belongs to self.df
         self.current_essay = None
-
-
-        """self.grid(row=0, column=0, sticky="nsew")  # Make the frame expand to the entire window
-        master.grid_rowconfigure(0, weight=1)  # Allow the row to expand
-        master.grid_columnconfigure(0, weight=1)  # Allow the column to expand
-
-        # Title Label
-        tk.Label(self, text="XLS Processor", font=("Arial", 18, "bold")).grid(row=0, column=0, padx=10, pady=10, columnspan=2)
-
-        # Load File Button
-        self.load_button = tk.Button(self, text="Load XLS File", command=self.load_file)
-        self.load_button.grid(row=1, column=0, padx=0, pady=5, sticky="w")
-
-        # Load Preset Button
-        self.load_preset_button = tk.Button(self, text="Load Presets", command=self.load_preset)
-        self.load_preset_button.grid(row=1, column=1, padx=0, pady=5, sticky="w")
-
-        # Save Preset Button
-        self.load_preset_button = tk.Button(self, text="Save Presets", command=self.save_preset)
-        self.load_preset_button.grid(row=1, column=2, padx=0, pady=5, sticky="w")
-
-        # Save File Button
-        self.save_button = tk.Button(self, text="Save Processed File", command=self.save_file, state=tk.DISABLED)
-        self.save_button.grid(row=1, column=3, padx=0, pady=5, sticky="w")
-
-        # DataFrame Preview Label
-        self.preview_label = tk.Label(self, text="DataFrame Preview:")
-        self.preview_label.grid(row=2, column=1, padx=10, pady=5, columnspan=2, sticky="w")
-
-        # Text widget for displaying the DataFrame preview
-        self.preview_text = tk.Text(self, height=40, width=150)
-        self.preview_text.grid(row=3, column=1, columnspan=2, padx=10, pady=5)
-
-        self.button_frame = tk.Frame(self, padx=0, pady=10)
-        self.button_frame.grid(row=3, column = 0, padx=5, pady=10)
-
-        # Additional buttons
-        self.drop_column_button = tk.Button(self.button_frame, text="Drop Column", command=self.drop_column)
-        self.drop_column_button.grid(row=0, column=0, padx=0, pady=5, sticky="w")
-
-        self.rename_target_button = tk.Button(self.button_frame, text="Rename Column", command=self.rename_column)
-        self.rename_target_button.grid(row=1, column=0, padx=0, pady=5, sticky="w")
-
-        self.pivot_table_button = tk.Button(self.button_frame, text="Pivot Table", command=self.pivot_table)
-        self.pivot_table_button.grid(row=2, column=0, padx=0, pady=5, sticky="w")
-
-        self.delta_calculation_button = tk.Button(self.button_frame, text="Delta Calculation", command=self.delta_calculation)
-        self.delta_calculation_button.grid(row=3, column=0, padx=0, pady=5, sticky="w")
-
-        self.combine_file_button = tk.Button(self.button_frame, text="Combine File", command=self.combine_file)
-        self.combine_file_button.grid(row=4, column=0, padx=0, pady=5, sticky="w")
-
-        self.combine_file_button = tk.Button(self.button_frame, text="Produce Out Put", command=self.produce_output)
-        self.combine_file_button.grid(row=5, column=0, padx=0, pady=5, sticky="w")
-
-        self.combine_file_button = tk.Button(self.button_frame, text="Keep Input", command=self.keep_column)
-        self.combine_file_button.grid(row=6, column=0, padx=0, pady=5, sticky="w")
-
-        self.combine_file_button = tk.Button(self.button_frame, text="Load Preset", command=self.load_preset)
-        self.combine_file_button.grid(row=7, column=0, padx=0, pady=5, sticky="w")"""
-
-
-
 
         # Create a frame to hold the header content
         header_frame = tk.Frame(self, bg=COLOURS["white_hex"])
@@ -274,10 +210,74 @@ class MainView(tk.Frame):
         parent.after(50, render_line)
 
 
+        # Horizontal scrollbar
+        x_scrollbar = tk.Scrollbar(text_scroll_frame, orient="horizontal")
+        x_scrollbar.pack(side="bottom", fill="x")
 
 
+        # Correct: Do NOT overwrite self.preview_frame
+        self.preview_text = tk.Text(
+            text_scroll_frame, 
+            height=45, 
+            width=125, 
+            bg=COLOURS["white_hex"], 
+            fg="black", 
+            highlightthickness=0,
+            yscrollcommand=y_scrollbar.set,
+            xscrollcommand=x_scrollbar.set,
+            wrap="none"
+        )
+        self.preview_text.pack(side="left", fill="both", expand=True)
 
+        # Hook up the scrollbars correctly
+        y_scrollbar.config(command=self.preview_text.yview)
+        x_scrollbar.config(command=self.preview_text.xview)
 
+    def draw_gradient_text(self, canvas, text, start_colour, end_colour, font):
+        x = 10
+        y = 10
+        num_chars = len(text)
+
+        r1, g1, b1 = start_colour
+        r2, g2, b2 = end_colour
+
+        for i, char in enumerate(text):
+            ratio = i / max(num_chars - 1, 1)  # Calculate ratio for gradient effect
+            r = int(r1 + (r2 - r1) * ratio)  # Calculate new red value
+            g = int(g1 + (g2 - g1) * ratio)  # Calculate new green value
+            b = int(b1 + (b2 - b1) * ratio)  # Calculate new blue value
+            colour = f'#{r:02x}{g:02x}{b:02x}'  # Convert RGB to hex
+
+            text_id = canvas.create_text(x, y, text=char, fill=colour, font=font, anchor='nw')
+            bbox = canvas.bbox(text_id)  # Get bounding box of text
+            char_width = bbox[2] - bbox[0] if bbox else 15  # Calculate text width
+            x += char_width  # Update x position for next character
+    
+    # Function to draw a gradient line
+    def draw_gradient_line(self, parent, start_colour, end_colour):
+        line = Canvas(parent, height=2, bg=parent['bg'], highlightthickness=0)
+        line.pack(fill="x", pady=(0, 8))
+
+        def render_line():
+            line.delete("all") # Clear any previous lines
+            width = line.winfo_width() # Get the width of the line
+
+            r1, g1, b1 = start_colour
+            r2, g2, b2 = end_colour
+
+            # Draw a gradient line horizontally
+            for i in range(width):
+                ratio = i / max(width, 1)
+                r = int(r1 + (r2 - r1) * ratio)
+                g = int(g1 + (g2 - g1) * ratio)
+                b = int(b1 + (b2 - b1) * ratio)
+                colour = f'#{r:02x}{g:02x}{b:02x}'
+                line.create_line(i, 0, i, 2, fill=colour)
+
+        parent.after(50, render_line)
+
+    # ================= Data Functions =================
+    # Load an Excel file and display it in preview
     def load_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
         if file_path:
@@ -285,13 +285,17 @@ class MainView(tk.Frame):
             self.df, self.current_essay = import_files(file_path)
             if self.df is not None:
                 messagebox.showinfo("Success", "File loaded successfully!")
-                #self.save_button.config(state=tk.NORMAL)
-
                 self.display_dataframe_preview()
 
     def display_dataframe_preview(self):
+        # Clear any existing text in the text widget
         self.preview_text.delete(1.0, tk.END)
+        # Convert the entire DataFrame to a string (without the index)
+        #print(self.df)
+        #print("AAAAAFAGFK:GDKLFGDLKFAD:K")
         preview = self.df.to_string(index=False)
+        
+        # Insert the preview into the text widget
         self.preview_text.insert(tk.END, preview)
 
     def save_file(self):
