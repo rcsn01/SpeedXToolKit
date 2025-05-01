@@ -7,7 +7,6 @@ from models.dataframe_model import *
 from models.drop_column_model import *
 from models.rename_column_model import *
 
-
 # Global variables
 # Define colour constants used in the app (SpeeDX colors)
 COLOURS = {
@@ -58,7 +57,11 @@ class MainView(tk.Frame):
         super().__init__(master)
 
         self.file_path = None
-        self.df = None
+        self.df = None  # Store the loaded DataFrame
+        #store is the a list of tuple, the tuple consisst of three item, first item is the naem of the preset, the second itme is the meta data, the third is all the fuctiions
+        self.store = []
+        #current_essay is the meta data that belongs to self.df
+        self.current_essay = None
 
         # Create a frame to hold the header content
         header_frame = tk.Frame(self, bg=COLOURS["white_hex"])
@@ -211,6 +214,73 @@ class MainView(tk.Frame):
 
         parent.after(50, render_line)
 
+
+        # Horizontal scrollbar
+        x_scrollbar = tk.Scrollbar(text_scroll_frame, orient="horizontal")
+        x_scrollbar.pack(side="bottom", fill="x")
+
+
+        # Correct: Do NOT overwrite self.preview_frame
+        self.preview_text = tk.Text(
+            text_scroll_frame, 
+            height=45, 
+            width=125, 
+            bg=COLOURS["white_hex"], 
+            fg="black", 
+            highlightthickness=0,
+            yscrollcommand=y_scrollbar.set,
+            xscrollcommand=x_scrollbar.set,
+            wrap="none"
+        )
+        self.preview_text.pack(side="left", fill="both", expand=True)
+
+        # Hook up the scrollbars correctly
+        y_scrollbar.config(command=self.preview_text.yview)
+        x_scrollbar.config(command=self.preview_text.xview)
+
+    def draw_gradient_text(self, canvas, text, start_colour, end_colour, font):
+        x = 10
+        y = 10
+        num_chars = len(text)
+
+        r1, g1, b1 = start_colour
+        r2, g2, b2 = end_colour
+
+        for i, char in enumerate(text):
+            ratio = i / max(num_chars - 1, 1)  # Calculate ratio for gradient effect
+            r = int(r1 + (r2 - r1) * ratio)  # Calculate new red value
+            g = int(g1 + (g2 - g1) * ratio)  # Calculate new green value
+            b = int(b1 + (b2 - b1) * ratio)  # Calculate new blue value
+            colour = f'#{r:02x}{g:02x}{b:02x}'  # Convert RGB to hex
+
+            text_id = canvas.create_text(x, y, text=char, fill=colour, font=font, anchor='nw')
+            bbox = canvas.bbox(text_id)  # Get bounding box of text
+            char_width = bbox[2] - bbox[0] if bbox else 15  # Calculate text width
+            x += char_width  # Update x position for next character
+    
+    # Function to draw a gradient line
+    def draw_gradient_line(self, parent, start_colour, end_colour):
+        line = Canvas(parent, height=2, bg=parent['bg'], highlightthickness=0)
+        line.pack(fill="x", pady=(0, 8))
+
+        def render_line():
+            line.delete("all") # Clear any previous lines
+            width = line.winfo_width() # Get the width of the line
+
+            r1, g1, b1 = start_colour
+            r2, g2, b2 = end_colour
+
+            # Draw a gradient line horizontally
+            for i in range(width):
+                ratio = i / max(width, 1)
+                r = int(r1 + (r2 - r1) * ratio)
+                g = int(g1 + (g2 - g1) * ratio)
+                b = int(b1 + (b2 - b1) * ratio)
+                colour = f'#{r:02x}{g:02x}{b:02x}'
+                line.create_line(i, 0, i, 2, fill=colour)
+
+        parent.after(50, render_line)
+
     # ================= Data Functions =================
     # Load an Excel file and display it in preview
     def load_file(self):
@@ -275,6 +345,10 @@ class MainView(tk.Frame):
             self.df, self.current_essay, self.store = load_preset(self.df, self.current_essay, self.store)
             self.display_dataframe_preview()
     
+    def save_preset(self):
+        if self.df is not None:
+            self.store = save_preset(self.current_essay, self.store)
+
     def save_preset(self):
         if self.df is not None:
             self.store = save_preset(self.current_essay, self.store)
