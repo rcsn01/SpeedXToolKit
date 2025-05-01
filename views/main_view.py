@@ -1,8 +1,57 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, Canvas
+from controllers.processing_controller import *
 from controllers.save_controller import *
 import pandas as pd
-from controllers.processing_controller import *
+from models.dataframe_model import *
+from models.drop_column_model import *
+from models.rename_column_model import *
+
+# Global variables
+# Define colour constants used in the app (SpeeDX colors)
+COLOURS = {
+    "blue_rgb": (32, 165, 221), #SDX Blue
+    "purple_rgb": (89, 48, 133), #SDX Purple
+    "white_rgb": (255, 255, 255), # White in RGB
+    "blue_hex": "#20a5dd", #SDX Blue
+    "purple_hex": "#593085", #SDX Purple
+    "white_hex": "#FFFFFF" # White in hex
+}
+
+# Class for creating a gradient canvas frame (background)
+class GradientFrame(tk.Canvas):
+    def __init__(self, parent, color1="white", color2="black", **kwargs):
+        super().__init__(parent, **kwargs)
+        self._color1 = color1 # Start color for gradient
+        self._color2 = color2 # End color for gradient
+        self.bind("<Configure>", self._draw_gradient) # Redraw gradient when resizing
+
+    def _draw_gradient(self, event=None):
+        self.delete("gradient")  # Remove any existing gradient
+        width = self.winfo_width()  # Get width of the canvas
+        height = self.winfo_height()  # Get height of the canvas
+        limit = height  # Use height as the limit for the gradient (vertical gradient)
+
+        # Convert color to RGB
+        (r1, g1, b1) = self.winfo_rgb(self._color1)
+        (r2, g2, b2) = self.winfo_rgb(self._color2)
+
+        # Calculate the color difference between start and end colors
+        r_ratio = float(r2 - r1) / limit
+        g_ratio = float(g2 - g1) / limit
+        b_ratio = float(b2 - b1) / limit
+
+        # Draw a gradient line from top to bottom
+        for i in range(limit):
+            nr = int(r1 + (r_ratio * i))  # New red value
+            ng = int(g1 + (g_ratio * i))  # New green value
+            nb = int(b1 + (b_ratio * i))  # New blue value
+            color = "#%4.4x%4.4x%4.4x" % (nr, ng, nb)  # Convert to hex
+            self.create_line(0, i, width, i, tags=("gradient",), fill=color)  # Draw horizontal line for vertical gradient
+
+        self.lower("gradient")  # Ensure the gradient stays behind other elements
+
+
 
 class MainView(tk.Frame):
     def __init__(self, master):
@@ -10,8 +59,11 @@ class MainView(tk.Frame):
 
         self.file_path = None
         self.df = None  # Store the loaded DataFrame
+        #store is the a list of tuple, the tuple consisst of three item, first item is the naem of the preset, the second itme is the meta data, the third is all the fuctiions
         self.store = []
+        #current_essay is the meta data that belongs to self.df
         self.current_essay = None
+
 
         self.grid(row=0, column=0, sticky="nsew")  # Make the frame expand to the entire window
         master.grid_rowconfigure(0, weight=1)  # Allow the row to expand
