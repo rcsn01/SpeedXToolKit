@@ -72,5 +72,5 @@ def delta_calculation_view(df):
 
     except Exception as e:
         print("OHHH NOOOOOOOOO")
-        print(f"Error: {e}")
+        print("Error: {e}")
         return None

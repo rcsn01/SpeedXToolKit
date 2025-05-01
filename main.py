@@ -6,7 +6,7 @@ class XLSProcessorApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Universal Data Translator")
-        self.geometry("1280x720")
+        self.geometry("1280x780")
 
         # Load the main view
         MainView(self).pack(fill="both", expand=True)

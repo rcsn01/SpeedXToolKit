@@ -120,13 +120,18 @@ class MainView(tk.Frame):
 
 
         # Attach menu buttons
-        self.load_button = menu_button(self.side_menu, "Load XLS File", self.load_file)
+        self.load_button = menu_button(self.side_menu, "Load File", self.load_file)
         self.save_button = menu_button(self.side_menu, "Save Processed File", self.save_file)
-        self.drop_column_button = menu_button(self.side_menu, "Drop Column", self.drop_column)
-        self.rename_target_button = menu_button(self.side_menu, "Rename Column", self.rename_column)
+        self.save_button = menu_button(self.side_menu, "Load Preset", self.load_preset)
+        self.save_button = menu_button(self.side_menu, "Save Preset", self.save_preset)
         self.pivot_table_button = menu_button(self.side_menu, "Pivot Table", self.pivot_table)
-        self.delta_calculation_button = menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
+        self.rename_target_button = menu_button(self.side_menu, "Rename Column", self.rename_column)
+        self.combine_file_button = menu_button(self.side_menu, "Keep Column", self.keep_column)
+        self.drop_column_button = menu_button(self.side_menu, "Remove Column", self.drop_column)
         self.combine_file_button = menu_button(self.side_menu, "Combine File", self.combine_file)
+        self.delta_calculation_button = menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
+        self.combine_file_button = menu_button(self.side_menu, "Produce Output", self.produce_output)
+        
 
 
         # Create a frame for the preview content that will take the remaining space
@@ -269,6 +274,10 @@ class MainView(tk.Frame):
         if self.df is not None:
             self.df, self.current_essay, self.store = load_preset(self.df, self.current_essay, self.store)
             self.display_dataframe_preview()
+    
+    def save_preset(self):
+        if self.df is not None:
+            self.store = save_preset(self.current_essay, self.store)
 
     def combine_file(self):
         if self.df is not None:
