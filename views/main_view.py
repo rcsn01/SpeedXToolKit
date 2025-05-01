@@ -65,7 +65,7 @@ class MainView(tk.Frame):
         self.current_essay = None
 
 
-        self.grid(row=0, column=0, sticky="nsew")  # Make the frame expand to the entire window
+        """self.grid(row=0, column=0, sticky="nsew")  # Make the frame expand to the entire window
         master.grid_rowconfigure(0, weight=1)  # Allow the row to expand
         master.grid_columnconfigure(0, weight=1)  # Allow the column to expand
 
@@ -122,7 +122,160 @@ class MainView(tk.Frame):
         self.combine_file_button.grid(row=6, column=0, padx=0, pady=5, sticky="w")
 
         self.combine_file_button = tk.Button(self.button_frame, text="Load Preset", command=self.load_preset)
-        self.combine_file_button.grid(row=7, column=0, padx=0, pady=5, sticky="w")
+        self.combine_file_button.grid(row=7, column=0, padx=0, pady=5, sticky="w")"""
+
+
+
+
+        # Create a frame to hold the header content
+        header_frame = tk.Frame(self, bg=COLOURS["white_hex"])
+        header_frame.pack(fill="x", anchor="n")  # Use 'anchor="n"' to anchor it to the top of the screen
+
+        # Canvas for gradient title text (left-aligned)
+        title_canvas = tk.Canvas(header_frame, bg=COLOURS["white_hex"], highlightthickness=0, height=70)
+        title_canvas.pack(fill="x")
+
+        # Draw the gradient title text
+        self.draw_gradient_text(title_canvas, "Universal Data Processor", COLOURS["blue_rgb"], COLOURS["purple_rgb"], font=("Arial", 40, "bold"))
+
+        # Side menu frame
+        self.side_menu = tk.Frame(self, width=250, padx=10, pady=20, bg=COLOURS["white_hex"])
+        self.side_menu.pack(side="left", fill="y", expand=False, anchor="nw")
+        self.side_menu.pack_propagate(False) # Prevent side menu from resizing
+
+        # Function to draw rounded rectangle without outline
+        def draw_rounded_rect(canvas, x1, y1, x2, y2, radius=10, **kwargs):
+            # Top-left and top-right corners
+            canvas.create_oval(x1, y1, x1 + 2 * radius, y1 + 2 * radius, outline="", **kwargs)  # top-left corner                
+            canvas.create_oval(x2 - 2 * radius, y1, x2, y1 + 2 * radius, outline="", **kwargs)  # top-right corner
+            # Top and bottom sides
+            canvas.create_rectangle(x1 + radius, y1, x2 - radius, y2, outline="", **kwargs)  # top
+            canvas.create_rectangle(x1, y1 + radius, x2, y2, outline="", **kwargs)  # bottom (straight)
+
+        # Function to create a menu button with gradient and hover effect
+        def menu_button(parent, text, command):
+            frame = tk.Frame(parent, bg=parent['bg'])
+            frame.pack(fill="x", pady=(0, 8))
+            
+            # Canvas for gradient text
+            canvas = Canvas(frame, height=40, bg=parent['bg'], highlightthickness=0)
+            canvas.pack(fill="both")
+            self.draw_gradient_text(canvas, text, COLOURS["blue_rgb"], COLOURS["purple_rgb"], font=("Arial", 14, "bold"))
+
+            canvas.bind("<Button-1>", lambda e: command())  # Enable click event
+
+            # Hover effect for menu button
+            def on_hover(event):
+                # Redraw the rounded background with hover colour
+                canvas.delete("all")  # Clear the previous background and text
+                draw_rounded_rect(canvas, 0, 0, frame.winfo_width(), 40, radius=10, fill="#20a5dd")  # Rounded background
+                self.draw_gradient_text(canvas, text, COLOURS["white_rgb"], COLOURS["white_rgb"], font=("Arial", 14, "bold"))  # Redraw text over the new background
+
+            def on_leave(event):
+                canvas.config(bg=parent['bg'])
+                # Redraw the rounded background with normal colour
+                canvas.delete("all")  # Clear the previous background and text
+                draw_rounded_rect(canvas, 0, 0, frame.winfo_width(), 40, radius=10, fill=parent['bg'])  # Rounded background
+                self.draw_gradient_text(canvas, text, COLOURS["blue_rgb"], COLOURS["purple_rgb"], font=("Arial", 14, "bold"))  # Redraw text over the new background
+
+            frame.bind("<Enter>", on_hover)
+            frame.bind("<Leave>", on_leave)
+
+            # Gradient line separator after every button
+            self.draw_gradient_line(frame, COLOURS["blue_rgb"], COLOURS["purple_rgb"])  # Default colour for line
+            return frame
+
+
+        # Attach menu buttons
+        self.load_button = menu_button(self.side_menu, "Load XLS File", self.load_file)
+        self.save_button = menu_button(self.side_menu, "Save Processed File", self.save_file)
+        self.drop_column_button = menu_button(self.side_menu, "Drop Column", self.drop_column)
+        self.rename_target_button = menu_button(self.side_menu, "Rename Column", self.rename_column)
+        self.pivot_table_button = menu_button(self.side_menu, "Pivot Table", self.pivot_table)
+        self.delta_calculation_button = menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
+        self.combine_file_button = menu_button(self.side_menu, "Combine File", self.combine_file)
+
+
+        # Create a frame for the preview content that will take the remaining space
+        self.preview_frame = GradientFrame(self, color1=COLOURS["blue_hex"], color2=COLOURS["purple_hex"], highlightthickness=0)
+        self.preview_frame.pack(side="left", fill="both", expand=True, anchor="nw")
+
+        # DataFrame Preview (Center over gradient)
+        text_scroll_frame = tk.Frame(self.preview_frame, bg=COLOURS["white_hex"])
+        text_scroll_frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Vertical scrollbar
+        y_scrollbar = tk.Scrollbar(text_scroll_frame)
+        y_scrollbar.pack(side="right", fill="y")
+
+        # Horizontal scrollbar
+        x_scrollbar = tk.Scrollbar(text_scroll_frame, orient="horizontal")
+        x_scrollbar.pack(side="bottom", fill="x")
+
+        # Correct: Do NOT overwrite self.preview_frame
+        self.preview_text = tk.Text(
+            text_scroll_frame, 
+            height=45, 
+            width=125, 
+            bg=COLOURS["white_hex"], 
+            fg="black", 
+            highlightthickness=0,
+            yscrollcommand=y_scrollbar.set,
+            xscrollcommand=x_scrollbar.set,
+            wrap="none"
+        )
+        self.preview_text.pack(side="left", fill="both", expand=True)
+
+        # Hook up the scrollbars correctly
+        y_scrollbar.config(command=self.preview_text.yview)
+        x_scrollbar.config(command=self.preview_text.xview)
+
+    def draw_gradient_text(self, canvas, text, start_colour, end_colour, font):
+        x = 10
+        y = 10
+        num_chars = len(text)
+
+        r1, g1, b1 = start_colour
+        r2, g2, b2 = end_colour
+
+        for i, char in enumerate(text):
+            ratio = i / max(num_chars - 1, 1)  # Calculate ratio for gradient effect
+            r = int(r1 + (r2 - r1) * ratio)  # Calculate new red value
+            g = int(g1 + (g2 - g1) * ratio)  # Calculate new green value
+            b = int(b1 + (b2 - b1) * ratio)  # Calculate new blue value
+            colour = f'#{r:02x}{g:02x}{b:02x}'  # Convert RGB to hex
+
+            text_id = canvas.create_text(x, y, text=char, fill=colour, font=font, anchor='nw')
+            bbox = canvas.bbox(text_id)  # Get bounding box of text
+            char_width = bbox[2] - bbox[0] if bbox else 15  # Calculate text width
+            x += char_width  # Update x position for next character
+    
+    # Function to draw a gradient line
+    def draw_gradient_line(self, parent, start_colour, end_colour):
+        line = Canvas(parent, height=2, bg=parent['bg'], highlightthickness=0)
+        line.pack(fill="x", pady=(0, 8))
+
+        def render_line():
+            line.delete("all") # Clear any previous lines
+            width = line.winfo_width() # Get the width of the line
+
+            r1, g1, b1 = start_colour
+            r2, g2, b2 = end_colour
+
+            # Draw a gradient line horizontally
+            for i in range(width):
+                ratio = i / max(width, 1)
+                r = int(r1 + (r2 - r1) * ratio)
+                g = int(g1 + (g2 - g1) * ratio)
+                b = int(b1 + (b2 - b1) * ratio)
+                colour = f'#{r:02x}{g:02x}{b:02x}'
+                line.create_line(i, 0, i, 2, fill=colour)
+
+        parent.after(50, render_line)
+
+
+
+
 
 
     def load_file(self):
@@ -132,7 +285,7 @@ class MainView(tk.Frame):
             self.df, self.current_essay = import_files(file_path)
             if self.df is not None:
                 messagebox.showinfo("Success", "File loaded successfully!")
-                self.save_button.config(state=tk.NORMAL)
+                #self.save_button.config(state=tk.NORMAL)
 
                 self.display_dataframe_preview()
 
