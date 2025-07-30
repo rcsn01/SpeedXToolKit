@@ -14,3 +14,6 @@ class XLSProcessorApp(tk.Tk):
 if __name__ == "__main__":
     app = XLSProcessorApp()
     app.mainloop()
+
+#pyinstaller --onefile --windowed main.py
+

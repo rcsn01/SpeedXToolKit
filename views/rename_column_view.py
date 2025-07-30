@@ -1,68 +1,67 @@
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkinter.simpledialog import askinteger, askstring
-from models.dataframe_model import *
-import numpy as np
-from models.rename_column_model import *
 
 def rename_column_view(df):
-    """Load Excel file and allow the user to confirm the header row."""
+    """Allow the user to select a column from the DataFrame and rename it."""
     try:
-
         root = tk.Tk()
-        root.title("Rename Target")
-        root.geometry("1000x700")
+        root.title("Rename Column")
+        root.geometry("600x200")
 
-        # Create the main frame
-        first_frame = tk.Frame(root)
-        first_frame.pack(pady=5)
-        
-        # Add title and input field for columns to drop
-        tk.Label(first_frame, text="Old Target Name").grid(row=0, column=0, padx=5, sticky="w")
-        target_name = tk.Entry(first_frame, width=70)
-        target_name.insert(0, '')  # Initialize the entry with empty string
-        target_name.grid(row=0, column=1, padx=5, sticky="w")
+        result = {"confirmed": False}
 
-        second_frame = tk.Frame(root)
-        second_frame.pack(pady=5)
+        # Frame for selecting the column
+        select_frame = tk.Frame(root)
+        select_frame.pack(pady=10)
 
-        # Add title and input field for columns to drop
-        tk.Label(second_frame, text="New Target Name").grid(row=0, column=0, padx=5, sticky="w")
-        new_name = tk.Entry(second_frame, width=70)
-        new_name.insert(0, '')  # Initialize the entry with empty string
-        new_name.grid(row=0, column=1, padx=5, sticky="w")
-        
-        # Process the user's input
-        result = {"input": None}
+        tk.Label(select_frame, text="Select Column to Rename").grid(row=0, column=0, padx=5, sticky="w")
 
+        column_selector = ttk.Combobox(select_frame, values=list(df.columns), width=20)
+        column_selector.grid(row=0, column=1, padx=5, sticky="w")
+        column_selector.set(df.columns[0])  # default selection
+
+        # Frame for entering the new name
+        rename_frame = tk.Frame(root)
+        rename_frame.pack(pady=10)
+
+        tk.Label(rename_frame, text="New Column Name").grid(row=0, column=0, padx=5, sticky="w")
+        new_name_entry = tk.Entry(rename_frame, width=20)
+        new_name_entry.grid(row=0, column=1, padx=5, sticky="w")
+
+        # Button actions
         def on_confirm():
-            """Confirm selection and close window."""
-            try:
-                result["target_name"] = target_name.get()
-                result["new_name"] = new_name.get()
-                root.quit()
-                root.destroy()
-            except ValueError:
-                messagebox.showerror("Invalid Input", "Please enter a valid integer for the header row.")
+            selected_column = column_selector.get()
+            new_name = new_name_entry.get().strip()
 
-        def on_cancel():
-            """Close window without confirming."""
+            if not new_name:
+                messagebox.showerror("Invalid Input", "New column name cannot be empty.")
+                return
+
+            result["confirmed"] = True
+            result["target_name"] = selected_column
+            result["new_name"] = new_name
+
             root.quit()
             root.destroy()
 
-        # Buttons
-        button_frame = tk.Frame(root)
-        button_frame.pack(pady=10)
+        def on_cancel():
+            root.quit()
+            root.destroy()
 
+        # Button Frame
+        button_frame = tk.Frame(root)
+        button_frame.pack(pady=20)
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
         ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
-        # Run the window
         root.mainloop()
-        target_name, new_name = result["target_name"], result["new_name"]
-        return df, target_name, new_name
+
+        if result["confirmed"]:
+            return df, result["target_name"], result["new_name"]
+        else:
+            return None, None, None
 
     except Exception as e:
         print(f"Error: {e}")
-        return None
+        return None, None, None

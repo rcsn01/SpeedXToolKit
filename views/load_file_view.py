@@ -2,6 +2,12 @@ import pandas as pd
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.simpledialog import askinteger, askstring
+from openpyxl import load_workbook
+import xlwt
+import os
+import tempfile
+import csv
+
 
 def truncate_text(value, max_length=20):
     """Truncate text if it exceeds the max length, adding '...' at the end."""
@@ -20,9 +26,69 @@ def find_header_row(df):
             return i
     return None
 
+def convert_xlsx_to_xls(xlsx_file, xls_file):
+    wb_xlsx = load_workbook(xlsx_file, data_only=True)
+    wb_xls = xlwt.Workbook()
+
+    for sheet_name in wb_xlsx.sheetnames:
+        sheet_xlsx = wb_xlsx[sheet_name]
+        sheet_xls = wb_xls.add_sheet(sheet_name[:31])  # max 31 chars
+
+        for row_idx, row in enumerate(sheet_xlsx.iter_rows()):
+            for col_idx, cell in enumerate(row):
+                if cell.value is not None:
+                    sheet_xls.write(row_idx, col_idx, cell.value)
+
+    wb_xls.save(xls_file)
+    print(f"Converted: {xlsx_file} -> {xls_file}")
+
+
+def convert_csv_to_xls(csv_file, xls_file, encoding='utf-8', delimiter=None):
+    with open(csv_file, 'r', encoding=encoding, newline='') as f:
+        # Auto-detect delimiter if not provided
+        if delimiter is None:
+            sample = f.read(1024)
+            f.seek(0)
+            sniffer = csv.Sniffer()
+            try:
+                dialect = sniffer.sniff(sample)
+                delimiter = dialect.delimiter
+            except csv.Error:
+                delimiter = ','  # Fallback
+
+        reader = csv.reader(f, delimiter=delimiter)
+
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('Sheet1')
+
+        for row_idx, row in enumerate(reader):
+            for col_idx, value in enumerate(row):
+                ws.write(row_idx, col_idx, value)
+
+    wb.save(xls_file)
+    print(f"Converted: {csv_file} -> {xls_file}")
+
+
 def load_file_view(file_path):
-    """Load Excel file and allow the user to confirm the header row."""
+    """Load Excel file (.xls or .xlsx), convert if needed, and allow user to confirm header row."""
     try:
+        original_path = file_path
+
+        # Ensure cache folder exists
+        cache_dir = os.path.join(os.path.dirname(__file__), "file_cache")
+        os.makedirs(cache_dir, exist_ok=True)
+
+        # Convert and update path
+        converted_path = None
+        if file_path.lower().endswith(".csv"):
+            converted_path = os.path.join(cache_dir, os.path.basename(file_path).replace(".csv", "_converted.xls"))
+            convert_csv_to_xls(file_path, converted_path)
+            file_path = converted_path
+        elif file_path.lower().endswith(".xlsx"):
+            converted_path = os.path.join(cache_dir, os.path.basename(file_path).replace(".xlsx", "_converted.xls"))
+            convert_xlsx_to_xls(file_path, converted_path)
+            file_path = converted_path
+
         df = pd.read_excel(file_path, engine="xlrd", header=None)
         header_row = find_header_row(df)
 
@@ -30,10 +96,7 @@ def load_file_view(file_path):
         root.title("Header Row Preview")
         root.geometry("1000x700")
 
-
-        """Display the entire file with truncated text for long cells."""
-        
-        df_truncated = format_dataframe(df)  # Truncate long text before displaying
+        df_truncated = format_dataframe(df)
 
         # Create frame with scrollbar
         frame = tk.Frame(root)
@@ -52,7 +115,7 @@ def load_file_view(file_path):
         # Header selection
         header_frame = tk.Frame(root)
         header_frame.pack(pady=5)
-        
+
         tk.Label(header_frame, text="Header Row:").grid(row=0, column=0, padx=5, sticky="w")
         header_input = tk.Entry(header_frame, width=5)
         header_input.insert(0, str(header_row))
@@ -69,7 +132,16 @@ def load_file_view(file_path):
                 widget.destroy()
 
             try:
-                preselected_columns = {"Well", "Well Position", "Sample Name", "Target Name", "CT", "CQ"}
+                preselected_columns = {
+                    "Well", 
+                    "Well Position", 
+                    "Sample Name", 
+                    "Sample",
+                    "Target Name",
+                    "Target",
+                    "CT", 
+                    "Cq",
+                    "CQ"}
                 selected_row = int(header_input.get())
                 headers = df.iloc[selected_row].astype(str).tolist()
                 check_vars.clear()
@@ -86,7 +158,6 @@ def load_file_view(file_path):
 
         update_checkboxes()
 
-        # Store result
         result = {"header_row": None, "keep_input": []}
 
         def on_confirm():
@@ -96,7 +167,7 @@ def load_file_view(file_path):
 
                 if not selected_headers:
                     messagebox.showwarning("No Selection", "Please select at least one column.")
-                    return  # Do not proceed
+                    return
 
                 result["header_row"] = user_header_row
                 result["keep_input"] = selected_headers
@@ -107,7 +178,6 @@ def load_file_view(file_path):
                 messagebox.showerror("Invalid Input", "Please select valid header.")
 
         def on_cancel():
-            """Close window without confirming."""
             root.quit()
             root.destroy()
 
@@ -118,11 +188,20 @@ def load_file_view(file_path):
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
         ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
-        # Run the window
         root.mainloop()
 
         return df, result["header_row"], result["keep_input"]
 
     except Exception as e:
         print(f"Error: {e}")
-        return None, None
+        return None, None, None
+    
+    finally:
+        # Clean up temporary file
+        if converted_path and os.path.exists(converted_path):
+            try:
+                os.remove(converted_path)
+                print(f"Deleted temporary file: {converted_path}")
+            except Exception as cleanup_err:
+                print(f"Failed to delete temporary file: {cleanup_err}")
+

@@ -42,9 +42,12 @@ def delta_calculation_view(df):
         # Process the user's input
         result = {"input": None}
 
+        result = {"confirmed": False}
+
         def on_confirm():
             """Confirm selection and close window."""
             try:
+                result["confirmed"] = True
                 result["var1"] = var1.get()
                 result["var2"] = var2.get()
                 result["var3"] = var3.get()
@@ -67,8 +70,14 @@ def delta_calculation_view(df):
 
         # Run the window
         root.mainloop()
-        var1, var2, var3 = result["var1"], result["var2"], result["var3"]
-        return df, var1, var2, var3
+
+        if result.get("confirmed"):
+            var1, var2, var3 = result["var1"], result["var2"], result["var3"]
+            return df, var1, var2, var3
+        else:
+            return None, None, None, None
+        
+
 
     except Exception as e:
         print("OHHH NOOOOOOOOO")

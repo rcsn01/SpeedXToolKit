@@ -1,11 +1,29 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
+import pandas as pd
 
-def produce_output_view(df):
+def combine_file_view():
     try:
+        # Prompt for first file
+        file1 = filedialog.askopenfilename(title="Select First CSV File", filetypes=[("CSV files", "*.csv")])
+        if not file1:
+            messagebox.showinfo("Cancelled", "No file selected.")
+            return None
+
+        # Prompt for second file
+        file2 = filedialog.askopenfilename(title="Select Second CSV File", filetypes=[("CSV files", "*.csv")])
+        if not file2:
+            messagebox.showinfo("Cancelled", "No second file selected.")
+            return None
+                
+        df1 = pd.read_csv(file1)
+        df2 = pd.read_csv(file2)
+
+        common_cols = list(set(df1.columns).intersection(set(df2.columns)))
+
         """Display all columns with checkboxes and allow user to select which ones to keep."""
         root = tk.Tk()  # Or use tk.Toplevel() if this is a popup in an existing Tkinter app
-        root.title("Output Selection")
+        root.title("Remove Columns")
         root.geometry("500x500")
 
         result = {"confirmed": False, "selected_columns": []}
@@ -14,7 +32,7 @@ def produce_output_view(df):
         def on_confirm():
             selected = [col for col, var in checkbox_vars.items() if var.get()]
             if not selected:
-                messagebox.showwarning("No columns selected", "Please select at least one column to keep.")
+                messagebox.showwarning("No columns selected", "Please select at least one column to remove.")
                 return
             result["confirmed"] = True
             result["selected_columns"] = selected
@@ -23,7 +41,7 @@ def produce_output_view(df):
             root.quit()  # (Optional: `destroy()` is usually enough to exit mainloop)
         
         # Instruction label
-        tk.Label(root, text="Select columns to be included in output:", 
+        tk.Label(root, text="Select the columns to merge on:", 
                 font=("Arial", 12, "bold")).pack(pady=10)
 
         # Scrollable frame setup
@@ -42,7 +60,7 @@ def produce_output_view(df):
         scrollbar.pack(side="right", fill="y")
 
         # Add checkboxes for each column (each BooleanVar now explicitly attached to `root`)
-        for col in df.columns:
+        for col in common_cols:
             var = tk.BooleanVar(master=root)  # explicitly bind to root
             cb = tk.Checkbutton(scrollable_frame, text=col, variable=var, anchor='w', padx=10)
             cb.pack(fill='x', anchor='w')
@@ -58,7 +76,8 @@ def produce_output_view(df):
 
         if result["confirmed"]:
             rstring = ", ".join(result["selected_columns"])
-            return df, rstring
+            #print(rstring)
+            return pd.merge(df1, df2, on=result["selected_columns"])
         else:
             return None, None
     except Exception as e:

@@ -24,9 +24,12 @@ def yes_no_gui(question):
         # Process the user's input
         result = {"input": None}
 
+        result = {"confirmed": False}
+
         def on_confirm():
             """Confirm selection and close window."""
             try:
+                result["confirmed"] = True
                 result["target_name"] = target_name.get()
                 root.quit()
                 root.destroy()
@@ -46,11 +49,16 @@ def yes_no_gui(question):
 
         # Run the window
         root.mainloop()
-        target_name = result["target_name"]
-        if target_name == "yes":
-            return True
+
+
+        if result.get("confirmed"):
+            target_name = result["target_name"]
+            if target_name == "yes":
+                return True
+            else:
+                return False
         else:
-            return False
+            return None
 
     except Exception as e:
         print(f"Error: {e}")

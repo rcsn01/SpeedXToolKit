@@ -79,6 +79,11 @@ class MainView(tk.Frame):
         self.side_menu.pack(side="left", fill="y", expand=False, anchor="nw")
         self.side_menu.pack_propagate(False) # Prevent side menu from resizing
 
+        # Side menu frame
+        self.top_menu = tk.Frame(self, height=100, padx=10, pady=20, bg=COLOURS["white_hex"])
+        self.top_menu.pack(side="top", fill="x", expand=False, anchor="nw")
+        self.top_menu.pack_propagate(False) # Prevent side menu from resizing
+
         # Function to draw rounded rectangle without outline
         def draw_rounded_rect(canvas, x1, y1, x2, y2, radius=10, **kwargs):
             # Top-left and top-right corners
@@ -89,7 +94,7 @@ class MainView(tk.Frame):
             canvas.create_rectangle(x1, y1 + radius, x2, y2, outline="", **kwargs)  # bottom (straight)
 
         # Function to create a menu button with gradient and hover effect
-        def menu_button(parent, text, command):
+        def side_menu_button(parent, text, command):
             frame = tk.Frame(parent, bg=parent['bg'])
             frame.pack(fill="x", pady=(0, 8))
             
@@ -121,19 +126,60 @@ class MainView(tk.Frame):
             self.draw_gradient_line(frame, COLOURS["blue_rgb"], COLOURS["purple_rgb"])  # Default colour for line
             return frame
 
+        # Function to draw rounded rectangle without outline (horizontal layout)
+        def draw_rounded_rect_h(canvas, x1, y1, x2, y2, radius=10, **kwargs):
+
+            # Center rectangle (middle section)
+            canvas.create_rectangle(x1 , y1, x2, y2, outline="", **kwargs)
+
+        # Function to create a horizontal toolbar menu button with gradient and hover effect
+        def top_menu_button(parent, text, command):
+            frame = tk.Frame(parent, bg=parent['bg'])
+            frame.pack(side="left", padx=(0, 8))  # Horizontal packing
+
+            # Canvas for gradient text
+            canvas = Canvas(frame, width=150, height=40, bg=parent['bg'], highlightthickness=0)
+            canvas.pack()
+
+            self.draw_gradient_text(canvas, text, COLOURS["blue_rgb"], COLOURS["purple_rgb"], font=("Arial", 14, "bold"))
+            canvas.bind("<Button-1>", lambda e: command())
+
+            # Hover effect
+            def on_hover(event):
+                canvas.delete("all")
+                draw_rounded_rect_h(canvas, 0, 0, canvas.winfo_width(), 40, radius=10, fill="#20a5dd")
+                self.draw_gradient_text(canvas, text, COLOURS["white_rgb"], COLOURS["white_rgb"], font=("Arial", 14, "bold"))
+
+            def on_leave(event):
+                canvas.config(bg=parent['bg'])
+                canvas.delete("all")
+                draw_rounded_rect_h(canvas, 0, 0, canvas.winfo_width(), 40, radius=10, fill=parent['bg'])
+                self.draw_gradient_text(canvas, text, COLOURS["blue_rgb"], COLOURS["purple_rgb"], font=("Arial", 14, "bold"))
+
+            frame.bind("<Enter>", on_hover)
+            frame.bind("<Leave>", on_leave)
+
+            return frame
+
+
 
         # Attach menu buttons
-        self.load_button = menu_button(self.side_menu, "Load File", self.load_file)
-        self.save_button = menu_button(self.side_menu, "Save Processed File", self.save_file)
-        self.save_button = menu_button(self.side_menu, "Load Preset", self.load_preset)
-        self.save_button = menu_button(self.side_menu, "Save Preset", self.save_preset)
-        self.pivot_table_button = menu_button(self.side_menu, "Pivot Table", self.pivot_table)
-        self.rename_target_button = menu_button(self.side_menu, "Rename Column", self.rename_column)
-        self.combine_file_button = menu_button(self.side_menu, "Keep Column", self.keep_column)
-        self.drop_column_button = menu_button(self.side_menu, "Remove Column", self.drop_column)
-        self.combine_file_button = menu_button(self.side_menu, "Combine File", self.combine_file)
-        self.delta_calculation_button = menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
-        self.combine_file_button = menu_button(self.side_menu, "Produce Output", self.produce_output)
+        #self.load_button = side_menu_button(self.side_menu, "Load File", self.load_file)
+        #self.combine_file_button = side_menu_button(self.side_menu, "Combine File", self.combine_file)
+        self.load_button = top_menu_button(self.top_menu, "Load File", self.load_file)
+        self.save_button = top_menu_button(self.top_menu, "Load Preset", self.load_preset)
+        self.combine_file_button = top_menu_button(self.top_menu, "Combine File", self.combine_file)
+        self.save_button = top_menu_button(self.top_menu, "Save File", self.save_file)
+        self.save_button = top_menu_button(self.top_menu, "Save Preset", self.save_preset)
+
+
+        self.pivot_table_button = side_menu_button(self.side_menu, "Pivot Table", self.pivot_table)
+        self.rename_target_button = side_menu_button(self.side_menu, "Rename Column", self.rename_column)
+        self.combine_file_button = side_menu_button(self.side_menu, "Keep Column", self.keep_column)
+        self.drop_column_button = side_menu_button(self.side_menu, "Remove Column", self.drop_column)
+        #self.combine_file_button = side_menu_button(self.side_menu, "Combine File", self.combine_file)
+        #self.delta_calculation_button = side_menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
+        self.combine_file_button = side_menu_button(self.side_menu, "Produce Output", self.produce_output)
         
 
 
@@ -170,6 +216,7 @@ class MainView(tk.Frame):
         # Hook up the scrollbars correctly
         y_scrollbar.config(command=self.preview_text.yview)
         x_scrollbar.config(command=self.preview_text.xview)
+
 
     def draw_gradient_text(self, canvas, text, start_colour, end_colour, font):
         x = 10
@@ -312,33 +359,45 @@ class MainView(tk.Frame):
 
     def drop_column(self):
         if self.df is not None:
-            self.df, self.current_essay = drop_column(self.df, self.current_essay)
-            self.display_dataframe_preview()
+            results = drop_column(self.df, self.current_essay)
+            if results is not None:
+                self.df, self.current_essay = results
+                self.display_dataframe_preview()
 
     def rename_column(self):
         if self.df is not None:
-            self.df, self.current_essay = rename_column(self.df, self.current_essay)
-            self.display_dataframe_preview()
+            results = rename_column(self.df, self.current_essay)
+            if results is not None:
+                self.df, self.current_essay = results
+                self.display_dataframe_preview()
 
     def pivot_table(self):
         if self.df is not None:
-            self.df, self.current_essay = pivot_table(self.df, self.current_essay)
-            self.display_dataframe_preview()
+            results = pivot_table(self.df, self.current_essay)
+            if results is not None:
+                self.df, self.current_essay = results
+                self.display_dataframe_preview()
 
     def delta_calculation(self):
         if self.df is not None:
-            self.df, self.current_essay = delta_calculation(self.df, self.current_essay)
-            self.display_dataframe_preview()
+            results = delta_calculation(self.df, self.current_essay)
+            if results is not None:
+                self.df, self.current_essay = results
+                self.display_dataframe_preview()
 
     def produce_output(self):
         if self.df is not None:
-            self.df, self.current_essay = produce_output(self.df, self.current_essay)
-            self.display_dataframe_preview()
+            results = produce_output(self.df, self.current_essay)
+            if results is not None:
+                self.df, self.current_essay = results
+                self.display_dataframe_preview()
 
     def keep_column(self):
         if self.df is not None:
-            self.df, self.current_essay = keep_column(self.df, self.current_essay)
-            self.display_dataframe_preview()
+            results = keep_column(self.df, self.current_essay)
+            if results is not None:
+                self.df, self.current_essay = results
+                self.display_dataframe_preview()
 
     def load_preset(self):
         if self.df is not None:
@@ -354,15 +413,5 @@ class MainView(tk.Frame):
             self.store = save_preset(self.current_essay, self.store)
 
     def combine_file(self):
-        if self.df is not None:
-            file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx")])
-            if file_path:
-                df_to_combine = load_xls(file_path)
-                if df_to_combine is not None:
-                    self.df = pd.concat([self.df, df_to_combine], ignore_index=True)
-                    messagebox.showinfo("Success", "Files combined.")
-                    self.display_dataframe_preview()
-                else:
-                    messagebox.showerror("Error", "Failed to load second file.")
-        else:
-            messagebox.showwarning("Warning", "No data loaded!")
+        self.df = combined_file()
+        self.display_dataframe_preview()

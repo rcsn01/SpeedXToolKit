@@ -1,0 +1,7 @@
+source .venv/bin/activate
+
+
+#current_essay is the meta data that belongs to self.df
+
+#store is the a list of tuple, the tuple consisst of three item, first item is the naem of the preset, the second itme is the meta data, the third is all the fuctiions
+

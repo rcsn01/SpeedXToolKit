@@ -1,31 +1,18 @@
-import pandas as pd
-import tkinter as tk
-from tkinter import ttk, messagebox
-from tkinter.simpledialog import askinteger, askstring
-from models.dataframe_model import *
-import numpy as np
-
-
-def drop_column_model(df, keep_input):
-    to_drop = keep_input.strip()
-    
-    if not to_drop:
-        return df  # Return original DataFrame if no columns specified
-    
+def drop_column_model(df, drop_input):
+    """Drop specific columns from the DataFrame."""
     try:
-        # Split the input into individual column names
-        columns_to_drop = [col.strip() for col in to_drop.split(',')]
-        
-        # Verify each column exists in the DataFrame
-        for col in columns_to_drop:
-            if col not in df.columns:
-                raise ValueError(f"Column {col} not found in DataFrame")
-        
-        # Drop the specified columns from the DataFrame
-        df = df.drop(columns=columns_to_drop)
-        
-        return df  # Return the modified DataFrame
-        
+        # If input is a string, convert it to a list (for backward compatibility)
+        if isinstance(drop_input, str):
+            drop_input = [col.strip() for col in drop_input.split(",")]
+
+        columns_to_drop = [col for col in drop_input if col in df.columns]
+
+        if not columns_to_drop:
+            print("No valid columns found to drop.")
+            return df  # Return original DataFrame if no valid columns to drop
+
+        return df.drop(columns=columns_to_drop)
+
     except Exception as e:
-        print(f"Error processing input: {e}")
+        print(f"Error: {e}")
         return df  # Return original DataFrame on error
