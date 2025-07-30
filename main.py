@@ -1,4 +1,6 @@
 import tkinter as tk
+import sys
+sys.setrecursionlimit(2000)
 
 from views.main_view import MainView
 
