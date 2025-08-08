@@ -12,30 +12,25 @@ def delta_calculation_view(df):
     try:
         root = tk.Tk()
         root.title("Delta Calculation")
-        root.geometry("1000x700")
+        root.geometry("300x200")
 
         # Create the main frame
         first_frame = tk.Frame(root)
         first_frame.pack(pady=5)
         
-        # Add title and input field for columns to drop
+        # Add title and dropdown for first column
         tk.Label(first_frame, text="First Column").grid(row=0, column=0, padx=5, sticky="w")
-        var1 = tk.Entry(first_frame, width=70)
-        var1.insert(0, '')  # Initialize the entry with empty string
+        var1 = ttk.Combobox(first_frame, values=list(df.columns), width=15, state="readonly")
         var1.grid(row=0, column=1, padx=5, sticky="w")
 
-        second_frame = tk.Frame(root)
-        second_frame.pack(pady=5)
-
-        # Add title and input field for columns to drop
+        # Add title and dropdown for second column
         tk.Label(first_frame, text="Second Column").grid(row=1, column=0, padx=5, sticky="w")
-        var2 = tk.Entry(first_frame, width=70)
-        var2.insert(0, '')  # Initialize the entry with empty string
+        var2 = ttk.Combobox(first_frame, values=list(df.columns), width=15, state="readonly")
         var2.grid(row=1, column=1, padx=5, sticky="w")
-        
-        # Add title and input field for columns to drop
+
+        # Add title and input field for delta value
         tk.Label(first_frame, text="Difference in value").grid(row=2, column=0, padx=5, sticky="w")
-        var3 = tk.Entry(first_frame, width=70)
+        var3 = tk.Entry(first_frame, width=15)
         var3.insert(0, '')  # Initialize the entry with empty string
         var3.grid(row=2, column=1, padx=5, sticky="w")
 

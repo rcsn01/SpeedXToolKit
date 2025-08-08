@@ -49,7 +49,11 @@ def pivot_table(df, essay):
         return None
 
 def delta_calculation(df, essay):
-    df, var1, vaf2, delta= delta_calculation_view(df)
+    # Check if 'output' column exists
+    if 'Output' not in df.columns:
+        messagebox.showwarning("Missing Output Column", "Please generate output before using delta calculation.")
+        return None
+    df, var1, vaf2, delta = delta_calculation_view(df)
     if df is not None:
         processed_df = delta_calculation_model(df, var1, vaf2, delta)
         essay = essay + (f"(delta_calculation_model!$!{var1}!$!{vaf2}!$!{delta})",)

@@ -35,9 +35,9 @@ def load_preset_view(tuple_list):
     
     # Run the GUI
     root.mainloop()
-    
-    
-    print(selected_tuple[0])
+
+
+    print("This is from load preset view: " + selected_tuple[0])
     return selected_tuple
 
 # Example usage:

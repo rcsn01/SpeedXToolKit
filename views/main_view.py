@@ -178,7 +178,7 @@ class MainView(tk.Frame):
         self.combine_file_button = side_menu_button(self.side_menu, "Keep Column", self.keep_column)
         self.drop_column_button = side_menu_button(self.side_menu, "Remove Column", self.drop_column)
         #self.combine_file_button = side_menu_button(self.side_menu, "Combine File", self.combine_file)
-        #self.delta_calculation_button = side_menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
+        self.delta_calculation_button = side_menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
         self.combine_file_button = side_menu_button(self.side_menu, "Produce Output", self.produce_output)
         
 
