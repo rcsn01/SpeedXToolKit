@@ -13,7 +13,7 @@ export interface BackendState {
   keepColumns: (cols: string[]) => Promise<void>;
   dropColumns: (cols: string[]) => Promise<void>;
   renameColumn: (oldName: string, newName: string) => Promise<void>;
-  pivot: (target: string, value: string) => Promise<void>;
+  pivot: (target: string, value: string, indexColumns?: string[]) => Promise<void>;
   produceOutput: (cols: string[]) => Promise<void>;
   delta: (col1: string, col2: string, threshold: number) => Promise<void>;
   refresh: () => Promise<void>;
@@ -78,7 +78,7 @@ export function useBackend(): BackendState {
     keepColumns: (cols) => op('/transform/keep-columns', { columns: cols }),
     dropColumns: (cols) => op('/transform/drop-columns', { columns: cols }),
     renameColumn: (oldName, newName) => op('/transform/rename-column', { old_name: oldName, new_name: newName }),
-    pivot: (target, value) => op('/transform/pivot', { target, value }),
+  pivot: (target, value, indexColumns) => op('/transform/pivot', { target, value, index_columns: indexColumns && indexColumns.length ? indexColumns : undefined }),
     produceOutput: (cols) => op('/transform/produce-output', { columns: cols }),
     delta: (col1, col2, threshold) => op('/transform/delta', { col1, col2, threshold }),
     refresh: async () => { if (sessionId) await fetchSession(sessionId); }

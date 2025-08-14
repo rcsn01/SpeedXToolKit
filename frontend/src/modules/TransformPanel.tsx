@@ -9,6 +9,7 @@ export const TransformPanel: React.FC<{ backend: BackendState }> = ({ backend })
   const [renameNew, setRenameNew] = useState('');
   const [pivotTarget, setPivotTarget] = useState('');
   const [pivotValue, setPivotValue] = useState('');
+  const [pivotIndexCols, setPivotIndexCols] = useState<string[]>([]);
   const [outputCols, setOutputCols] = useState<string[]>([]);
   const [deltaCol1, setDeltaCol1] = useState('');
   const [deltaCol2, setDeltaCol2] = useState('');
@@ -23,10 +24,10 @@ export const TransformPanel: React.FC<{ backend: BackendState }> = ({ backend })
           <TextField label="Header Row Index" value={headerRowIndex} onChange={e=>setHeaderRowIndex(e.target.value)} sx={{width:180}} />
           <Button variant="outlined" disabled={!headerRowIndex || backend.loading} onClick={()=>backend.setHeaderRow(Number(headerRowIndex))}>Set Header Row</Button>
         </Stack>
-        <Autocomplete multiple options={backend.columns} value={keep} onChange={(_,v)=>setKeep(v)} renderInput={(params)=><TextField {...params} label="Keep Columns" />} />
+  <Autocomplete multiple disableCloseOnSelect options={backend.columns} value={keep} onChange={(_,v)=>setKeep(v)} renderInput={(params)=><TextField {...params} label="Keep Columns" />} />
         <Button size="small" variant="contained" disabled={!keep.length || backend.loading} onClick={()=>backend.keepColumns(keep)}>Apply Keep</Button>
 
-        <Autocomplete multiple options={backend.columns} value={drop} onChange={(_,v)=>setDrop(v)} renderInput={(params)=><TextField {...params} label="Drop Columns" />} />
+  <Autocomplete multiple disableCloseOnSelect options={backend.columns} value={drop} onChange={(_,v)=>setDrop(v)} renderInput={(params)=><TextField {...params} label="Drop Columns" />} />
         <Button size="small" variant="contained" disabled={!drop.length || backend.loading} onClick={()=>backend.dropColumns(drop)}>Apply Drop</Button>
 
         <Stack direction="row" spacing={1}>
@@ -35,10 +36,13 @@ export const TransformPanel: React.FC<{ backend: BackendState }> = ({ backend })
           <Button variant="outlined" disabled={!renameOld || !renameNew || backend.loading} onClick={()=>backend.renameColumn(renameOld, renameNew)}>Rename</Button>
         </Stack>
 
-        <Stack direction="row" spacing={1}>
-          <Autocomplete options={backend.columns} value={pivotTarget} onChange={(_,v)=>setPivotTarget(v||'')} renderInput={(p)=><TextField {...p} label="Pivot Target" />} sx={{flex:1}} />
-          <Autocomplete options={backend.columns} value={pivotValue} onChange={(_,v)=>setPivotValue(v||'')} renderInput={(p)=><TextField {...p} label="Pivot Value" />} sx={{flex:1}} />
-          <Button variant="outlined" disabled={!pivotTarget || !pivotValue || backend.loading} onClick={()=>backend.pivot(pivotTarget, pivotValue)}>Pivot</Button>
+        <Stack spacing={1}>
+          <Stack direction="row" spacing={1}>
+            <Autocomplete options={backend.columns} value={pivotTarget} onChange={(_,v)=>setPivotTarget(v||'')} renderInput={(p)=><TextField {...p} label="Pivot Target" />} sx={{flex:1}} />
+            <Autocomplete options={backend.columns} value={pivotValue} onChange={(_,v)=>setPivotValue(v||'')} renderInput={(p)=><TextField {...p} label="Pivot Value" />} sx={{flex:1}} />
+          </Stack>
+          <Autocomplete multiple disableCloseOnSelect options={backend.columns.filter(c=>c!==pivotTarget && c!==pivotValue)} value={pivotIndexCols} onChange={(_,v)=>setPivotIndexCols(v)} renderInput={(p)=><TextField {...p} label="Pivot Index Columns (optional)" />} />
+          <Button variant="outlined" disabled={!pivotTarget || !pivotValue || backend.loading} onClick={()=>backend.pivot(pivotTarget, pivotValue, pivotIndexCols)}>Pivot</Button>
         </Stack>
 
         <Autocomplete multiple options={backend.columns} value={outputCols} onChange={(_,v)=>setOutputCols(v)} renderInput={(params)=><TextField {...params} label="Produce Output Columns" />} />

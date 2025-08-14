@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { CssBaseline, Container, Typography, Box, Stack } from '@mui/material';
+import { CssBaseline, Typography, Box, Stack } from '@mui/material';
 import { FileUpload } from './modules/FileUpload';
 import { DataTable } from './modules/DataTable';
 import { TransformPanel } from './modules/TransformPanel';
@@ -12,20 +12,20 @@ const App: React.FC = () => {
   return (
     <>
       <CssBaseline />
-      <Container maxWidth="xl" sx={{py:4}}>
-        <Typography variant="h4" gutterBottom>Data Processor</Typography>
-        <Stack direction={{xs:'column', md:'row'}} spacing={4} alignItems="flex-start">
-          <Box flex={1}>
-            <FileUpload onSessionCreated={backend.handleSessionCreated} loading={backend.loading} />
-            <Box mt={2}>
-              <TransformPanel backend={backend} />
-            </Box>
+      <Box sx={{display:'flex', flexDirection:'column', height:'100vh', width:'100vw', overflow:'hidden'}}>
+        <Box sx={{p:2, flexShrink:0}}>
+          <Typography variant="h4" gutterBottom>Universal Data Processor</Typography>
+          <FileUpload onSessionCreated={backend.handleSessionCreated} loading={backend.loading} />
+        </Box>
+        <Box sx={{flex:1, display:'flex', minHeight:0, overflow:'hidden', gap:2, px:2, pb:2}}>
+          <Box sx={{width:360, flexShrink:0, overflowY:'auto', borderRight: '1px solid', borderColor:'divider', pr:2}}>
+            <TransformPanel backend={backend} />
           </Box>
-          <Box flex={3}>
-            <DataTable rows={backend.rows} columns={backend.columns} />
+          <Box sx={{flex:1, minWidth:0, overflow:'hidden'}}>
+            <DataTable rows={backend.rows} columns={backend.columns} maxWidthPx={Infinity} />
           </Box>
-        </Stack>
-      </Container>
+        </Box>
+      </Box>
     </>
   );
 };

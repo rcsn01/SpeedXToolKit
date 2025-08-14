@@ -65,11 +65,11 @@ async def upload_file(file: UploadFile = File(...)):
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
 
-        preview_rows = min(50, len(df))
+        # Return ALL rows (debug mode) – beware large payloads for big files
         return {
             "filename": file.filename,
             "columns": list(map(str, df.columns)),
-            "rows": df.head(preview_rows).to_dict(orient="records"),
+            "rows": df.to_dict(orient="records"),
             "rowCount": int(len(df)),
         }
     except HTTPException:

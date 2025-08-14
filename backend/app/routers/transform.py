@@ -1,9 +1,22 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import pandas as pd
-from typing import List, Optional
+from typing import List
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+if not logging.getLogger().handlers:
+    logging.basicConfig(level=logging.INFO)
+
+def debug_full_df(name: str, df: pd.DataFrame):
+    """Log entire DataFrame (all rows/cols). Use ONLY for debugging."""
+    try:
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', None, 'display.max_colwidth', None):
+            dump = df.to_string()
+        logger.info(f"\n==== DataFrame Dump: {name} shape={df.shape} ====\n{dump}\n==== End Dump ====")
+    except Exception as e:  # noqa: BLE001
+        logger.exception(f"Failed to dump DataFrame {name}: {e}")
 
 # In-memory storage (replace with cache/DB in production)
 # Each session will store a dict: { 'df': DataFrame, 'raw_rows': List[dict] }
@@ -29,6 +42,7 @@ class PivotRequest(BaseModel):
     session_id: str
     target: str
     value: str
+    index_columns: List[str] | None = None  # optional explicit index columns
 
 class ProduceOutputRequest(BaseModel):
     session_id: str
@@ -99,6 +113,7 @@ async def set_header_row(req: SetHeaderRowRequest):
             data_rows.append(dict(zip(new_columns, values)))
 
         entry['df'] = pd.DataFrame(data_rows if data_rows else [], columns=new_columns)
+        debug_full_df("after set-header-row (single_col_mode)", entry['df'])
         # Update raw_rows to reflect newly structured rows for potential subsequent operations
         entry['raw_rows'] = data_rows
         return {"columns": list(entry['df'].columns)}
@@ -115,9 +130,10 @@ async def set_header_row(req: SetHeaderRowRequest):
             elif len(values) > len(new_columns):
                 values = values[:len(new_columns)]
             data_rows.append(dict(zip(new_columns, values)))
-        entry['df'] = pd.DataFrame(data_rows if data_rows else [], columns=new_columns)
-        entry['raw_rows'] = data_rows
-        return {"columns": list(entry['df'].columns)}
+    entry['df'] = pd.DataFrame(data_rows if data_rows else [], columns=new_columns)
+    debug_full_df("after set-header-row (multi-col mode)", entry['df'])
+    entry['raw_rows'] = data_rows
+    return {"columns": list(entry['df'].columns)}
 
 @router.post('/session')
 async def create_session(payload: SessionCreate):
@@ -134,7 +150,8 @@ async def get_session(session_id: str):
     df = entry['df']
     # Sanitize for JSON (Starlette disallows NaN/Inf by default)
     import numpy as np
-    preview = df.head(100).copy()
+    # Return full dataframe (no row limit) – caution: large responses for big sessions
+    preview = df.copy()
     preview.replace([np.inf, -np.inf], np.nan, inplace=True)
     preview = preview.where(~preview.isna(), None)
     rows = preview.to_dict(orient='records')
@@ -184,12 +201,23 @@ async def pivot(req: PivotRequest):
     df = entry['df']
     if req.target not in df.columns or req.value not in df.columns:
         raise HTTPException(400, 'Invalid columns')
-    index_cols = [c for c in df.columns if c not in [req.target, req.value]]
+    if req.index_columns:
+        missing = [c for c in req.index_columns if c not in df.columns]
+        if missing:
+            raise HTTPException(400, f"Index columns not found: {missing}")
+        # Ensure target/value not accidentally included twice; remove them if present
+        index_cols = [c for c in req.index_columns if c not in [req.target, req.value]]
+        if not index_cols:
+            raise HTTPException(400, 'No valid index columns after excluding target/value')
+    else:
+        index_cols = [c for c in df.columns if c not in [req.target, req.value]]
     try:
+        debug_full_df("before pivot", df)
         pivoted = df.pivot_table(index=index_cols, columns=req.target, values=req.value, aggfunc='first').reset_index()
     except Exception as e:
         raise HTTPException(400, str(e))
     entry['df'] = pivoted
+    debug_full_df("after pivot", pivoted)
     return {"columns": list(pivoted.columns)}
 
 @router.post('/produce-output')
@@ -201,7 +229,18 @@ async def produce_output(req: ProduceOutputRequest):
     cols = [c for c in req.columns if c in df.columns]
     if not cols:
         raise HTTPException(400, 'No valid columns provided')
-    df['Output'] = df[cols].apply(lambda row: ', '.join(row.index[row.notna() & (row != 0)]), axis=1)
+    def build_output(row):
+        selected = []
+        for c in cols:
+            v = row[c]
+            if pd.isna(v):
+                continue
+            s = str(v).strip()
+            if not s or s == '0':
+                continue
+            selected.append(c)
+        return ', '.join(selected)
+    df['Output'] = df.apply(build_output, axis=1)
     entry['df'] = df
     return {"columns": list(df.columns)}
 
