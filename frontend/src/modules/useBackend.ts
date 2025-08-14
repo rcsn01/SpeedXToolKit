@@ -9,6 +9,7 @@ export interface BackendState {
   rows: any[];
   loading: boolean;
   handleSessionCreated: (file: File) => Promise<void>;
+  setHeaderRow: (rowIndex: number) => Promise<void>;
   keepColumns: (cols: string[]) => Promise<void>;
   dropColumns: (cols: string[]) => Promise<void>;
   renameColumn: (oldName: string, newName: string) => Promise<void>;
@@ -56,12 +57,24 @@ export function useBackend(): BackendState {
     }
   }, [sessionId, fetchSession]);
 
+  const setHeaderRow = useCallback(async (rowIndex: number) => {
+    if (!sessionId) return;
+    setLoading(true);
+    try {
+      await axios.post(`${API_BASE}/transform/set-header-row`, { session_id: sessionId, header_row_index: rowIndex });
+      await fetchSession(sessionId);
+    } finally {
+      setLoading(false);
+    }
+  }, [sessionId, fetchSession]);
+
   return {
     sessionId,
     columns,
     rows,
     loading,
     handleSessionCreated,
+  setHeaderRow,
     keepColumns: (cols) => op('/transform/keep-columns', { columns: cols }),
     dropColumns: (cols) => op('/transform/drop-columns', { columns: cols }),
     renameColumn: (oldName, newName) => op('/transform/rename-column', { old_name: oldName, new_name: newName }),

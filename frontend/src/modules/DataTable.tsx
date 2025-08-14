@@ -12,15 +12,17 @@ export const DataTable: React.FC<Props> = ({ rows, columns }) => {
   }
   return (
     <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
-      <Table stickyHeader size="small">
+  <Table stickyHeader size="small">
         <TableHead>
           <TableRow>
+    <TableCell sx={{fontWeight:600}}>#</TableCell>
             {columns.map(col => <TableCell key={col}>{col}</TableCell>)}
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row, idx) => (
             <TableRow key={idx}>
+      <TableCell sx={{color:'text.secondary'}}>{idx}</TableCell>
               {columns.map(col => <TableCell key={col}>{row[col]}</TableCell>)}
             </TableRow>
           ))}

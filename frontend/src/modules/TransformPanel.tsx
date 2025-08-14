@@ -13,11 +13,16 @@ export const TransformPanel: React.FC<{ backend: BackendState }> = ({ backend })
   const [deltaCol1, setDeltaCol1] = useState('');
   const [deltaCol2, setDeltaCol2] = useState('');
   const [deltaThreshold, setDeltaThreshold] = useState(0);
+  const [headerRowIndex, setHeaderRowIndex] = useState('');
 
   return (
     <Paper sx={{p:2}}>
       <Typography variant="h6" gutterBottom>Transformations</Typography>
       <Stack spacing={2}>
+        <Stack direction="row" spacing={1}>
+          <TextField label="Header Row Index" value={headerRowIndex} onChange={e=>setHeaderRowIndex(e.target.value)} sx={{width:180}} />
+          <Button variant="outlined" disabled={!headerRowIndex || backend.loading} onClick={()=>backend.setHeaderRow(Number(headerRowIndex))}>Set Header Row</Button>
+        </Stack>
         <Autocomplete multiple options={backend.columns} value={keep} onChange={(_,v)=>setKeep(v)} renderInput={(params)=><TextField {...params} label="Keep Columns" />} />
         <Button size="small" variant="contained" disabled={!keep.length || backend.loading} onClick={()=>backend.keepColumns(keep)}>Apply Keep</Button>
 
