@@ -6,3 +6,4 @@ temp.py
 /build
 /dist
 main.spec
+/frontend/node_modules
