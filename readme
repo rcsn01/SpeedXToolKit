@@ -1,5 +1,6 @@
 source .venv/bin/activate
 
+pyinstaller --onefile --windowed --name "Universal Data Translator" main.py
 
 #current_essay is the meta data that belongs to self.df
 
