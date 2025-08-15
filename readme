@@ -1,6 +1,12 @@
+macos
 source .venv/bin/activate
 
-pyinstaller --onefile --windowed --name "Universal Data Translator" main.py
+windows
+.\.venv\Scripts\Activate.ps1
+pyinstaller --onefile --windowed main.py
+
+to install requirements
+pip install -r requirements.txt
 
 #current_essay is the meta data that belongs to self.df
 
