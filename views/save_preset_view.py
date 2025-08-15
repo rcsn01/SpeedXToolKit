@@ -6,53 +6,45 @@ from models.dataframe_model import *
 import numpy as np
 from models.rename_column_model import *
 
+# ...existing code...
 def save_preset_view():
-    """Load Excel file and allow the user to confirm the header row."""
+    """Prompt user for a preset name. Returns None if cancelled or empty."""
     try:
-
         root = tk.Tk()
         root.title("Preset Name")
-        root.geometry("1000x700")
+        root.geometry("300x120")
+        root.resizable(False, False)
 
-        # Create the main frame
         first_frame = tk.Frame(root)
-        first_frame.pack(pady=5)
-        
-        # Add title and input field for columns to drop
+        first_frame.pack(pady=10, padx=10)
+
         tk.Label(first_frame, text="Preset Name").grid(row=0, column=0, padx=5, sticky="w")
-        target_name = tk.Entry(first_frame, width=70)
-        target_name.insert(0, '')  # Initialize the entry with empty string
+        target_name = tk.Entry(first_frame, width=26)
         target_name.grid(row=0, column=1, padx=5, sticky="w")
-        
-        # Process the user's input
-        result = {"input": None}
+
+        canceled = {"value": False}
 
         def on_confirm():
-            """Confirm selection and close window."""
-            try:
-                result["target_name"] = target_name.get()
-                root.quit()
-                root.destroy()
-            except ValueError:
-                messagebox.showerror("Invalid Input")
+            root.quit()
 
         def on_cancel():
-            """Close window without confirming."""
+            canceled["value"] = True
             root.quit()
-            root.destroy()
 
-        # Buttons
         button_frame = tk.Frame(root)
-        button_frame.pack(pady=10)
+        button_frame.pack(pady=8)
+        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=6)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=6)
 
-        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
-
-        # Run the window
         root.mainloop()
-        target_name= result["target_name"]
-        return target_name
 
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
+        if canceled["value"]:
+            return None
+        name = target_name.get().strip()
+        return name or None
+    finally:
+        try:
+            root.destroy()
+        except Exception:
+            pass
+# ...existing

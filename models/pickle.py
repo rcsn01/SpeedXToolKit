@@ -1,57 +1,65 @@
 import pickle
 import os
 from pathlib import Path
+from typing import List, Dict, Any
 
-def essay_to_pickle(name, essay):
-    print(type(essay))
-    
-    # Combine name with essay content
-    essay_data = (name,) + essay  # Ensure essay is converted to tuple if it isn't already
-    
-    # Create presets directory if it doesn't exist
+def essay_to_pickle(store: Dict[str, Any]):
+    """Persist a single preset store dict {name, metadata, functions} to presets/<name>.pkl."""
+    if not isinstance(store, dict):
+        raise TypeError("store must be a dict with keys: name, metadata, functions")
+    name = store.get('name')
+    if not name:
+        # Auto-generate a name if missing
+        name = 'preset_' + str(len(store.get('functions', [])))
+        store['name'] = name
+
     os.makedirs("presets", exist_ok=True)
-    
-    # Create filename (using the name with .pkl extension)
     filename = f"presets/{name}.pkl"
-    
-    # Save the data using pickle
     with open(filename, 'wb') as f:
-        pickle.dump(essay_data, f)
-    
-    return(essay_data)
+        pickle.dump(store, f)
+    return store
 
-import pickle
-from pathlib import Path
+def pickle_to_essay(collection):
+    """Load all dict-based presets from presets/*.pkl and merge into a collection.
 
-def pickle_to_essay(store):
+    collection can be:
+      - a list of preset dicts
+      - a dict mapping preset name -> preset dict
+      - None (treated as empty list)
+    Returns the updated collection in the same structural type passed in.
     """
-    Load all pickle files from the presets directory, skipping tuples whose names are already in store.
-    Returns the updated store list.
-    """
-    presets_dir = "presets"
-    presets_path = Path(presets_dir)
-    
-    # Check if directory exists
+    presets_path = Path("presets")
     if not presets_path.exists():
-        print(f"Presets directory '{presets_dir}' not found!")
-        return store  # Return the original store if directory doesn't exist
-    
-    # Get set of existing names in store for quick lookup
-    existing_names = {item[0] for item in store if isinstance(item, tuple) and len(item) > 0}
-    
-    # Process each .pkl file in directory
-    for file in presets_path.glob("*.pkl"):
+        return collection
+
+    # Normalize to working list
+    input_was_dict = False
+    if collection is None:
+        working: List[Dict[str, Any]] = []
+    elif isinstance(collection, dict):
+        # Assume mapping name->preset
+        input_was_dict = True
+        working = list(collection.values())
+    elif isinstance(collection, list):
+        working = [c for c in collection if isinstance(c, dict)]
+    else:
+        working = []
+
+    existing_names = {c.get('name') for c in working if isinstance(c, dict) and c.get('name')}
+
+    for file in presets_path.glob('*.pkl'):
         try:
             with open(file, 'rb') as f:
-                loaded_tuple = pickle.load(f)
-                # Check if it's a tuple with at least one item and if the name is new
-                if isinstance(loaded_tuple, tuple) and len(loaded_tuple) > 0 and loaded_tuple[0] not in existing_names:
-                    store.append(loaded_tuple)
-                    existing_names.add(loaded_tuple[0])  # Update the set with the new name
+                loaded = pickle.load(f)
+            if isinstance(loaded, dict) and loaded.get('name') and loaded.get('name') not in existing_names:
+                working.append(loaded)
+                existing_names.add(loaded.get('name'))
         except (pickle.PickleError, EOFError) as e:
             print(f"Error loading {file.name}: {e}")
         except Exception as e:
             print(f"Unexpected error with {file.name}: {e}")
-    
-    return store
+
+    if input_was_dict:
+        return {item.get('name'): item for item in working if item.get('name')}
+    return working
 

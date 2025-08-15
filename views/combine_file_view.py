@@ -22,9 +22,9 @@ def combine_file_view():
         common_cols = list(set(df1.columns).intersection(set(df2.columns)))
 
         """Display all columns with checkboxes and allow user to select which ones to keep."""
-        root = tk.Tk()  # Or use tk.Toplevel() if this is a popup in an existing Tkinter app
-        root.title("Remove Columns")
-        root.geometry("500x500")
+        root = tk.Tk()  # Or use tk.Toplevel() if embedded
+        root.title("Combine Files - Select Join Columns")
+        root.geometry("520x560")
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -36,13 +36,18 @@ def combine_file_view():
                 return
             result["confirmed"] = True
             result["selected_columns"] = selected
-            # Closing the window
             root.destroy()
-            root.quit()  # (Optional: `destroy()` is usually enough to exit mainloop)
-        
+            root.quit()
+
+        # File info display
+        info_frame = tk.Frame(root)
+        info_frame.pack(fill='x', padx=10, pady=(10,4))
+        tk.Label(info_frame, text=f"File 1: {file1}", anchor='w', wraplength=480, justify='left').pack(fill='x')
+        tk.Label(info_frame, text=f"File 2: {file2}", anchor='w', wraplength=480, justify='left').pack(fill='x', pady=(2,6))
+
         # Instruction label
-        tk.Label(root, text="Select the columns to merge on:", 
-                font=("Arial", 12, "bold")).pack(pady=10)
+        tk.Label(root, text="Select the columns to merge on (only common columns listed):", 
+                 font=("Arial", 11, "bold"), wraplength=480, justify='left').pack(pady=4, padx=10, anchor='w')
 
         # Scrollable frame setup
         checkbox_frame = tk.Frame(root)
@@ -61,7 +66,7 @@ def combine_file_view():
 
         # Add checkboxes for each column (each BooleanVar now explicitly attached to `root`)
         for col in common_cols:
-            var = tk.BooleanVar(master=root)  # explicitly bind to root
+            var = tk.BooleanVar(master=root)
             cb = tk.Checkbutton(scrollable_frame, text=col, variable=var, anchor='w', padx=10)
             cb.pack(fill='x', anchor='w')
             checkbox_vars[col] = var
@@ -75,11 +80,8 @@ def combine_file_view():
         root.mainloop()
 
         if result["confirmed"]:
-            rstring = ", ".join(result["selected_columns"])
-            #print(rstring)
             return pd.merge(df1, df2, on=result["selected_columns"])
-        else:
-            return None, None
+        return None
     except Exception as e:
         print("OHHH NOOOOOOOOO")
         print(f"Error: {e}")

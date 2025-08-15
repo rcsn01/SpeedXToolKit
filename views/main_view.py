@@ -58,10 +58,11 @@ class MainView(tk.Frame):
 
         self.file_path = None
         self.df = None  # Store the loaded DataFrame
-        #store is the a list of tuple, the tuple consisst of three item, first item is the naem of the preset, the second itme is the meta data, the third is all the fuctiions
-        self.store = []
-        #current_essay is the meta data that belongs to self.df
-        self.current_essay = None
+        # Store is now a dictionary holding current preset information:
+        # name: preset name (str or None)
+        # metadata: metadata of the current dataframe (any structure, typically tuple)
+        # functions: list of functions applied to the dataframe (list[str])
+        self.store = {"name": None, "metadata": None, "functions": []}
 
         # Create a frame to hold the header content
         header_frame = tk.Frame(self, bg=COLOURS["white_hex"])
@@ -261,94 +262,34 @@ class MainView(tk.Frame):
 
         parent.after(50, render_line)
 
-
-        # Horizontal scrollbar
-        x_scrollbar = tk.Scrollbar(text_scroll_frame, orient="horizontal")
-        x_scrollbar.pack(side="bottom", fill="x")
-
-
-        # Correct: Do NOT overwrite self.preview_frame
-        self.preview_text = tk.Text(
-            text_scroll_frame, 
-            height=45, 
-            width=125, 
-            bg=COLOURS["white_hex"], 
-            fg="black", 
-            highlightthickness=0,
-            yscrollcommand=y_scrollbar.set,
-            xscrollcommand=x_scrollbar.set,
-            wrap="none"
-        )
-        self.preview_text.pack(side="left", fill="both", expand=True)
-
-        # Hook up the scrollbars correctly
-        y_scrollbar.config(command=self.preview_text.yview)
-        x_scrollbar.config(command=self.preview_text.xview)
-
-    def draw_gradient_text(self, canvas, text, start_colour, end_colour, font):
-        x = 10
-        y = 10
-        num_chars = len(text)
-
-        r1, g1, b1 = start_colour
-        r2, g2, b2 = end_colour
-
-        for i, char in enumerate(text):
-            ratio = i / max(num_chars - 1, 1)  # Calculate ratio for gradient effect
-            r = int(r1 + (r2 - r1) * ratio)  # Calculate new red value
-            g = int(g1 + (g2 - g1) * ratio)  # Calculate new green value
-            b = int(b1 + (b2 - b1) * ratio)  # Calculate new blue value
-            colour = f'#{r:02x}{g:02x}{b:02x}'  # Convert RGB to hex
-
-            text_id = canvas.create_text(x, y, text=char, fill=colour, font=font, anchor='nw')
-            bbox = canvas.bbox(text_id)  # Get bounding box of text
-            char_width = bbox[2] - bbox[0] if bbox else 15  # Calculate text width
-            x += char_width  # Update x position for next character
-    
-    # Function to draw a gradient line
-    def draw_gradient_line(self, parent, start_colour, end_colour):
-        line = Canvas(parent, height=2, bg=parent['bg'], highlightthickness=0)
-        line.pack(fill="x", pady=(0, 8))
-
-        def render_line():
-            line.delete("all") # Clear any previous lines
-            width = line.winfo_width() # Get the width of the line
-
-            r1, g1, b1 = start_colour
-            r2, g2, b2 = end_colour
-
-            # Draw a gradient line horizontally
-            for i in range(width):
-                ratio = i / max(width, 1)
-                r = int(r1 + (r2 - r1) * ratio)
-                g = int(g1 + (g2 - g1) * ratio)
-                b = int(b1 + (b2 - b1) * ratio)
-                colour = f'#{r:02x}{g:02x}{b:02x}'
-                line.create_line(i, 0, i, 2, fill=colour)
-
-        parent.after(50, render_line)
-
     # ================= Data Functions =================
     # Load an Excel file and display it in preview
     def load_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
         if file_path:
             self.file_path = file_path
-            self.df, self.current_essay = import_files(file_path)
-            if self.df is not None:
+            result = import_files(file_path)
+            if result and isinstance(result, tuple) and len(result) == 2:
+                self.df, self.current_essay = result
+                # Update store metadata when a new file is loaded
+                self.store['metadata'] = self.current_essay
+                self.store['functions'] = []  # reset function history on new load
+            else:
+                self.df = None
+            if isinstance(self.df, pd.DataFrame):
                 messagebox.showinfo("Success", "File loaded successfully!")
                 self.display_dataframe_preview()
+            else:
+                messagebox.showwarning("Load Failed", "Could not load a valid dataset.")
 
     def display_dataframe_preview(self):
         # Clear any existing text in the text widget
         self.preview_text.delete(1.0, tk.END)
-        # Convert the entire DataFrame to a string (without the index)
-        #print(self.df)
-        #print("AAAAAFAGFK:GDKLFGDLKFAD:K")
-        preview = self.df.to_string(index=False)
-        
-        # Insert the preview into the text widget
-        self.preview_text.insert(tk.END, preview)
+        if isinstance(self.df, pd.DataFrame):
+            preview = self.df.to_string(index=False)
+            self.preview_text.insert(tk.END, preview)
+        else:
+            self.preview_text.insert(tk.END, "No data loaded.")
 
     def save_file(self):
         if self.df is not None:
@@ -359,58 +300,57 @@ class MainView(tk.Frame):
 
     def drop_column(self):
         if self.df is not None:
-            results = drop_column(self.df, self.current_essay)
+            results = drop_column(self.df, self.store)
             if results is not None:
-                self.df, self.current_essay = results
+                self.df, self.store = results
                 self.display_dataframe_preview()
 
     def rename_column(self):
         if self.df is not None:
-            results = rename_column(self.df, self.current_essay)
+            results = rename_column(self.df, self.store)
             if results is not None:
-                self.df, self.current_essay = results
+                self.df, self.store = results
                 self.display_dataframe_preview()
 
     def pivot_table(self):
         if self.df is not None:
-            results = pivot_table(self.df, self.current_essay)
+            results = pivot_table(self.df, self.store)
             if results is not None:
-                self.df, self.current_essay = results
+                self.df, self.store = results
                 self.display_dataframe_preview()
 
     def delta_calculation(self):
         if self.df is not None:
-            results = delta_calculation(self.df, self.current_essay)
+            results = delta_calculation(self.df, self.store)
             if results is not None:
-                self.df, self.current_essay = results
+                self.df, self.store = results
                 self.display_dataframe_preview()
 
     def produce_output(self):
         if self.df is not None:
-            results = produce_output(self.df, self.current_essay)
+            results = produce_output(self.df, self.store)
             if results is not None:
-                self.df, self.current_essay = results
+                self.df, self.store = results
                 self.display_dataframe_preview()
 
     def keep_column(self):
         if self.df is not None:
-            results = keep_column(self.df, self.current_essay)
+            results = keep_column(self.df, self.store)
             if results is not None:
-                self.df, self.current_essay = results
+                self.df, self.store = results
                 self.display_dataframe_preview()
 
     def load_preset(self):
         if self.df is not None:
-            self.df, self.current_essay, self.store = load_preset(self.df, self.current_essay, self.store)
-            self.display_dataframe_preview()
+            self.df, self.store = load_preset(self.df, self.store)
+            if isinstance(self.store, dict):
+                self.current_essay = self.store.get('metadata')
+            if isinstance(self.df, pd.DataFrame):
+                self.display_dataframe_preview()
     
     def save_preset(self):
         if self.df is not None:
-            self.store = save_preset(self.current_essay, self.store)
-
-    def save_preset(self):
-        if self.df is not None:
-            self.store = save_preset(self.current_essay, self.store)
+            self.store = save_preset(self.store)
 
     def combine_file(self):
         self.df = combined_file()

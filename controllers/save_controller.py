@@ -1,24 +1,34 @@
 import pandas as pd
-from tkinter.simpledialog import askstring
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 
 def save_dataframe(df):
-    """Save DataFrame to CSV or Excel."""
+    """Prompt for destination and save DataFrame as CSV.
+
+    Returns:
+        True  - if file successfully saved
+        None  - if user cancelled or no data
+        False - on error
+    """
     try:
-        file_format = askstring("Save File", "Enter file format to save (csv/xlsx):").strip().lower()
-        file_name = askstring("Save File", "Enter file name (without extension):").strip()
+        if df is None or df.empty:
+            messagebox.showwarning("Save", "No data to save.")
+            return None
 
-        if file_format == "csv":
-            file_path = f"{file_name}.csv"
-            df.to_csv(file_path, index=False)
-        elif file_format == "xlsx":
-            file_path = f"{file_name}.xlsx"
-            df.to_excel(file_path, index=False, engine="openpyxl")
-        else:
-            messagebox.showwarning("Error", "Invalid format. Please enter 'csv' or 'xlsx'.")
-            return
+        file_path = filedialog.asksaveasfilename(
+            title="Save CSV",
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv")],
+            confirmoverwrite=True
+        )
+        if not file_path:
+            return None  # User cancelled
 
-        messagebox.showinfo("Success", f"File saved as {file_path}")
+        if not file_path.lower().endswith('.csv'):
+            file_path += '.csv'
 
+        df.to_csv(file_path, index=False)
+        messagebox.showinfo("Success", f"File saved: {file_path}")
+        return True
     except Exception as e:
-        messagebox.showerror("Error", f"Error: {e}")
+        messagebox.showerror("Error", f"Error saving file: {e}")
+        return False
