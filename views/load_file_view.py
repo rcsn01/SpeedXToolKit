@@ -155,13 +155,17 @@ def load_file_view(file_path):
 
         scrollbar = tk.Scrollbar(frame)
         scrollbar.pack(side="right", fill="y")
+        # Added horizontal scrollbar
+        x_scrollbar = tk.Scrollbar(frame, orient="horizontal")
+        x_scrollbar.pack(side="bottom", fill="x")
 
-        text_widget = tk.Text(frame, wrap="none", height=20, width=80, yscrollcommand=scrollbar.set)
+        text_widget = tk.Text(frame, wrap="none", height=20, width=80, yscrollcommand=scrollbar.set, xscrollcommand=x_scrollbar.set)
         text_widget.insert("1.0", df_truncated.to_string(index=True))
         text_widget.config(state="disabled")
         text_widget.pack(side="left", fill="both", expand=True)
 
         scrollbar.config(command=text_widget.yview)
+        x_scrollbar.config(command=text_widget.xview)
 
         # Header selection
         header_frame = tk.Frame(root)
