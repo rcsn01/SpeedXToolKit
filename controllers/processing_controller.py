@@ -117,8 +117,13 @@ def df_to_tuple(df):
 
 def import_files(file_path): 
     df, header_row, keep_input = load_file_view(file_path)
+    if df is None or header_row is None:
+        messagebox.showerror("Load Failed", "File could not be loaded or header not detected.")
+        return None
     df_with_format, df_with_header = essay_process_model(df, header_row)
-    
+    if df_with_header is None:
+        messagebox.showerror("Processing Failed", "Unable to process file structure.")
+        return None
     df_with_header = keep_column_model(df_with_header, keep_input)
     processed_df = clear_undefined(df_with_header)
     essay_info = None

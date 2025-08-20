@@ -17,6 +17,8 @@ COLOURS = {
     "purple_hex": "#593085", #SDX Purple
     "white_hex": "#FFFFFF" # White in hex
 }
+# Application version
+APP_VERSION = "v0.1.0"
 
 # Class for creating a gradient canvas frame (background)
 class GradientFrame(tk.Canvas):
@@ -72,8 +74,12 @@ class MainView(tk.Frame):
         title_canvas = tk.Canvas(header_frame, bg=COLOURS["white_hex"], highlightthickness=0, height=70)
         title_canvas.pack(fill="x")
 
-        # Draw the gradient title text
+        # Draw the gradient title text (without version for cleaner look)
         self.draw_gradient_text(title_canvas, "Universal Data Processor", COLOURS["blue_rgb"], COLOURS["purple_rgb"], font=("Arial", 40, "bold"))
+
+        # Small version label in header (top-right)
+        version_label = tk.Label(header_frame, text=APP_VERSION, bg=COLOURS["white_hex"], fg="#555555", font=("Arial", 10, "bold"))
+        version_label.place(relx=0.99, rely=0.15, anchor="ne")
 
         # Side menu frame
         self.side_menu = tk.Frame(self, width=250, padx=10, pady=20, bg=COLOURS["white_hex"])
@@ -265,8 +271,22 @@ class MainView(tk.Frame):
     # ================= Data Functions =================
     # Load an Excel file and display it in preview
     def load_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xls"), ("Excel files", "*.xlsx"), ("CSV files", "*.csv")])
+        # Updated: combined first filter so *.csv appears immediately
+        file_path = filedialog.askopenfilename(
+            title="Select data file",
+            filetypes=[
+                ("Data files", "*.xls *.xlsx *.csv"),
+                ("Excel (xls)", "*.xls"),
+                ("Excel (xlsx)", "*.xlsx"),
+                ("CSV", "*.csv"),
+                ("All files", "*.*"),
+            ]
+        )
         if file_path:
+            # Basic validation (in case user picked unsupported type via All files)
+            if not file_path.lower().endswith((".xls", ".xlsx", ".csv")):
+                messagebox.showwarning("Unsupported", "Please select an .xls, .xlsx, or .csv file.")
+                return
             self.file_path = file_path
             result = import_files(file_path)
             if result and isinstance(result, tuple) and len(result) == 2:

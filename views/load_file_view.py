@@ -7,7 +7,20 @@ import xlwt
 import os
 import tempfile
 import csv
+import chardet
 
+# Helper to deduplicate header names (Name, Name (1), Name (2) ...)
+def _dedupe_headers(raw_headers):
+    deduped = []
+    counts = {}
+    for name in raw_headers:
+        base = (name or '').strip() or 'Unnamed'
+        counts[base] = counts.get(base, 0) + 1
+        if counts[base] == 1:
+            deduped.append(base)
+        else:
+            deduped.append(f"{base} ({counts[base]-1})")
+    return deduped
 
 def truncate_text(value, max_length=20):
     """Truncate text if it exceeds the max length, adding '...' at the end."""
@@ -44,30 +57,65 @@ def convert_xlsx_to_xls(xlsx_file, xls_file):
 
 
 def convert_csv_to_xls(csv_file, xls_file, encoding='utf-8', delimiter=None):
-    with open(csv_file, 'r', encoding=encoding, newline='') as f:
-        # Auto-detect delimiter if not provided
-        if delimiter is None:
-            sample = f.read(1024)
-            f.seek(0)
-            sniffer = csv.Sniffer()
+    # Try multiple encodings with simple fallback, optionally sniff using chardet
+    tried = []
+    encodings_to_try = [encoding, 'utf-8-sig', 'cp1252', 'latin-1']
+    raw_data = None
+    for enc in encodings_to_try:
+        if enc in tried:
+            continue
+        try:
+            with open(csv_file, 'r', encoding=enc, newline='') as f:
+                if raw_data is None:
+                    raw_data = f.read(4096)
+                    f.seek(0)
+                # Auto-detect delimiter if not provided
+                _sample = f.read(1024)
+                f.seek(0)
+                if delimiter is None:
+                    sniffer = csv.Sniffer()
+                    try:
+                        dialect = sniffer.sniff(_sample)
+                        _delim = dialect.delimiter
+                    except csv.Error:
+                        _delim = ','
+                else:
+                    _delim = delimiter
+                reader = csv.reader(f, delimiter=_delim)
+                wb = xlwt.Workbook()
+                ws = wb.add_sheet('Sheet1')
+                for row_idx, row in enumerate(reader):
+                    for col_idx, value in enumerate(row):
+                        ws.write(row_idx, col_idx, value)
+                wb.save(xls_file)
+                print(f"Converted: {csv_file} -> {xls_file} (encoding={enc}, delimiter='{_delim}')")
+                return
+        except UnicodeDecodeError as ue:
+            tried.append(enc)
+            continue
+        except Exception as e:
+            print(f"CSV convert unexpected error with encoding {enc}: {e}")
+            tried.append(enc)
+            continue
+    # If all failed, last resort: detect with chardet
+    if raw_data is not None:
+        detect = chardet.detect(raw_data.encode('latin-1', errors='ignore')) if isinstance(raw_data, str) else chardet.detect(raw_data)
+        guessed = detect.get('encoding')
+        if guessed and guessed not in tried:
             try:
-                dialect = sniffer.sniff(sample)
-                delimiter = dialect.delimiter
-            except csv.Error:
-                delimiter = ','  # Fallback
-
-        reader = csv.reader(f, delimiter=delimiter)
-
-        wb = xlwt.Workbook()
-        ws = wb.add_sheet('Sheet1')
-
-        for row_idx, row in enumerate(reader):
-            for col_idx, value in enumerate(row):
-                ws.write(row_idx, col_idx, value)
-
-    wb.save(xls_file)
-    print(f"Converted: {csv_file} -> {xls_file}")
-
+                with open(csv_file, 'r', encoding=guessed, newline='') as f:
+                    reader = csv.reader(f)
+                    wb = xlwt.Workbook()
+                    ws = wb.add_sheet('Sheet1')
+                    for row_idx, row in enumerate(reader):
+                        for col_idx, value in enumerate(row):
+                            ws.write(row_idx, col_idx, value)
+                    wb.save(xls_file)
+                    print(f"Converted: {csv_file} -> {xls_file} (encoding={guessed} via chardet)")
+                    return
+            except Exception as e:
+                print(f"Chardet attempt failed: {e}")
+    raise UnicodeDecodeError('csv-decoder', b'', 0, 1, 'Failed to decode file with tried encodings')
 
 def load_file_view(file_path):
     """Load Excel file (.xls or .xlsx), convert if needed, and allow user to confirm header row."""
@@ -91,6 +139,9 @@ def load_file_view(file_path):
 
         df = pd.read_excel(file_path, engine="xlrd", header=None)
         header_row = find_header_row(df)
+        if header_row is None:
+            messagebox.showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
+            return None, None, None
 
         root = tk.Tk()
         root.title("Header Row Preview")
@@ -143,7 +194,8 @@ def load_file_view(file_path):
                     "Cq",
                     "CQ"}
                 selected_row = int(header_input.get())
-                headers = df.iloc[selected_row].astype(str).tolist()
+                raw_headers = df.iloc[selected_row].astype(str).tolist()
+                headers = _dedupe_headers(raw_headers)
                 check_vars.clear()
 
                 for i, col_name in enumerate(headers):

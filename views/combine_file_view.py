@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import pandas as pd
+import csv
 
 def combine_file_view():
     try:
@@ -16,10 +17,52 @@ def combine_file_view():
             messagebox.showinfo("Cancelled", "No second file selected.")
             return None
                 
-        df1 = pd.read_csv(file1)
-        df2 = pd.read_csv(file2)
+        def _read_csv_with_fallback(path):
+            encodings = ['utf-8', 'utf-8-sig', 'cp1252', 'latin-1']
+            last_err = None
+            # Read small sample for delimiter sniffing
+            for enc in encodings:
+                try:
+                    with open(path, 'r', encoding=enc, newline='') as f:
+                        sample = f.read(2048)
+                        f.seek(0)
+                        # Delimiter detection
+                        try:
+                            dialect = csv.Sniffer().sniff(sample)
+                            delim = dialect.delimiter
+                        except csv.Error:
+                            delim = ','
+                        return pd.read_csv(f, delimiter=delim)
+                except UnicodeDecodeError as e:
+                    last_err = e
+                    continue
+                except Exception as e:
+                    last_err = e
+                    continue
+            raise last_err if last_err else RuntimeError('Failed to read CSV with fallback encodings.')
+
+        df1 = _read_csv_with_fallback(file1)
+        df2 = _read_csv_with_fallback(file2)
+
+        # If duplicate column names, disambiguate with (1), (2) style
+        def _dedupe_cols(cols):
+            counts = {}
+            result = []
+            for c in cols:
+                base = (c or '').strip() or 'Unnamed'
+                counts[base] = counts.get(base, 0) + 1
+                if counts[base] == 1:
+                    result.append(base)
+                else:
+                    result.append(f"{base} ({counts[base]-1})")
+            return result
+        df1.columns = _dedupe_cols(df1.columns)
+        df2.columns = _dedupe_cols(df2.columns)
 
         common_cols = list(set(df1.columns).intersection(set(df2.columns)))
+        if not common_cols:
+            messagebox.showerror("No Common Columns", "The selected files share no column names to merge on.")
+            return None
 
         """Display all columns with checkboxes and allow user to select which ones to keep."""
         root = tk.Tk()  # Or use tk.Toplevel() if embedded
@@ -85,4 +128,8 @@ def combine_file_view():
     except Exception as e:
         print("OHHH NOOOOOOOOO")
         print(f"Error: {e}")
+        try:
+            messagebox.showerror("Combine Failed", f"Failed to combine files:\n{e}")
+        except Exception:
+            pass
         return None
