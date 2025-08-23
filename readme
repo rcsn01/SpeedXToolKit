@@ -116,7 +116,7 @@ python main.py
 ## Building Executable (PyInstaller)
 Example spec/command (adjust name):
 ```
-pyinstaller --onefile --windowed SpeedXToolKit.py
+pyinstaller --onefile --windowed --name SpeedXToolKit main.py
 ```
 Recommended additions:
 - Hidden imports if wildcard imports confuse analysis:
