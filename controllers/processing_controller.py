@@ -33,7 +33,7 @@ def drop_column(df, store):
     processed_df = drop_column_model(df, input)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(f"drop_column_model!$!{input}")
+            store['functions'].append(["drop_column_model", input])
         return processed_df, store
     return None, store
 
@@ -46,7 +46,7 @@ def rename_column(df, store):
     processed_df = rename_column_model(df, target_name, new_name)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(f"rename_column_model!$!{target_name}!$!{new_name}")
+            store['functions'].append(["rename_column_model", target_name, new_name])
         return processed_df, store
     return None, store
 
@@ -59,7 +59,7 @@ def pivot_table(df, store):
     processed_df = pivot_table_model(df, target_name, new_name)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(f"pivot_table_model!$!{target_name}!$!{new_name}")
+            store['functions'].append(["pivot_table_model", target_name, new_name])
         return processed_df, store
     return None, store
 
@@ -75,7 +75,7 @@ def delta_calculation(df, store):
     processed_df = delta_calculation_model(df, var1, vaf2, delta)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(f"delta_calculation_model!$!{var1}!$!{vaf2}!$!{delta}")
+            store['functions'].append(["delta_calculation_model", var1, vaf2, delta])
         return processed_df, store
     return None, store
 
@@ -88,7 +88,7 @@ def produce_output(df, store):
     processed_df = produce_output_model(df, var1)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(f"produce_output_model!$!{var1}")
+            store['functions'].append(["produce_output_model", var1])
         return processed_df, store
     return None, store
 
@@ -101,7 +101,20 @@ def keep_column(df, store):
     processed_df = keep_column_model(df, input)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(f"keep_column_model!$!{input}")
+            store['functions'].append(["keep_column_model", input])
+        return processed_df, store
+    return None, store
+
+def custom_code(df, store):
+    """Open custom code view, execute code, and log the action."""
+    view_result = custom_code_view()
+    if not view_result:
+        return None, store
+    code = view_result["code"]
+    processed_df = custom_code_model(df, code)
+    if isinstance(processed_df, pd.DataFrame):
+        if 'functions' in store:
+            store['functions'].append(["custom_code_model", code])
         return processed_df, store
     return None, store
 
@@ -113,6 +126,9 @@ def df_to_tuple(df):
     second_col_tuple = tuple(df.iloc[:, 1].values)
 
     return (first_col_tuple, second_col_tuple)
+
+
+
 
 
 def import_files(file_path): 
@@ -152,15 +168,12 @@ def load_preset(df, store):
     """
     original_df = df.copy() if isinstance(df, pd.DataFrame) else df
     presets = pickle_to_essay([])  # list of dict presets
-    if not presets:
-        messagebox.showinfo("Presets", "No presets found.")
-        return df, store
-
-    # Build compatibility tuples for existing selection view: (name, metadata, *functions)
+    
+    # Build compatibility tuples for existing selection view: (name, metadata, functions)
     selection_data = []
     for p in presets:
         if isinstance(p, dict):
-            selection_data.append((p.get('name'), p.get('metadata'), *p.get('functions', [])))
+            selection_data.append((p.get('name'), p.get('metadata'), p.get('functions', [])))
 
     chosen_tuple = load_preset_view(selection_data)
     if not chosen_tuple:
@@ -180,13 +193,13 @@ def load_preset(df, store):
         'delta_calculation_model': lambda frame, v1, v2, d: delta_calculation_model(frame, v1, v2, d),
         'produce_output_model': lambda frame, v1: produce_output_model(frame, v1),
         'keep_column_model': lambda frame, cols: keep_column_model(frame, cols),
+        'custom_code_model': lambda frame, code: custom_code_model(frame, code),
     }
     rebuilt_df = original_df
     for entry in store.get('functions', []):
         try:
-            parts = entry.split('!$!')
-            name = parts[0]
-            params = parts[1:]
+            name = entry[0]
+            params = entry[1:]
             func = func_map.get(name)
             if func and isinstance(rebuilt_df, pd.DataFrame):
                 rebuilt_df = func(rebuilt_df, *params)

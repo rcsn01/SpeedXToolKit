@@ -9,3 +9,4 @@ from .save_preset_view import *
 from .load_preset_view import *
 from .yes_no import *
 from .combine_file_view import *
+from .custom_code_view import *

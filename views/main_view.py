@@ -6,6 +6,8 @@ import pandas as pd
 from models.dataframe_model import *
 from models.drop_column_model import *
 from models.rename_column_model import *
+from models.custom_code_model import *
+from views.custom_code_view import *
 
 # Global variables
 # Define colour constants used in the app (SpeeDX colors)
@@ -18,7 +20,7 @@ COLOURS = {
     "white_hex": "#FFFFFF" # White in hex
 }
 # Application version
-APP_VERSION = "v0.1.0"
+APP_VERSION = "v0.2.0"
 
 # Class for creating a gradient canvas frame (background)
 class GradientFrame(tk.Canvas):
@@ -187,6 +189,7 @@ class MainView(tk.Frame):
         #self.combine_file_button = side_menu_button(self.side_menu, "Combine File", self.combine_file)
         self.delta_calculation_button = side_menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
         self.combine_file_button = side_menu_button(self.side_menu, "Produce Output", self.produce_output)
+        self.custom_code_button = side_menu_button(self.side_menu, "Custom Code", self.custom_code)
         
 
 
@@ -371,6 +374,14 @@ class MainView(tk.Frame):
     def save_preset(self):
         if self.df is not None:
             self.store = save_preset(self.store)
+
+    def custom_code(self):
+        if self.df is not None:
+            results = custom_code(self.df, self.store)
+            if results is not None:
+                self.df, self.store = results
+                self.display_dataframe_preview()
+
 
     def combine_file(self):
         self.df = combined_file()

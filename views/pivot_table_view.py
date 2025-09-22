@@ -52,7 +52,7 @@ def pivot_table_view(df):
         button_frame.pack(pady=10)
 
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=root.destroy).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 

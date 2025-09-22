@@ -24,7 +24,7 @@ def clear_undefined(df):
     """Replace 'undefined' and 'undetermined' values (case-insensitive and with possible spaces) in the DataFrame with NaN."""
     try:
         # Strip spaces and convert everything to lowercase before replacement
-        df = df.applymap(lambda x: np.nan if isinstance(x, str) and x.strip().lower() in {"undefined", "undetermined"} else x)
+        df = df.map(lambda x: np.nan if isinstance(x, str) and x.strip().lower() in {"undefined", "undetermined"} else x)
         return df
     except Exception as e:
         print(f"Error: {e}")
