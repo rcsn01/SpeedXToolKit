@@ -190,6 +190,7 @@ class MainView(tk.Frame):
         self.delta_calculation_button = side_menu_button(self.side_menu, "Delta Calculation", self.delta_calculation)
         self.combine_file_button = side_menu_button(self.side_menu, "Produce Output", self.produce_output)
         self.custom_code_button = side_menu_button(self.side_menu, "Custom Code", self.custom_code)
+        self.remove_empty_rows_button = side_menu_button(self.side_menu, "Remove Empty Rows", lambda: remove_empty_rows(self.df, self.store))
         
 
 
@@ -378,6 +379,13 @@ class MainView(tk.Frame):
     def custom_code(self):
         if self.df is not None:
             results = custom_code(self.df, self.store)
+            if results is not None:
+                self.df, self.store = results
+                self.display_dataframe_preview()
+
+    def remove_empty_rows(self):
+        if self.df is not None:
+            results = remove_empty_rows(self.df, self.store)
             if results is not None:
                 self.df, self.store = results
                 self.display_dataframe_preview()

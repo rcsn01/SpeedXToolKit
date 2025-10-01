@@ -10,3 +10,4 @@ main.spec
 Universal Data Translator.spec
 SpeedXToolKit.spec
 dist.zip
+/.venv
