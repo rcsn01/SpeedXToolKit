@@ -30,7 +30,13 @@ def truncate_text(value, max_length=20):
 
 def format_dataframe(df, max_length=20):
     """Apply truncation to all text values in the DataFrame."""
-    return df.applymap(lambda x: truncate_text(str(x), max_length))
+    # DataFrame.applymap is deprecated in newer pandas — use DataFrame.map when available.
+    try:
+        # DataFrame.map applies elementwise mapping and avoids the applymap deprecation warning.
+        return df.map(lambda x: truncate_text(str(x), max_length))
+    except Exception:
+        # Fallback for older pandas versions where map might not behave as expected.
+        return df.applymap(lambda x: truncate_text(str(x), max_length))
 
 def find_header_row(df):
     """Find the first row where more than 3 columns have data."""
@@ -211,7 +217,6 @@ def load_file_view(file_path):
 
                 result["header_row"] = user_header_row
                 result["keep_input"] = selected_headers
-                print("Kept headers:", result["keep_input"])
                 root.quit()
                 root.destroy()
             except ValueError:

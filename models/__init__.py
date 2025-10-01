@@ -10,4 +10,4 @@ from .path_utils import *
 from .produce_output_model import *
 from .pickle import *
 from .custom_code_model import *
-from .remove_emtpy_rows import *
+from .remove_emtpy_rows_model import *

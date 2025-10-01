@@ -127,19 +127,19 @@ def df_to_tuple(df):
 
     return (first_col_tuple, second_col_tuple)
 
+
 def remove_empty_rows(df, store):
     """Remove empty rows based on user-selected column and log the action."""
     view_result = remove_empty_rows_view(df)
-    if not view_result or not view_result[0]:
+    if not view_result:
         return None, store
-    df, column = view_result
-    processed_df = remove_empty_rows_model(df, column)
+    df, target_name = view_result
+    processed_df = remove_empty_rows_model(df, target_name)
     if isinstance(processed_df, pd.DataFrame):
         if 'functions' in store:
-            store['functions'].append(["remove_empty_rows_model", column])
+            store['functions'].append(["remove_empty_rows_model", target_name])
         return processed_df, store
     return None, store
-
 
 
 def import_files(file_path): 
