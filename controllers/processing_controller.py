@@ -172,6 +172,68 @@ def find_essay(essay, store):
         if essays[2] == essay[1]:
             return essays
 
+def show_plugins():
+    return pickle_to_essay([])
+
+def apply_plugin(df, plugin):
+    """Apply a plugin/preset to df. `plugin` may be:
+    - a preset name (str)
+    - a preset dict as returned by pickle_to_essay
+    - a selection tuple (name, metadata, functions)
+
+    Returns (new_df, new_store)
+    """
+    original_df = df.copy() if isinstance(df, pd.DataFrame) else df
+
+    # Resolve plugin to a preset dict
+    presets = pickle_to_essay([])
+    chosen = None
+    try:
+        if isinstance(plugin, dict):
+            chosen = plugin
+        elif isinstance(plugin, str):
+            chosen = next((p for p in presets if isinstance(p, dict) and p.get('name') == plugin), None)
+        elif isinstance(plugin, (list, tuple)) and plugin:
+            # Could be (name, metadata, functions) tuple or a sequence where first item is name
+            chosen_name = plugin[0]
+            chosen = next((p for p in presets if isinstance(p, dict) and p.get('name') == chosen_name), None)
+    except Exception:
+        chosen = None
+
+    if not chosen:
+        # nothing to apply
+        return df, {"name": None, "metadata": None, "functions": []}
+
+    # Adopt chosen preset store
+    store = {"name": chosen.get('name'), "metadata": chosen.get('metadata'), "functions": list(chosen.get('functions', []))}
+
+    func_map = {
+        'drop_column_model': lambda frame, col: drop_column_model(frame, col),
+        'rename_column_model': lambda frame, target, new: rename_column_model(frame, target, new),
+        'pivot_table_model': lambda frame, target, new: pivot_table_model(frame, target, new),
+        'delta_calculation_model': lambda frame, v1, v2, d: delta_calculation_model(frame, v1, v2, d),
+        'produce_output_model': lambda frame, v1: produce_output_model(frame, v1),
+        'keep_column_model': lambda frame, cols: keep_column_model(frame, cols),
+        'custom_code_model': lambda frame, code: custom_code_model(frame, code),
+        'remove_empty_rows_model': lambda frame, col: remove_empty_rows_model(frame, col),
+    }
+
+    rebuilt_df = original_df
+    for entry in store.get('functions', []):
+        try:
+            name = entry[0]
+            params = entry[1:]
+            func = func_map.get(name)
+            if func and isinstance(rebuilt_df, pd.DataFrame):
+                rebuilt_df = func(rebuilt_df, *params)
+        except Exception as e:
+            print(f"[Preset Replay] Failed on {entry}: {e}")
+            continue
+
+    if isinstance(rebuilt_df, pd.DataFrame):
+        return rebuilt_df, store
+    return original_df, store
+
 def load_preset(df, store):
     """Load a dict-based preset from disk and replay its function history.
 
@@ -205,6 +267,7 @@ def load_preset(df, store):
         'produce_output_model': lambda frame, v1: produce_output_model(frame, v1),
         'keep_column_model': lambda frame, cols: keep_column_model(frame, cols),
         'custom_code_model': lambda frame, code: custom_code_model(frame, code),
+        'remove_empty_rows_model': lambda frame, col: remove_empty_rows_model(frame, col),
     }
     rebuilt_df = original_df
     for entry in store.get('functions', []):

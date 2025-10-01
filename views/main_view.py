@@ -4,6 +4,7 @@ from controllers.processing_controller import *
 from controllers.save_controller import *
 import pandas as pd
 from models.dataframe_model import *
+from models.path_utils import get_resource_path
 
 # Global variables
 # Define colour constants used in the app (SpeeDX colors)
@@ -16,7 +17,7 @@ COLOURS = {
     "white_hex": "#FFFFFF" # White in hex
 }
 # Application version
-APP_VERSION = "v0.2.0"
+APP_VERSION = "v0.3.0"
 
 # Simplified UI: use basic Tkinter widgets (Label, Button, Frame) instead of custom gradient canvas
 
@@ -33,12 +34,27 @@ class MainView(tk.Frame):
         # functions: list of functions applied to the dataframe (list[str])
         self.store = {"name": None, "metadata": None, "functions": []}
 
-        # Create a simple header
-        header_frame = tk.Frame(self, bg=COLOURS["white_hex"], pady=8)
+        # Create a simple header with a light blue background
+        header_bg = "#abd2ff"  # light blue
+        header_frame = tk.Frame(self, bg=header_bg, pady=8)
         header_frame.pack(fill="x")
-        title_label = tk.Label(header_frame, text="SpeedXToolKit", bg=COLOURS["white_hex"], fg=COLOURS["blue_hex"], font=("Arial", 24, "bold"))
+        # Try to load a logo image from assets/logo.png and display to the left of the title
+        try:
+            logo_path = get_resource_path("assets/logo.png")
+            if logo_path.exists():
+                logo_img = tk.PhotoImage(file=str(logo_path))
+                # subsample reduces size by integer factor (e.g., 2 => half size)
+                logo_img = logo_img.subsample(2, 2)
+                label = tk.Label(header_frame, image=logo_img, bg=header_bg)
+                label.image = logo_img
+                label.pack(side="left", padx=(6,8))
+        except Exception:
+            # If loading fails, silently continue without logo
+            pass
+
+        title_label = tk.Label(header_frame, text="ToolKit", bg=header_bg, fg="#000000", font=("Arial", 24, "bold"))
         title_label.pack(side="left", padx=10)
-        version_label = tk.Label(header_frame, text=APP_VERSION, bg=COLOURS["white_hex"], fg="#555555", font=("Arial", 10))
+        version_label = tk.Label(header_frame, text=APP_VERSION, bg=header_bg, fg="#555555", font=("Arial", 10))
         version_label.pack(side="right", padx=10)
 
         # Top menu: simple buttons
@@ -58,6 +74,107 @@ class MainView(tk.Frame):
         # The actual side menu (starts visible) placed in column 0
         self.side_menu = tk.Frame(self.left_container, width=200, padx=6, pady=6, bg=COLOURS["white_hex"])
         self.side_menu.grid(row=0, column=0, sticky='ns')
+
+        # Plugins list: show available plugins above the side-menu buttons
+        try:
+            plugins = show_plugins()
+        except Exception:
+            plugins = []
+
+        plugins_label = tk.Label(self.side_menu, text="Plugins:", bg="#dddddd", font=("Arial", 10, "bold"), bd=1, relief='solid')
+        plugins_label.pack(fill='x', pady=(8,4))
+        plugins_frame = tk.Frame(self.side_menu, bg=COLOURS["white_hex"])
+        plugins_frame.pack(fill='x', pady=(0,8))
+        if plugins:
+            # If plugins is a list of tuples or dicts, try to extract readable names
+            display_items = []
+            for p in plugins:
+                try:
+                    if isinstance(p, dict):
+                        display_items.append(p.get('name', str(p)))
+                    elif isinstance(p, (list, tuple)) and p:
+                        display_items.append(str(p[0]))
+                    else:
+                        display_items.append(str(p))
+                except Exception:
+                    display_items.append(str(p))
+
+            self.plugins_listbox = tk.Listbox(plugins_frame, height=5)
+            for item in display_items:
+                self.plugins_listbox.insert(tk.END, item)
+            self.plugins_listbox.pack(fill='x')
+
+            # Apply button under the plugins list
+            def on_apply_plugin():
+                try:
+                    sel = self.plugins_listbox.curselection()
+                    if not sel:
+                        messagebox.showwarning("No selection", "Please select a plugin to apply.")
+                        return
+                    name = self.plugins_listbox.get(sel[0])
+                    # Call controller apply_plugin
+                    new_df, new_store = apply_plugin(self.df, name)
+                    if isinstance(new_df, pd.DataFrame):
+                        self.df = new_df
+                        self.store = new_store
+                        self.display_dataframe_preview()
+                        messagebox.showinfo("Plugin Applied", f"Plugin '{name}' applied.")
+                    else:
+                        messagebox.showwarning("Apply Failed", f"Plugin '{name}' did not produce a valid DataFrame.")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to apply plugin: {e}")
+            # Refresh handler: reload plugin list and update the listbox (or create it)
+            def on_refresh_plugins():
+                try:
+                    new_plugins = show_plugins()
+                    # Build display items
+                    items = []
+                    for p in new_plugins:
+                        try:
+                            if isinstance(p, dict):
+                                items.append(p.get('name', str(p)))
+                            elif isinstance(p, (list, tuple)) and p:
+                                items.append(str(p[0]))
+                            else:
+                                items.append(str(p))
+                        except Exception:
+                            items.append(str(p))
+
+                    # If a 'no plugins' label was shown, remove it
+                    if hasattr(self, 'no_plugins_label') and self.no_plugins_label:
+                        try:
+                            self.no_plugins_label.destroy()
+                            self.no_plugins_label = None
+                        except Exception:
+                            pass
+
+                    # If listbox exists, replace contents; otherwise create it
+                    if hasattr(self, 'plugins_listbox') and self.plugins_listbox:
+                        self.plugins_listbox.delete(0, tk.END)
+                        for it in items:
+                            self.plugins_listbox.insert(tk.END, it)
+                    else:
+                        self.plugins_listbox = tk.Listbox(plugins_frame, height=5)
+                        for it in items:
+                            self.plugins_listbox.insert(tk.END, it)
+                        self.plugins_listbox.pack(fill='x')
+
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to refresh plugins: {e}")
+
+            # Buttons frame for Apply and Refresh
+            btn_frame = tk.Frame(plugins_frame, bg=COLOURS["white_hex"])
+            btn_frame.pack(pady=4)
+            tk.Button(btn_frame, text="Apply", command=on_apply_plugin).pack(side='left', padx=4)
+            tk.Button(btn_frame, text="Refresh", command=on_refresh_plugins).pack(side='left', padx=4)
+        else:
+            self.no_plugins_label = tk.Label(plugins_frame, text="No plugins", bg=COLOURS["white_hex"], fg="#777777")
+            self.no_plugins_label.pack(fill='x')
+
+        # Transform label: sits under the plugins area and above the side menu buttons
+        # Slightly grey background for visual separation
+        transform_label = tk.Label(self.side_menu, text="Transform:", bg="#dddddd", font=("Arial", 10, "bold"), bd=1, relief='solid')
+        transform_label.pack(fill='x', pady=(8,4))
 
         btn_specs = [
             ("Pivot Table", self.pivot_table),
