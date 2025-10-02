@@ -2,22 +2,77 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import shutil
+import pickle
 from tkinter import filedialog, messagebox
 from models.path_utils import ensure_presets_dir
 
-def load_preset_view(tuple_list):
+def manage_preset_view(tuple_list):
     """Display a GUI to select one tuple from a list of tuples."""
     selected_tuple = None  # This will store the user's selection
 
-    def on_select():
-        nonlocal selected_tuple
+    def on_view():
         # Get the selected index
         selection = listbox.curselection()
         if selection:  # If something is selected
             index = selection[0]
-            selected_tuple = tuple_list[index]
-            root.quit()
-            root.destroy()  # Close the window
+            preset_name = listbox.get(index)
+            
+            # Load and display preset contents
+            try:
+                presets_dir = ensure_presets_dir()
+                preset_path = presets_dir / f"{preset_name}.pkl"
+                
+                if preset_path.exists():
+                    with open(preset_path, 'rb') as f:
+                        preset_data = pickle.load(f)
+                    
+                    # Create a new window to display preset contents
+                    view_window = tk.Toplevel(root)
+                    view_window.title(f"Preset Contents: {preset_name}")
+                    view_window.geometry("600x400")
+                    
+                    # Create scrollable text widget
+                    text_frame = tk.Frame(view_window)
+                    text_frame.pack(fill="both", expand=True, padx=10, pady=10)
+                    
+                    scrollbar = tk.Scrollbar(text_frame)
+                    scrollbar.pack(side="right", fill="y")
+                    
+                    text_widget = tk.Text(text_frame, wrap="word", yscrollcommand=scrollbar.set)
+                    text_widget.pack(side="left", fill="both", expand=True)
+                    scrollbar.config(command=text_widget.yview)
+                    
+                    # Format and display preset data
+                    content = f"Preset Name: {preset_data.get('name', 'Unknown')}\n\n"
+                    content += f"Metadata: {preset_data.get('metadata', 'None')}\n\n"
+                    content += "Functions Applied:\n"
+                    
+                    functions = preset_data.get('functions', [])
+                    if functions:
+                        for i, func in enumerate(functions, 1):
+                            if isinstance(func, list) and func:
+                                func_name = func[0]
+                                func_args = func[1:] if len(func) > 1 else []
+                                content += f"  {i}. {func_name}({', '.join(map(str, func_args))})\n"
+                            else:
+                                content += f"  {i}. {func}\n"
+                    else:
+                        content += "  No functions recorded\n"
+                    
+                    text_widget.insert("1.0", content)
+                    text_widget.config(state="disabled")  # Make read-only
+                    
+                    # Add close button
+                    close_btn = ttk.Button(view_window, text="Close", command=view_window.destroy)
+                    close_btn.pack(pady=10)
+                    
+                else:
+                    messagebox.showerror("Error", f"Preset file not found: {preset_path}")
+                    
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load preset: {e}")
+        else:
+            messagebox.showwarning("No Selection", "Please select a preset to view.")
 
     def on_add():
         file_path = filedialog.askopenfilename(filetypes=[("Pickle Files", "*.pkl")])
@@ -80,23 +135,23 @@ def load_preset_view(tuple_list):
     button_frame = tk.Frame(root)
     button_frame.pack(pady=10)
 
-    select_button = ttk.Button(button_frame, text="Select", command=on_select)
-    select_button.grid(row=0, column=0, padx=5)
+    view_button = ttk.Button(button_frame, text="View", command=on_view)
+    view_button.grid(row=0, column=0, padx=5)
 
     add_button = ttk.Button(button_frame, text="Add", command=on_add)
-    add_button.grid(row=0, column=1, padx=5)
+    add_button.grid(row=0, column=2, padx=5)
 
     remove_button = ttk.Button(button_frame, text="Remove", command=on_remove)
-    remove_button.grid(row=0, column=2, padx=5)
+    remove_button.grid(row=0, column=3, padx=5)
 
     cancel_button = ttk.Button(button_frame, text="Cancel", command=on_cancel)
-    cancel_button.grid(row=0, column=3, padx=5)
+    cancel_button.grid(row=0, column=4, padx=5)
 
     # Run the GUI
     root.mainloop()
 
     if selected_tuple:
-        print("This is from load preset view: " + str(selected_tuple[0]))
+        print("This is from manage preset view: " + str(selected_tuple[0]))
     return selected_tuple
 
 # Example usage:
@@ -109,5 +164,5 @@ if __name__ == "__main__":
         ("Spinach", "Vegetable", "Green")
     ]
     
-    selected = load_preset_view(data)
+    selected = manage_preset_view(data)
     print(f"You selected: {selected}")

@@ -234,12 +234,11 @@ def apply_plugin(df, plugin):
         return rebuilt_df, store
     return original_df, store
 
-def load_preset(df, store):
-    """Load a dict-based preset from disk and replay its function history.
+def manage_preset():
+    """Manage presets - view, add, remove, or select presets.
 
     Returns (rebuilt_df, updated_store)
     """
-    original_df = df.copy() if isinstance(df, pd.DataFrame) else df
     presets = pickle_to_essay([])  # list of dict presets
     
     # Build compatibility tuples for existing selection view: (name, metadata, functions)
@@ -248,42 +247,7 @@ def load_preset(df, store):
         if isinstance(p, dict):
             selection_data.append((p.get('name'), p.get('metadata'), p.get('functions', [])))
 
-    chosen_tuple = load_preset_view(selection_data)
-    if not chosen_tuple:
-        return df, store
-    chosen_name = chosen_tuple[0]
-    chosen = next((p for p in presets if isinstance(p, dict) and p.get('name') == chosen_name), None)
-    if not chosen:
-        return df, store
-
-    # Adopt chosen preset store
-    store = {"name": chosen.get('name'), "metadata": chosen.get('metadata'), "functions": list(chosen.get('functions', []))}
-
-    func_map = {
-        'drop_column_model': lambda frame, col: drop_column_model(frame, col),
-        'rename_column_model': lambda frame, target, new: rename_column_model(frame, target, new),
-        'pivot_table_model': lambda frame, target, new: pivot_table_model(frame, target, new),
-        'delta_calculation_model': lambda frame, v1, v2, d: delta_calculation_model(frame, v1, v2, d),
-        'produce_output_model': lambda frame, v1: produce_output_model(frame, v1),
-        'keep_column_model': lambda frame, cols: keep_column_model(frame, cols),
-        'custom_code_model': lambda frame, code: custom_code_model(frame, code),
-        'remove_empty_rows_model': lambda frame, col: remove_empty_rows_model(frame, col),
-    }
-    rebuilt_df = original_df
-    for entry in store.get('functions', []):
-        try:
-            name = entry[0]
-            params = entry[1:]
-            func = func_map.get(name)
-            if func and isinstance(rebuilt_df, pd.DataFrame):
-                rebuilt_df = func(rebuilt_df, *params)
-        except Exception as e:
-            print(f"[Preset Replay] Failed on {entry}: {e}")
-            continue
-
-    if isinstance(rebuilt_df, pd.DataFrame):
-        return rebuilt_df, store
-    return original_df, store
+    manage_preset_view(selection_data)
 
     
 def combined_file():
