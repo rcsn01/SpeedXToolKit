@@ -24,10 +24,25 @@ class ToolbarPanel(tk.Frame):
             ("Save Plugin", self._on_save_plugin),
         ]
         
-        # Create buttons
+        # Create buttons with custom styling
         self.buttons = {}
         for text, command in button_configs:
-            btn = tk.Button(self, text=text, command=command)
+            btn = tk.Button(
+                self, 
+                text=text, 
+                command=command,
+                # Button styling options:
+                #bg="#20a5dd",           # Background color
+                #fg="white",             # Text color
+                #font=("Arial", 10, "bold"),  # Font family, size, style
+                #relief="flat",        # Border style: flat, raised, sunken, ridge, groove, solid
+                #bd=2,                   # Border width
+                #padx=15,               # Internal horizontal padding
+                #pady=5,                # Internal vertical padding
+                #activebackground="#388194",  # Color when clicked
+                #activeforeground="white",     # Text color when clicked
+                #cursor="hand2"         # Cursor style when hovering
+            )
             btn.pack(side="left", padx=4)
             self.buttons[text.lower().replace(" ", "_")] = btn
     

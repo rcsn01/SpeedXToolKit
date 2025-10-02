@@ -26,7 +26,7 @@ def custom_code_view():
 
     # Instruction label
     tk.Label(root, text="Enter Python code to process the dataframe.\nUse 'df' as the input dataframe variable.\nThe result should be assigned back to 'df'.",
-             font=("Arial", 10)).pack(pady=10, padx=10, anchor='w')
+             font=("Arial", 10)).pack(pady=10, padx=10, anchor='s')
 
     # Text area for code input
     code_text = scrolledtext.ScrolledText(root, wrap=tk.WORD, width=70, height=15, font=("Courier", 10))

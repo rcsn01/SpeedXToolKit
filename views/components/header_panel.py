@@ -46,7 +46,7 @@ class HeaderPanel(tk.Frame):
             if logo_path.exists():
                 logo_img = tk.PhotoImage(file=str(logo_path))
                 # subsample reduces size by integer factor
-                logo_img = logo_img.subsample(2, 2)
+                logo_img = logo_img.subsample(3, 3)
                 self.logo_label = tk.Label(self, image=logo_img, bg=self.bg_color)
                 self.logo_label.image = logo_img  # Keep reference
                 self.logo_label.pack(side="left", padx=(6, 8))

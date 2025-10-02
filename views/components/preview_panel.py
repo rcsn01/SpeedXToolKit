@@ -14,6 +14,16 @@ class PreviewPanel(tk.Frame):
         """Setup the preview panel UI"""
         self.pack(side="left", fill="both", expand=True)
         
+        # Title label for the preview
+        self.title_label = tk.Label(
+            self,
+            text="File Preview",
+            bg=self.bg_color,
+            fg="black",
+            font=("Arial", 11, "bold")
+        )
+        self.title_label.pack(side="top", anchor="w", padx=12, pady=(8, 0))
+
         # Create scrollable text frame
         self.text_scroll_frame = tk.Frame(self, bg=self.bg_color)
         self.text_scroll_frame.pack(fill="both", expand=True, padx=10, pady=10)

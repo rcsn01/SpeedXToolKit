@@ -13,10 +13,11 @@ COLOURS = {
     "white_rgb": (255, 255, 255), # White in RGB
     "blue_hex": "#20a5dd", #SDX Blue
     "purple_hex": "#593085", #SDX Purple
-    "white_hex": "#FFFFFF" # White in hex
+    "white_hex": "#FFFFFF", # White in hex
+    "light_blue_hex": "#abd2ff" # Light blue for header
 }
 # Application version
-APP_VERSION = "v0.3.0"
+APP_VERSION = "v0.3.1"
 
 # Main application view using component-based architecture
 class MainView(tk.Frame):
@@ -43,13 +44,13 @@ class MainView(tk.Frame):
     def _setup_ui(self):
         """Setup the main UI using components"""
         # Header panel
-        self.header = HeaderPanel(self, title="ToolKit", version=APP_VERSION, bg_color="#abd2ff")
+        self.header = HeaderPanel(self, title="ToolKit", version=APP_VERSION, bg_color=COLOURS["white_hex"])
         
         # Toolbar panel
-        self.toolbar = ToolbarPanel(self, controller=self, bg_color=COLOURS["white_hex"])
+        self.toolbar = ToolbarPanel(self, controller=self, bg_color=COLOURS["light_blue_hex"])
         
         # Sidebar panel
-        self.sidebar = SidebarPanel(self, controller=self, bg_color=COLOURS["white_hex"])
+        self.sidebar = SidebarPanel(self, controller=self, bg_color=COLOURS["light_blue_hex"])
         
         # Preview panel
         self.preview = PreviewPanel(self, bg_color=COLOURS["white_hex"])

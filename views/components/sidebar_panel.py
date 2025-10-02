@@ -38,10 +38,9 @@ class SidebarPanel(tk.Frame):
         self.transform_label = tk.Label(
             self.side_menu, 
             text="Transform:", 
-            bg="#dddddd", 
-            font=("Arial", 10, "bold"), 
-            bd=1, 
-            relief='solid'
+            bg="white",
+            fg="black",
+            font=("Arial", 11, "bold")
         )
         self.transform_label.pack(fill='x', pady=(8, 4))
         

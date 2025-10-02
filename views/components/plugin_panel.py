@@ -21,10 +21,9 @@ class PluginPanel(tk.Frame):
         self.plugins_label = tk.Label(
             self, 
             text="Plugins:", 
-            bg="#dddddd", 
-            font=("Arial", 10, "bold"), 
-            bd=1, 
-            relief='solid'
+            bg="white",
+            fg="black",
+            font=("Arial", 11, "bold")
         )
         self.plugins_label.pack(fill='x', pady=(8, 4))
         
