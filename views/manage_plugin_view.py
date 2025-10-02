@@ -4,9 +4,9 @@ import os
 import shutil
 import pickle
 from tkinter import filedialog, messagebox
-from models.path_utils import ensure_presets_dir
+from models.path_utils import *
 
-def manage_preset_view(tuple_list):
+def manage_plugin_view(tuple_list):
     """Display a GUI to select one tuple from a list of tuples."""
     selected_tuple = None  # This will store the user's selection
 
@@ -15,20 +15,20 @@ def manage_preset_view(tuple_list):
         selection = listbox.curselection()
         if selection:  # If something is selected
             index = selection[0]
-            preset_name = listbox.get(index)
-            
-            # Load and display preset contents
+            plugin_name = listbox.get(index)
+
+            # Load and display plugin contents
             try:
-                presets_dir = ensure_presets_dir()
-                preset_path = presets_dir / f"{preset_name}.pkl"
-                
-                if preset_path.exists():
-                    with open(preset_path, 'rb') as f:
-                        preset_data = pickle.load(f)
-                    
-                    # Create a new window to display preset contents
+                plugins_dir = ensure_plugins_dir()
+                plugin_path = plugins_dir / f"{plugin_name}.pkl"
+
+                if plugin_path.exists():
+                    with open(plugin_path, 'rb') as f:
+                        plugin_data = pickle.load(f)
+
+                    # Create a new window to display plugin contents
                     view_window = tk.Toplevel(root)
-                    view_window.title(f"Preset Contents: {preset_name}")
+                    view_window.title(f"Plugin Contents: {plugin_name}")
                     view_window.geometry("600x400")
                     
                     # Create scrollable text widget
@@ -41,13 +41,12 @@ def manage_preset_view(tuple_list):
                     text_widget = tk.Text(text_frame, wrap="word", yscrollcommand=scrollbar.set)
                     text_widget.pack(side="left", fill="both", expand=True)
                     scrollbar.config(command=text_widget.yview)
-                    
-                    # Format and display preset data
-                    content = f"Preset Name: {preset_data.get('name', 'Unknown')}\n\n"
-                    content += f"Metadata: {preset_data.get('metadata', 'None')}\n\n"
+                    # Format and display plugin data
+                    content = f"Plugin Name: {plugin_data.get('name', 'Unknown')}\n\n"
+                    content += f"Metadata: {plugin_data.get('metadata', 'None')}\n\n"
                     content += "Functions Applied:\n"
-                    
-                    functions = preset_data.get('functions', [])
+
+                    functions = plugin_data.get('functions', [])
                     if functions:
                         for i, func in enumerate(functions, 1):
                             if isinstance(func, list) and func:
@@ -67,45 +66,45 @@ def manage_preset_view(tuple_list):
                     close_btn.pack(pady=10)
                     
                 else:
-                    messagebox.showerror("Error", f"Preset file not found: {preset_path}")
-                    
+                    messagebox.showerror("Error", f"Plugin file not found: {plugin_path}")
+
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to load preset: {e}")
+                messagebox.showerror("Error", f"Failed to load plugin: {e}")
         else:
-            messagebox.showwarning("No Selection", "Please select a preset to view.")
+            messagebox.showwarning("No Selection", "Please select a plugin to view.")
 
     def on_add():
         file_path = filedialog.askopenfilename(filetypes=[("Pickle Files", "*.pkl")])
         if file_path:
             try:
-                presets_dir = ensure_presets_dir()
-                destination = presets_dir / os.path.basename(file_path)
+                plugins_dir = ensure_plugins_dir()
+                destination = plugins_dir / os.path.basename(file_path)
                 # Use copy instead of rename to preserve original file
                 shutil.copy2(file_path, destination)
-                preset_name = os.path.splitext(os.path.basename(file_path))[0]
-                messagebox.showinfo("Success", f"Preset added: {preset_name}")
+                plugin_name = os.path.splitext(os.path.basename(file_path))[0]
+                messagebox.showinfo("Success", f"Plugin added: {plugin_name}")
                 # Add to the listbox display
-                listbox.insert(tk.END, preset_name)
+                listbox.insert(tk.END, plugin_name)
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to add preset: {e}")
+                messagebox.showerror("Error", f"Failed to add plugin: {e}")
 
     def on_remove():
         selection = listbox.curselection()
         if selection:
             index = selection[0]
-            preset_name = listbox.get(index)
-            # Look for a .pkl file with this name in the presets directory
-            presets_dir = ensure_presets_dir()
-            preset_path = presets_dir / f"{preset_name}.pkl"
-            if preset_path.exists():
+            plugin_name = listbox.get(index)
+            # Look for a .pkl file with this name in the plugins directory
+            plugins_dir = ensure_plugins_dir()
+            plugin_path = plugins_dir / f"{plugin_name}.pkl"
+            if plugin_path.exists():
                 try:
-                    preset_path.unlink()
-                    messagebox.showinfo("Success", f"Preset removed: {preset_name}")
+                    plugin_path.unlink()
+                    messagebox.showinfo("Success", f"Plugin removed: {plugin_name}")
                     listbox.delete(index)
                 except Exception as e:
-                    messagebox.showerror("Error", f"Failed to remove preset: {e}")
+                    messagebox.showerror("Error", f"Failed to remove plugin: {e}")
             else:
-                messagebox.showerror("Error", f"Preset file not found: {preset_path}")
+                messagebox.showerror("Error", f"Plugin file not found: {plugin_path}")
 
     def on_cancel():
         nonlocal selected_tuple
@@ -115,13 +114,13 @@ def manage_preset_view(tuple_list):
 
     # Create the main window
     root = tk.Tk()
-    root.title("Manage Presets")
+    root.title("Manage Plugins")
 
     # Create a label
     if tuple_list:
-        label_text = "Select a preset from the list:"
+        label_text = "Select a plugin from the list:"
     else:
-        label_text = "No presets found. Use 'Add' to import a preset:"
+        label_text = "No plugins found. Use 'Add' to import a plugin:"
     label = ttk.Label(root, text=label_text)
     label.pack(pady=10)
 
@@ -138,7 +137,7 @@ def manage_preset_view(tuple_list):
     view_button = ttk.Button(button_frame, text="View", command=on_view)
     view_button.grid(row=0, column=0, padx=5)
 
-    add_button = ttk.Button(button_frame, text="Add", command=on_add)
+    add_button = ttk.Button(button_frame, text="Import", command=on_add)
     add_button.grid(row=0, column=2, padx=5)
 
     remove_button = ttk.Button(button_frame, text="Remove", command=on_remove)
@@ -151,7 +150,7 @@ def manage_preset_view(tuple_list):
     root.mainloop()
 
     if selected_tuple:
-        print("This is from manage preset view: " + str(selected_tuple[0]))
+        print("This is from manage plugin view: " + str(selected_tuple[0]))
     return selected_tuple
 
 # Example usage:
@@ -163,6 +162,6 @@ if __name__ == "__main__":
         ("Carrot", "Vegetable", "Orange"),
         ("Spinach", "Vegetable", "Green")
     ]
-    
-    selected = manage_preset_view(data)
+
+    selected = manage_plugin_view(data)
     print(f"You selected: {selected}")

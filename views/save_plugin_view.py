@@ -7,18 +7,18 @@ import numpy as np
 from models.rename_column_model import *
 
 # ...existing code...
-def save_preset_view():
-    """Prompt user for a preset name. Returns None if cancelled or empty."""
+def save_plugin_view():
+    """Prompt user for a plugin name. Returns None if cancelled or empty."""
     try:
         root = tk.Tk()
-        root.title("Preset Name")
+        root.title("Plugin Name")
         root.geometry("300x120")
         root.resizable(False, False)
 
         first_frame = tk.Frame(root)
         first_frame.pack(pady=10, padx=10)
 
-        tk.Label(first_frame, text="Preset Name").grid(row=0, column=0, padx=5, sticky="w")
+        tk.Label(first_frame, text="Plugin Name").grid(row=0, column=0, padx=5, sticky="w")
         target_name = tk.Entry(first_frame, width=26)
         target_name.grid(row=0, column=1, padx=5, sticky="w")
 

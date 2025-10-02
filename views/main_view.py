@@ -132,12 +132,12 @@ class MainView(tk.Frame):
     def keep_column(self):
         self._apply_transform(keep_column)
 
-    def manage_preset(self):
-        manage_preset()
-    
-    def save_preset(self):
+    def manage_plugin(self):
+        manage_plugin()
+
+    def save_plugin(self):
         if self.df is not None:
-            self.store = save_preset(self.store)
+            self.store = save_plugin(self.store)
 
     def custom_code(self):
         self._apply_transform(custom_code)

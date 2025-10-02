@@ -2,7 +2,7 @@ import pickle
 import os
 from pathlib import Path
 from typing import List, Dict, Any
-from .path_utils import get_presets_dir, ensure_presets_dir
+from .path_utils import *
 
 def essay_to_pickle(store: Dict[str, Any]):
     """Persist a single preset store dict {name, metadata, functions} to presets/<name>.pkl."""
@@ -14,8 +14,8 @@ def essay_to_pickle(store: Dict[str, Any]):
         name = 'preset_' + str(len(store.get('functions', [])))
         store['name'] = name
 
-    presets_dir = ensure_presets_dir()
-    filename = presets_dir / f"{name}.pkl"
+    plugins_dir = ensure_plugins_dir()
+    filename = plugins_dir / f"{name}.pkl"
     with open(filename, 'wb') as f:
         pickle.dump(store, f)
     return store
@@ -29,8 +29,8 @@ def pickle_to_essay(collection):
       - None (treated as empty list)
     Returns the updated collection in the same structural type passed in.
     """
-    presets_path = get_presets_dir()
-    if not presets_path.exists():
+    plugins_path = get_plugins_dir()
+    if not plugins_path.exists():
         return collection
 
     # Normalize to working list
@@ -48,7 +48,7 @@ def pickle_to_essay(collection):
 
     existing_names = {c.get('name') for c in working if isinstance(c, dict) and c.get('name')}
 
-    for file in presets_path.glob('*.pkl'):
+    for file in plugins_path.glob('*.pkl'):
         try:
             with open(file, 'rb') as f:
                 loaded = pickle.load(f)

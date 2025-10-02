@@ -5,24 +5,9 @@ import pandas as pd
 import tkinter as tk
 from tkinter import messagebox
 
-def save_file(df, essay, store):
-    if df is None:
-        messagebox.showwarning("Warning", "No data to save!")
-        return store
-    result = save_dataframe(df)
-    # Only proceed to save preset if user actually saved the file (result True)
-    if result is True:
-        store = save_preset(store)
-    return store
-
-def save_preset(store):
-    name = save_preset_view()
-    # If user cancelled or empty input -> do nothing
-    if not name:
-        return store
-    store['name'] = name
-    store = essay_to_pickle(store)
-    return store
+#=====================================================================
+#======================= Data Transformations ========================
+#=====================================================================
 
 def drop_column(df, store):
     """Drop a selected column and record the action in store['functions']."""
@@ -118,16 +103,6 @@ def custom_code(df, store):
         return processed_df, store
     return None, store
 
-def df_to_tuple(df):
-    if len(df.columns) < 2:
-        print("processing controller df_to_tuple error")
-    
-    first_col_tuple = tuple(df.iloc[:, 0].values)
-    second_col_tuple = tuple(df.iloc[:, 1].values)
-
-    return (first_col_tuple, second_col_tuple)
-
-
 def remove_empty_rows(df, store):
     """Remove empty rows based on user-selected column and log the action."""
     view_result = remove_empty_rows_view(df)
@@ -141,6 +116,9 @@ def remove_empty_rows(df, store):
         return processed_df, store
     return None, store
 
+#=====================================================================
+#========================== File Operations ==========================
+#=====================================================================
 
 def import_files(file_path): 
     df, header_row, keep_input = load_file_view(file_path)
@@ -167,10 +145,43 @@ def import_files(file_path):
         print(type(processed_df))
         print("Model df is not a df.")
 
-def find_essay(essay, store):
-    for essays in store:
-        if essays[2] == essay[1]:
-            return essays
+def save_file(df, essay, store):
+    if df is None:
+        messagebox.showwarning("Warning", "No data to save!")
+        return store
+    save_dataframe(df)
+    return store
+
+def combined_file():
+    return combine_file_view()
+
+#=====================================================================
+#========================= Plugin Management =========================
+#=====================================================================
+
+def save_plugin(store):
+    name = save_plugin_view()
+    # If user cancelled or empty input -> do nothing
+    if not name:
+        return store
+    store['name'] = name
+    store = essay_to_pickle(store)
+    return store
+
+def manage_plugin():
+    """Manage plugins - view, add, remove, or select plugins.
+
+    Returns (rebuilt_df, updated_store)
+    """
+    presets = pickle_to_essay([])  # list of dict presets
+    
+    # Build compatibility tuples for existing selection view: (name, metadata, functions)
+    selection_data = []
+    for p in presets:
+        if isinstance(p, dict):
+            selection_data.append((p.get('name'), p.get('metadata'), p.get('functions', [])))
+
+    manage_plugin_view(selection_data)
 
 def show_plugins():
     return pickle_to_essay([])
@@ -234,22 +245,21 @@ def apply_plugin(df, plugin):
         return rebuilt_df, store
     return original_df, store
 
-def manage_preset():
-    """Manage presets - view, add, remove, or select presets.
+#=====================================================================
+#========================= Utility Functions =========================
+#=====================================================================
 
-    Returns (rebuilt_df, updated_store)
-    """
-    presets = pickle_to_essay([])  # list of dict presets
+def df_to_tuple(df):
+    if len(df.columns) < 2:
+        print("processing controller df_to_tuple error")
     
-    # Build compatibility tuples for existing selection view: (name, metadata, functions)
-    selection_data = []
-    for p in presets:
-        if isinstance(p, dict):
-            selection_data.append((p.get('name'), p.get('metadata'), p.get('functions', [])))
+    first_col_tuple = tuple(df.iloc[:, 0].values)
+    second_col_tuple = tuple(df.iloc[:, 1].values)
 
-    manage_preset_view(selection_data)
-
+    return (first_col_tuple, second_col_tuple)
     
-def combined_file():
-    return combine_file_view()
+def find_essay(essay, store):
+    for essays in store:
+        if essays[2] == essay[1]:
+            return essays
 

@@ -18,10 +18,10 @@ class ToolbarPanel(tk.Frame):
         button_configs = [
             ("Settings", self._on_settings),
             ("Load File", self._on_load_file),
-            ("Manage Preset", self._on_manage_preset),
             ("Combine File", self._on_combine_file),
             ("Save File", self._on_save_file),
-            ("Save Preset", self._on_save_preset),
+            ("Manage Plugin", self._on_manage_plugin),
+            ("Save Plugin", self._on_save_plugin),
         ]
         
         # Create buttons
@@ -41,10 +41,10 @@ class ToolbarPanel(tk.Frame):
         if hasattr(self.controller, 'load_file'):
             self.controller.load_file()
     
-    def _on_manage_preset(self):
-        """Handle manage preset button click"""
-        if hasattr(self.controller, 'manage_preset'):
-            self.controller.manage_preset()
+    def _on_manage_plugin(self):
+        """Handle manage plugin button click"""
+        if hasattr(self.controller, 'manage_plugin'):
+            self.controller.manage_plugin()
     
     def _on_combine_file(self):
         """Handle combine file button click"""
@@ -56,10 +56,10 @@ class ToolbarPanel(tk.Frame):
         if hasattr(self.controller, 'save_file'):
             self.controller.save_file()
     
-    def _on_save_preset(self):
-        """Handle save preset button click"""
-        if hasattr(self.controller, 'save_preset'):
-            self.controller.save_preset()
+    def _on_save_plugin(self):
+        """Handle save plugin button click"""
+        if hasattr(self.controller, 'save_plugin'):
+            self.controller.save_plugin()
     
     def enable_button(self, button_name, enabled=True):
         """Enable/disable a specific button"""

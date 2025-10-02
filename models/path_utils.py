@@ -42,38 +42,38 @@ def get_resource_path(relative_path):
         return Path(relative_path)
 
 
-def get_presets_dir():
+def get_plugins_dir():
     """
-    Get the path to the presets directory.
-    
+    Get the path to the plugins directory.
+
     Returns:
-        Path: Path to the presets directory
+        Path: Path to the plugins directory
     """
-    # If running in a PyInstaller bundle prefer an external 'presets' folder next to the exe
+    # If running in a PyInstaller bundle prefer an external 'plugins' folder next to the exe
     try:
         if getattr(sys, 'frozen', False):
             exe_dir = Path(sys.executable).parent
-            external = exe_dir / 'presets'
+            external = exe_dir / 'plugins'
             if external.exists():
                 return external
             # fall back to bundled data inside _MEIPASS if available
             try:
-                return Path(sys._MEIPASS) / 'presets'
+                return Path(sys._MEIPASS) / 'plugins'
             except Exception:
                 return external
     except Exception:
         pass
 
-    return get_resource_path("presets")
+    return get_resource_path("plugins")
 
 
-def ensure_presets_dir():
+def ensure_plugins_dir():
     """
-    Ensure the presets directory exists, create it if it doesn't.
-    
+    Ensure the plugins directory exists, create it if it doesn't.
+
     Returns:
-        Path: Path to the presets directory
+        Path: Path to the plugins directory
     """
-    presets_path = get_presets_dir()
-    presets_path.mkdir(exist_ok=True)
-    return presets_path
+    plugins_path = get_plugins_dir()
+    plugins_path.mkdir(exist_ok=True)
+    return plugins_path
