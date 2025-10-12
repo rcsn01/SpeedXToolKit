@@ -1,3 +1,6 @@
+from tkinter import messagebox
+
+
 def drop_column_model(df, drop_input):
     """Drop specific columns from the DataFrame."""
     try:
@@ -14,5 +17,5 @@ def drop_column_model(df, drop_input):
         return df.drop(columns=columns_to_drop)
 
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return df  # Return original DataFrame on error

@@ -1,3 +1,6 @@
+from tkinter import messagebox
+
+
 def pivot_table_model(df, target, value):
     # If target or value is missing, return the original DataFrame
     if not target or not value:
@@ -18,6 +21,6 @@ def pivot_table_model(df, target, value):
         return df_pivot
 
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return df, None  # Return original DataFrame if pivoting fails
 

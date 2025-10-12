@@ -1,3 +1,6 @@
+from tkinter import messagebox
+
+
 def produce_output_model(df, input_columns):
     """Create 'Output' column showing which input columns have non-zero, non-null values per row."""
     try:
@@ -21,5 +24,5 @@ def produce_output_model(df, input_columns):
         return df
 
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return df  # Return original DataFrame in case of an error

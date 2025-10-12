@@ -109,12 +109,13 @@ def remove_empty_rows(df, store):
     if not view_result:
         return None, store
     df, target_name = view_result
-    processed_df = remove_empty_rows_model(df, target_name)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["remove_empty_rows_model", target_name])
-        return processed_df, store
-    return None, store
+    if isinstance(target_name, str) and isinstance(df, pd.DataFrame):
+        processed_df = remove_empty_rows_model(df, target_name)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["remove_empty_rows_model", target_name])
+            return processed_df, store
+        return None, store
 
 #=====================================================================
 #========================== File Operations ==========================

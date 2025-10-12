@@ -1,4 +1,7 @@
 import pandas as pd
+import tkinter as tk
+from tkinter import messagebox
+
 def delta_calculation_model(df, column1, column2, delta):
     """
     Calculate the difference between two columns and append the result as a new column.
@@ -11,7 +14,7 @@ def delta_calculation_model(df, column1, column2, delta):
     try:
         # If columns are missing, return the original DataFrame
         if column1 not in df.columns or column2 not in df.columns:
-            print("Error: One or both specified columns not found in DataFrame")
+            messagebox.showerror("Error", "One or both specified columns not found in DataFrame")
             return df, None
         
         df[column1] = pd.to_numeric(df[column1], errors='coerce')
@@ -51,5 +54,5 @@ def delta_calculation_model(df, column1, column2, delta):
         return df
     
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return df, None  # Return original DataFrame if operation fails

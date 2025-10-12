@@ -1,4 +1,5 @@
 # ...existing code...
+from tkinter import messagebox
 import pandas as pd
 
 def remove_empty_rows_model(df: pd.DataFrame, column: str) -> pd.DataFrame:
@@ -36,5 +37,5 @@ def remove_empty_rows_model(df: pd.DataFrame, column: str) -> pd.DataFrame:
         return filtered
 
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return df  # Return original DataFrame on error

@@ -1,3 +1,6 @@
+from tkinter import messagebox
+
+
 def keep_column_model(df, input_columns):
     """Filter specific columns from the DataFrame."""
     try:
@@ -8,11 +11,11 @@ def keep_column_model(df, input_columns):
         selected_columns = [col for col in input_columns if col in df.columns]
 
         if not selected_columns:
-            print("No valid columns selected.")
+            messagebox.showerror("Error", f"Column not detected: {input_columns}")
             return None
 
         return df[selected_columns]
 
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return None

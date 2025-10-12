@@ -1,3 +1,4 @@
+from tkinter import messagebox
 import pandas as pd
 
 def custom_code_model(df, code):
@@ -17,4 +18,4 @@ def custom_code_model(df, code):
         return result_df
 
     except Exception as e:
-        raise RuntimeError(f"Error executing custom code: {str(e)}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
