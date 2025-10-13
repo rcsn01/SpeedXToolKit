@@ -17,7 +17,7 @@ COLOURS = {
     "light_blue_hex": "#abd2ff" # Light blue for header
 }
 # Application version
-APP_VERSION = "v0.3.1"
+APP_VERSION = "3.2"
 
 # Main application view using component-based architecture
 class MainView(tk.Frame):
