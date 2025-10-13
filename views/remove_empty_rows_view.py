@@ -9,7 +9,7 @@ def remove_empty_rows_view(df):
         root.title("Remove Empty Rows")
         root.geometry("600x200")
 
-        result = {"confirmed": False}
+        result = {"confirmed": False, "target_name": ""}
 
         # Frame for selecting the column
         select_frame = tk.Frame(root)
@@ -47,7 +47,7 @@ def remove_empty_rows_view(df):
         button_frame = tk.Frame(root)
         button_frame.pack(pady=20)
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=root.destroy).grid(row=0, column=1, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 
@@ -57,5 +57,5 @@ def remove_empty_rows_view(df):
             return None, None
 
     except Exception as e:
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return None, None

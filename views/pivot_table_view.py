@@ -1,3 +1,4 @@
+from logging import root
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -16,20 +17,29 @@ def pivot_table_view(df):
         first_frame = tk.Frame(root)
         first_frame.pack(pady=5)
 
-        # Target column dropdown
-        tk.Label(first_frame, text="Target Column").grid(row=0, column=0, padx=5, sticky="w")
-        var1 = ttk.Combobox(first_frame, values=list(df.columns), state="readonly", width=20)
-        var1.grid(row=0, column=1, padx=5, sticky="w")
+        tk.Label(first_frame, text="Select Target Column, this column should contain different target names. (e.g. SARS, MgPa, IC)").grid(row=0, column=0, padx=5, sticky="w")
 
-        # Value column dropdown
+        # Target column dropdown
         second_frame = tk.Frame(root)
         second_frame.pack(pady=5)
 
-        tk.Label(second_frame, text="Value Column").grid(row=0, column=0, padx=5, sticky="w")
-        var2 = ttk.Combobox(second_frame, values=list(df.columns), state="readonly", width=20)
-        var2.grid(row=0, column=1, padx=5, sticky="w")
+        tk.Label(second_frame, text="Target Column").grid(row=1, column=0, padx=5, sticky="w")
+        var1 = ttk.Combobox(second_frame, values=list(df.columns), state="readonly", width=20)
+        var1.grid(row=1, column=1, padx=5, sticky="w")
 
-        result = {"confirmed": False}
+        # Value column dropdown
+
+        third_frame = tk.Frame(root)
+        third_frame.pack(pady=5)
+        tk.Label(third_frame, text="Select Value Column, this column should contain the Cq values of the target.").grid(row=0, column=0, padx=5, sticky="w")
+
+        fourth_frame = tk.Frame(root)
+        fourth_frame.pack(pady=5)
+        tk.Label(fourth_frame, text="Value Column").grid(row=1, column=0, padx=5, sticky="w")
+        var2 = ttk.Combobox(fourth_frame, values=list(df.columns), state="readonly", width=20)
+        var2.grid(row=1, column=1, padx=5, sticky="w")
+
+        result = {"confirmed": False, "target_name": "", "new_name": ""}
 
         def on_confirm():
             """Confirm selection and close window."""
@@ -52,7 +62,7 @@ def pivot_table_view(df):
         button_frame.pack(pady=10)
 
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=root.destroy).grid(row=0, column=1, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 
@@ -62,6 +72,5 @@ def pivot_table_view(df):
             return None, None, None
 
     except Exception as e:
-        print("OHHH NOOOOOOOOO")
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return None

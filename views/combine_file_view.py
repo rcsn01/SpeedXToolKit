@@ -82,6 +82,10 @@ def combine_file_view():
             root.destroy()
             root.quit()
 
+        def on_cancel():
+            root.quit()
+            root.destroy()
+
         # File info display
         info_frame = tk.Frame(root)
         info_frame.pack(fill='x', padx=10, pady=(10,4))
@@ -118,7 +122,7 @@ def combine_file_view():
         button_frame = tk.Frame(root)
         button_frame.pack(pady=20)
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=root.destroy).grid(row=0, column=1, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 

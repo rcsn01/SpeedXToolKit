@@ -80,25 +80,6 @@ class SidebarPanel(tk.Frame):
                 width=20
             ).pack(pady=2)
     
-    def toggle_side_panel(self):
-        """Toggle visibility of the side panel"""
-        if self.side_visible:
-            # Hide the side menu
-            try:
-                self.side_menu.grid_remove()
-            except Exception:
-                self.side_menu.pack_forget()
-            self.side_visible = False
-            self.toggle_btn.config(text='›')
-        else:
-            # Show the side menu
-            try:
-                self.side_menu.grid()
-            except Exception:
-                self.side_menu.pack(side='left', fill='y')
-            self.side_visible = True
-            self.toggle_btn.config(text='≡')
-    
     def get_selected_plugin(self):
         """Get selected plugin from the plugin panel"""
         return self.plugin_panel.get_selected_plugin()
@@ -114,25 +95,6 @@ class SidebarPanel(tk.Frame):
             self.left_container.grid_rowconfigure(0, weight=1)
         except Exception:
             pass
-    
-    def _create_transform_buttons(self):
-        """Create transform operation buttons"""
-        button_specs = [
-            ("Pivot Table", self._on_pivot_table),
-            ("Rename Column", self._on_rename_column),
-            ("Keep Column", self._on_keep_column),
-            ("Remove Column", self._on_drop_column),
-            ("Delta Calculation", self._on_delta_calculation),
-            ("Produce Output", self._on_produce_output),
-            ("Custom Code", self._on_custom_code),
-            ("Remove Empty Rows", self._on_remove_empty_rows),
-        ]
-        
-        self.transform_buttons = {}
-        for text, command in button_specs:
-            btn = tk.Button(self.side_menu, text=text, command=command, width=20)
-            btn.pack(pady=2)
-            self.transform_buttons[text.lower().replace(" ", "_")] = btn
     
     def _create_toggle_button(self):
         """Create sidebar toggle button"""
@@ -193,9 +155,3 @@ class SidebarPanel(tk.Frame):
     def _on_remove_empty_rows(self):
         if hasattr(self.controller, 'remove_empty_rows'):
             self.controller.remove_empty_rows()
-    
-    def enable_transform_buttons(self, enabled=True):
-        """Enable/disable all transform buttons"""
-        state = "normal" if enabled else "disabled"
-        for btn in self.transform_buttons.values():
-            btn.config(state=state)

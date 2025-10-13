@@ -49,10 +49,14 @@ def keep_column_view(df):
             checkbox_vars[col] = var
 
         # Confirm/Cancel buttons
+        def on_cancel():
+            root.quit()
+            root.destroy()
+
         button_frame = tk.Frame(root)
         button_frame.pack(pady=20)
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=root.destroy).grid(row=0, column=1, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 
@@ -60,8 +64,7 @@ def keep_column_view(df):
             rstring = ", ".join(result["selected_columns"])
             return df, rstring
         else:
-            return None, None
+            return None
     except Exception as e:
-        print("OHHH NOOOOOOOOO")
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return None

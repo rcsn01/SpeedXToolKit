@@ -109,7 +109,9 @@ class MainView(tk.Frame):
         """Helper method to apply transformations and update preview"""
         if self.df is not None:
             results = transform_func(self.df, self.store)
-            if results is not None:
+            tempdf, tempstore = results
+            print(tempdf)
+            if tempdf is not None:
                 self.df, self.store = results
                 self.display_dataframe_preview()
         else:

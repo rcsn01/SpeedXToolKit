@@ -21,7 +21,11 @@ def produce_output_view(df):
             # Closing the window
             root.destroy()
             root.quit()  # (Optional: `destroy()` is usually enough to exit mainloop)
-        
+
+        def on_cancel():
+            root.quit()
+            root.destroy()
+
         # Instruction label
         tk.Label(root, text="Select columns to be included in output:", 
                 font=("Arial", 12, "bold")).pack(pady=10)
@@ -52,7 +56,7 @@ def produce_output_view(df):
         button_frame = tk.Frame(root)
         button_frame.pack(pady=20)
         ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=root.destroy).grid(row=0, column=1, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 
@@ -62,6 +66,5 @@ def produce_output_view(df):
         else:
             return None, None
     except Exception as e:
-        print("OHHH NOOOOOOOOO")
-        print(f"Error: {e}")
+        messagebox.showerror("Error", f"An error occurred: {e}")
         return None
