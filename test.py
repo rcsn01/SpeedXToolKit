@@ -1,10 +1,12 @@
+# ...existing code...
 from pathlib import Path
 import pandas as pd
 
 CSV_PATH = Path(__file__).parent / 'test.csv'
 
 
-def pivot_csv_simple(path):
+
+def test(path):
     """Read CSV directly with pandas and pivot on 'Target Name' using 'CT' values.
 
     Assumes the CSV uses UTF-8 compatible encoding and comma delimiter.
@@ -17,32 +19,96 @@ def pivot_csv_simple(path):
     df = pd.read_csv(path)
 
     # Normalize simple column names (strip whitespace)
-    df.columns = [str(c).strip() for c in df.columns]
-    print('Columns:', df.columns.tolist())
+    print(df)
 
-    target_col = 'Target Name'
-    ct_col = 'Cт'
-    index_col = 'Well' if 'Well' in df.columns else df.columns[0]
+    # Thresholds (editable at top of file)
+    CT_GAT = 29.7
+    CT_NED = 30.6
+    NG_GAT = 30.6
+    NG_NED = 32
+    CT_INDEX_THRESHOLD = 1.57
+    NG_INDEX_THRESHOLD = 1.46
 
-    if target_col not in df.columns:
-        print(f"Column {target_col!r} not found in CSV columns")
-        return
-    if ct_col not in df.columns:
-        print(f"Column {ct_col!r} not found in CSV columns")
-        return
+    # Evaluate CT columns
+    ct_cols = ['CT GAT', 'CT NED']
+    df_ct = df.reindex(columns=ct_cols)  # missing cols become NaN
+    # A row is 'missing' if all CT columns are NaN
+    ct_missing_mask = df_ct.apply(lambda row: all(pd.isna(x) for x in row), axis=1)
+    # Start with empty values
+    df['Sample Interpretation for CT'] = ''
+    df.loc[ct_missing_mask, 'Sample Interpretation for CT'] = 'CT not detected'
 
-    df[ct_col] = pd.to_numeric(df[ct_col], errors='coerce')
-    usable = df.dropna(subset=[target_col, ct_col])
-    print('Usable rows for pivot (non-null target & ct):', len(usable))
-    if usable.empty:
-        print('No usable rows for pivot. Showing sample rows:')
-        print(df.head(20))
-        return
+    # Now apply thresholds: convert CT columns to numeric (coerce errors -> NaN)
+    ct_num = df_ct.apply(lambda col: pd.to_numeric(col, errors='coerce'))
 
-    pt = usable.pivot_table(index=index_col, columns=target_col, values=ct_col, aggfunc='first')
-    print('\nPivot result (shape={}):'.format(pt.shape))
-    print(pt.head(20))
+
+    # Calculate delta between CT NED and CT GAT and compute index = (2^delta)/2
+    # Use numeric Ct values (ct_num) so non-numeric become NaN
+    if 'CT GAT' in ct_num.columns and 'CT NED' in ct_num.columns:
+        # delta = CT_NED - CT_GAT (positive delta means CT_NED larger)
+        delta = ct_num['CT NED'] - ct_num['CT GAT']
+        ct_index = (2 ** delta) / 2
+        # Only consider rows where both numeric Ct values exist
+        ct_both_numeric = (~ct_num['CT GAT'].isna()) & (~ct_num['CT NED'].isna())
+        # Viable when index > threshold, Unviable when index <= threshold
+        ct_viable_mask = ct_both_numeric & (ct_index > CT_INDEX_THRESHOLD)
+        ct_unviable_mask = ct_both_numeric & (ct_index <= CT_INDEX_THRESHOLD)
+        # Only set values where we haven't already set an interpretation (don't overwrite)
+        empty_ct_field = df['Sample Interpretation for CT'].eq('')
+        df.loc[ct_viable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Viable'
+        df.loc[ct_unviable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Unviable'
+
+    # Evaluate NG columns
+    ng_cols = ['NG GAT', 'NG NED']
+    df_ng = df.reindex(columns=ng_cols)
+    ng_missing_mask = df_ng.apply(lambda row: all(pd.isna(x) for x in row), axis=1)
+    # Start with empty values
+    df['Sample Interpretation for NG'] = ''
+    df.loc[ng_missing_mask, 'Sample Interpretation for NG'] = 'NG not detected'
+
+    # Thresholds for NG
+    ng_num = df_ng.apply(lambda col: pd.to_numeric(col, errors='coerce'))
+    ng_detect_mask = pd.Series(False, index=df.index)
+
+    # Calculate delta between NG NED and NG GAT and compute index = (2^delta)/2
+    if 'NG GAT' in ng_num.columns and 'NG NED' in ng_num.columns:
+        delta_ng = ng_num['NG NED'] - ng_num['NG GAT']
+        ng_index = (2 ** delta_ng) / 2
+        # Only consider rows where both numeric NG values exist
+        ng_both_numeric = (~ng_num['NG GAT'].isna()) & (~ng_num['NG NED'].isna())
+        # Viable when index > threshold, Unviable when index <= threshold
+        ng_viable_mask = ng_both_numeric & (ng_index > NG_INDEX_THRESHOLD)
+        ng_unviable_mask = ng_both_numeric & (ng_index <= NG_INDEX_THRESHOLD)
+        # Only set values where we haven't already set an interpretation (don't overwrite)
+        empty_ng_field = df['Sample Interpretation for NG'].eq('')
+        df.loc[ng_viable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Viable'
+        df.loc[ng_unviable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Unviable'
+
+    # If any CT column exceeds its threshold mark as detected/indeterminate
+    ct_detect_mask = pd.Series(False, index=df.index)
+    if 'CT GAT' in ct_num.columns:
+        ct_detect_mask = ct_detect_mask | (ct_num['CT GAT'] > CT_GAT)
+    if 'CT NED' in ct_num.columns:
+        ct_detect_mask = ct_detect_mask | (ct_num['CT NED'] > CT_NED)
+    df.loc[ct_detect_mask, 'Sample Interpretation for CT'] = 'CT detected, Indeterminate Viability'
+
+    if 'NG GAT' in ng_num.columns:
+        ng_detect_mask = ng_detect_mask | (ng_num['NG GAT'] > NG_GAT)
+    if 'NG NED' in ng_num.columns:
+        ng_detect_mask = ng_detect_mask | (ng_num['NG NED'] > NG_NED)
+    df.loc[ng_detect_mask, 'Sample Interpretation for NG'] = 'NG detected, Indeterminate Viability'
+
+    # If EC is NaN, mark both interpretations as invalid and request repeat/re-extraction
+    if 'EC' in df.columns:
+        ec_missing_mask = df['EC'].isna()
+        msg = 'Invalid EC, repeat test/re-extract sample'
+        df.loc[ec_missing_mask, 'Sample Interpretation for CT'] = msg
+        df.loc[ec_missing_mask, 'Sample Interpretation for NG'] = msg
+
+    print(df)
+    return df
 
 
 if __name__ == '__main__':
-    pivot_csv_simple(CSV_PATH)
+    test(CSV_PATH)
+# ...existing code...
