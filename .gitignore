@@ -4,7 +4,6 @@
 **/__pycache__/
 temp.py
 /build
-/dist
 main.spec
 /frontend/node_modules
 Universal Data Translator.spec
