@@ -92,135 +92,139 @@ def manage_plugin_view(tuple_list):
                     # Create edit window
                     edit_window = tk.Toplevel(root)
                     edit_window.title(f"Edit Plugin: {plugin_name}")
-                    edit_window.geometry("700x500")
+                    edit_window.geometry("900x600")
                     
-                    # Plugin Name
+                    # Plugin Name (read-only display)
                     name_frame = tk.Frame(edit_window)
                     name_frame.pack(fill="x", padx=10, pady=5)
-                    tk.Label(name_frame, text="Plugin Name:", width=15, anchor="w").pack(side="left")
-                    name_var = tk.StringVar(value=plugin_data.get('name', ''))
-                    name_entry = ttk.Entry(name_frame, textvariable=name_var, width=50)
-                    name_entry.pack(side="left", fill="x", expand=True)
+                    tk.Label(name_frame, text="Plugin Name:", width=15, anchor="w", font=('TkDefaultFont', 9, 'bold')).pack(side="left")
+                    tk.Label(name_frame, text=plugin_data.get('name', 'Unknown'), anchor="w").pack(side="left")
                     
-                    # Metadata
+                    # Metadata (read-only display)
                     metadata_frame = tk.Frame(edit_window)
                     metadata_frame.pack(fill="x", padx=10, pady=5)
-                    tk.Label(metadata_frame, text="Metadata:", width=15, anchor="w").pack(side="left")
-                    metadata_var = tk.StringVar(value=plugin_data.get('metadata', ''))
-                    metadata_entry = ttk.Entry(metadata_frame, textvariable=metadata_var, width=50)
-                    metadata_entry.pack(side="left", fill="x", expand=True)
+                    tk.Label(metadata_frame, text="Metadata:", width=15, anchor="w", font=('TkDefaultFont', 9, 'bold')).pack(side="left")
+                    tk.Label(metadata_frame, text=plugin_data.get('metadata', 'None'), anchor="w").pack(side="left")
                     
-                    # Functions list header with toggle button
-                    header_frame = tk.Frame(edit_window)
-                    header_frame.pack(fill="x", padx=10, pady=(10, 5))
+                    # Separator
+                    ttk.Separator(edit_window, orient='horizontal').pack(fill='x', padx=10, pady=10)
                     
-                    tk.Label(header_frame, text="Functions (JSON format - preserves all data types):").pack(side="left")
+                    # Functions header
+                    tk.Label(edit_window, text="Edit Function Parameters:", font=('TkDefaultFont', 10, 'bold')).pack(padx=10, pady=(5, 10), anchor="w")
                     
-                    # Toggle for viewing escape sequences
-                    view_mode = tk.StringVar(value="json")  # "json" or "pretty"
+                    # Create scrollable frame for functions
+                    canvas_frame = tk.Frame(edit_window)
+                    canvas_frame.pack(fill="both", expand=True, padx=10, pady=5)
                     
-                    def toggle_view():
-                        current_content = functions_text.get("1.0", tk.END).strip()
-                        
-                        if view_mode.get() == "json":
-                            # Switch to pretty mode - convert \n to actual newlines
-                            try:
-                                # Parse as JSON first to validate
-                                data = json.loads(current_content)
-                                # Convert to pretty format with actual newlines
-                                pretty_content = json.dumps(data, indent=2, ensure_ascii=False)
-                                # Replace escape sequences with actual characters for display
-                                pretty_content = pretty_content.encode().decode('unicode_escape')
-                                
-                                functions_text.delete("1.0", tk.END)
-                                functions_text.insert("1.0", pretty_content)
-                                view_mode.set("pretty")
-                                toggle_btn.config(text="View: Pretty ↻ Switch to JSON")
-                            except:
-                                messagebox.showwarning("Warning", "Cannot switch view - invalid JSON format")
-                        else:
-                            # Switch back to JSON mode - convert actual newlines to \n
-                            try:
-                                # Encode to handle escape sequences properly
-                                json_content = current_content.encode('unicode_escape').decode('ascii')
-                                # Parse to validate and reformat
-                                data = json.loads(json_content)
-                                json_content = json.dumps(data, indent=2, ensure_ascii=False)
-                                
-                                functions_text.delete("1.0", tk.END)
-                                functions_text.insert("1.0", json_content)
-                                view_mode.set("json")
-                                toggle_btn.config(text="View: JSON ↻ Switch to Pretty")
-                            except Exception as e:
-                                messagebox.showwarning("Warning", f"Cannot switch view: {e}")
+                    canvas = tk.Canvas(canvas_frame)
+                    scrollbar = tk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
+                    scrollable_frame = tk.Frame(canvas)
                     
-                    toggle_btn = ttk.Button(header_frame, text="View: JSON ↻ Switch to Pretty", command=toggle_view)
-                    toggle_btn.pack(side="right", padx=5)
+                    scrollable_frame.bind(
+                        "<Configure>",
+                        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+                    )
                     
-                    # Functions list
-                    text_frame = tk.Frame(edit_window)
-                    text_frame.pack(fill="both", expand=True, padx=10, pady=5)
+                    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+                    canvas.configure(yscrollcommand=scrollbar.set)
                     
-                    scrollbar = tk.Scrollbar(text_frame)
+                    canvas.pack(side="left", fill="both", expand=True)
                     scrollbar.pack(side="right", fill="y")
                     
-                    functions_text = tk.Text(text_frame, wrap="word", yscrollcommand=scrollbar.set, height=15)
-                    functions_text.pack(side="left", fill="both", expand=True)
-                    scrollbar.config(command=functions_text.yview)
+                    # Store text widgets for each argument
+                    function_widgets = []
                     
-                    # Populate functions text widget with JSON format
+                    # Parse and display each function
                     functions = plugin_data.get('functions', [])
-                    try:
-                        # Pretty print JSON with indentation for readability
-                        # ensure_ascii=False preserves unicode and special characters
-                        json_str = json.dumps(functions, indent=2, ensure_ascii=False)
-                        functions_text.insert("1.0", json_str)
-                    except Exception as e:
-                        # Fallback to string representation if JSON fails
-                        functions_text.insert("1.0", str(functions))
+                    for func_idx, func in enumerate(functions):
+                        if isinstance(func, list) and func:
+                            func_name = func[0] if len(func) > 0 else "unknown"
+                            func_args = func[1:] if len(func) > 1 else []
+                            
+                            # Function container
+                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func_name}", padx=10, pady=10)
+                            func_frame.pack(fill="x", padx=5, pady=5)
+                            
+                            # Store function name
+                            function_widgets.append({
+                                'name': func_name,
+                                'args': []
+                            })
+                            
+                            # Display each argument
+                            for arg_idx, arg in enumerate(func_args):
+                                arg_frame = tk.Frame(func_frame)
+                                arg_frame.pack(fill="x", pady=3)
+                                
+                                tk.Label(arg_frame, text=f"Argument {arg_idx + 1}:", width=12, anchor="w").pack(side="left")
+                                
+                                # Create text widget for the argument (supports multi-line)
+                                arg_text = tk.Text(arg_frame, height=4, wrap="word")
+                                arg_text.pack(side="left", fill="both", expand=True, padx=5)
+                                
+                                # Add scrollbar for text widget
+                                arg_scrollbar = tk.Scrollbar(arg_frame, command=arg_text.yview)
+                                arg_scrollbar.pack(side="right", fill="y")
+                                arg_text.config(yscrollcommand=arg_scrollbar.set)
+                                
+                                # Insert the argument value (as JSON for complex types)
+                                try:
+                                    arg_str = json.dumps(arg, indent=2, ensure_ascii=False) if not isinstance(arg, str) else arg
+                                except:
+                                    arg_str = str(arg)
+                                
+                                arg_text.insert("1.0", arg_str)
+                                
+                                # Store the text widget
+                                function_widgets[-1]['args'].append(arg_text)
+                        else:
+                            # Handle non-list functions
+                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func}", padx=10, pady=10)
+                            func_frame.pack(fill="x", padx=5, pady=5)
+                            tk.Label(func_frame, text="(No editable parameters)", font=('TkDefaultFont', 8, 'italic')).pack()
+                            function_widgets.append({
+                                'name': str(func),
+                                'args': []
+                            })
                     
                     def save_changes():
                         try:
-                            # Parse functions from text widget as JSON
-                            functions_content = functions_text.get("1.0", tk.END).strip()
                             new_functions = []
                             
-                            if functions_content:
-                                try:
-                                    # Try to parse as JSON
-                                    new_functions = json.loads(functions_content)
+                            for func_widget in function_widgets:
+                                func_name = func_widget['name']
+                                func_args = []
+                                
+                                # Get values from text widgets
+                                for arg_text_widget in func_widget['args']:
+                                    arg_value = arg_text_widget.get("1.0", tk.END).strip()
                                     
-                                    # Validate that it's a list
-                                    if not isinstance(new_functions, list):
-                                        messagebox.showerror("Error", "Functions must be a JSON array (list). Example:\n[\n  [\"function_name\", \"arg1\", \"arg2\"],\n  [\"another_function\", {\"key\": \"value\"}]\n]")
-                                        return
-                                        
-                                except json.JSONDecodeError as e:
-                                    messagebox.showerror("Error", f"Invalid JSON format:\n{str(e)}\n\nPlease ensure your functions are in valid JSON format.")
-                                    return
+                                    # Try to parse as JSON for complex types
+                                    try:
+                                        parsed_value = json.loads(arg_value)
+                                        func_args.append(parsed_value)
+                                    except json.JSONDecodeError:
+                                        # If not valid JSON, treat as string
+                                        func_args.append(arg_value)
+                                
+                                # Build function list
+                                if func_args:
+                                    new_functions.append([func_name] + func_args)
+                                else:
+                                    new_functions.append([func_name])
                             
-                            # Create updated plugin data
+                            # Create updated plugin data (keep original name and metadata)
                             updated_data = {
-                                'name': name_var.get(),
-                                'metadata': metadata_var.get(),
+                                'name': plugin_data.get('name', ''),
+                                'metadata': plugin_data.get('metadata', ''),
                                 'functions': new_functions
                             }
                             
-                            # Get new filename from the name field
-                            new_plugin_name = name_var.get()
-                            new_plugin_path = plugins_dir / f"{new_plugin_name}.pkl"
-                            
                             # Save the updated plugin
-                            with open(new_plugin_path, 'wb') as f:
+                            with open(plugin_path, 'wb') as f:
                                 pickle.dump(updated_data, f)
                             
-                            # If name changed, delete old file and update listbox
-                            if new_plugin_name != plugin_name:
-                                plugin_path.unlink()
-                                listbox.delete(index)
-                                listbox.insert(index, new_plugin_name)
-                            
-                            messagebox.showinfo("Success", f"Plugin '{new_plugin_name}' updated successfully!")
+                            messagebox.showinfo("Success", f"Plugin '{plugin_name}' updated successfully!")
                             edit_window.destroy()
                             
                         except Exception as e:
@@ -230,7 +234,7 @@ def manage_plugin_view(tuple_list):
                     button_frame = tk.Frame(edit_window)
                     button_frame.pack(pady=10)
                     
-                    save_btn = ttk.Button(button_frame, text="Save", command=save_changes)
+                    save_btn = ttk.Button(button_frame, text="Save Changes", command=save_changes)
                     save_btn.pack(side="left", padx=5)
                     
                     cancel_btn = ttk.Button(button_frame, text="Cancel", command=edit_window.destroy)
