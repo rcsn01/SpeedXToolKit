@@ -95,20 +95,25 @@ def manage_plugin_view(tuple_list):
                                 
                                 tk.Label(arg_frame, text=f"Argument {arg_idx + 1}:", width=12, anchor="w").pack(side="left")
                                 
+                                # Insert the argument value (as JSON for complex types)
+                                try:
+                                    arg_str = json.dumps(arg, indent=2, ensure_ascii=False) if not isinstance(arg, str) else arg
+                                except:
+                                    arg_str = str(arg)
+                                
+                                # Calculate height based on number of lines
+                                line_count = arg_str.count('\n') + 1
+                                # Set minimum height of 2, maximum of 20, otherwise use actual line count
+                                text_height = max(2, min(20, line_count))
+                                
                                 # Create text widget for the argument (supports multi-line)
-                                arg_text = tk.Text(arg_frame, height=4, wrap="word")
+                                arg_text = tk.Text(arg_frame, height=text_height, wrap="word")
                                 arg_text.pack(side="left", fill="both", expand=True, padx=5)
                                 
                                 # Add scrollbar for text widget
                                 arg_scrollbar = tk.Scrollbar(arg_frame, command=arg_text.yview)
                                 arg_scrollbar.pack(side="right", fill="y")
                                 arg_text.config(yscrollcommand=arg_scrollbar.set)
-                                
-                                # Insert the argument value (as JSON for complex types)
-                                try:
-                                    arg_str = json.dumps(arg, indent=2, ensure_ascii=False) if not isinstance(arg, str) else arg
-                                except:
-                                    arg_str = str(arg)
                                 
                                 arg_text.insert("1.0", arg_str)
                                 
