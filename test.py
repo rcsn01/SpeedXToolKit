@@ -21,15 +21,23 @@ def test(path):
     # Normalize simple column names (strip whitespace)
     print(df)
 
-    # Thresholds (editable at top of file)
+    # Editable variables at top of file
+    # VIABILITY THRESHOLDS
     CT_GAT = 29.7
     CT_NED = 30.6
     NG_GAT = 30.6
     NG_NED = 32
+
+    # INDEX THRESHOLDS
     CT_INDEX_THRESHOLD = 1.57
     NG_INDEX_THRESHOLD = 1.46
+
+    # DECIMAL PRECISION
     DECIMAL_PRECISION = 2  # Number of decimal places to round CT/NG/EC values
 
+    # ========================================================================
+    # DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING
+    # ========================================================================
     # Evaluate CT columns
     ct_cols = ['CT GAT', 'CT NED']
     df_ct = df.reindex(columns=ct_cols)  # missing cols become NaN
@@ -105,13 +113,12 @@ def test(path):
         msg = 'Invalid EC, repeat test/re-extract sample'
         df.loc[ec_missing_mask, 'Sample Interpretation for CT'] = msg
         df.loc[ec_missing_mask, 'Sample Interpretation for NG'] = msg
-    
+
     # Round specified columns to configured decimal precision
     columns_to_round = ['CT GAT', 'CT NED', 'EC', 'NG GAT', 'NG NED']
     for col in columns_to_round:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce').round(DECIMAL_PRECISION)
-    DECIMAL_PRECISION = 2  # Number of decimal places to round CT/NG/EC values
 
     print(df)
     return df
