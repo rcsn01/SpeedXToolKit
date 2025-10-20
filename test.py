@@ -1,6 +1,7 @@
 # ...existing code...
 from pathlib import Path
 import pandas as pd
+import numpy as np
 
 CSV_PATH = Path(__file__).parent / 'test.csv'
 
@@ -18,8 +19,7 @@ def test(path):
     # Read directly
     df = pd.read_csv(path)
 
-    # Normalize simple column names (strip whitespace)
-    print(df)
+
 
     # Editable variables at top of file
     # VIABILITY THRESHOLDS
@@ -36,9 +36,12 @@ def test(path):
     DECIMAL_PRECISION = 2  # Number of decimal places to round CT/NG/EC values
 
     # ========================================================================
-    # DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING
+    # DO NOT EDIT BELOW THIS LINE
     # ========================================================================
+
     # Evaluate CT columns
+    df['CT Index'] = pd.NA
+
     ct_cols = ['CT GAT', 'CT NED']
     df_ct = df.reindex(columns=ct_cols)  # missing cols become NaN
     # A row is 'missing' if all CT columns are NaN
@@ -57,6 +60,8 @@ def test(path):
         # delta = CT_NED - CT_GAT (positive delta means CT_NED larger)
         delta = ct_num['CT NED'] - ct_num['CT GAT']
         ct_index = (2 ** delta) / 2
+        # Persist CT Index column
+        df['CT Index'] = ct_index
         # Only consider rows where both numeric Ct values exist
         ct_both_numeric = (~ct_num['CT GAT'].isna()) & (~ct_num['CT NED'].isna())
         # Viable when index > threshold, Unviable when index <= threshold
@@ -65,9 +70,11 @@ def test(path):
         # Only set values where we haven't already set an interpretation (don't overwrite)
         empty_ct_field = df['Sample Interpretation for CT'].eq('')
         df.loc[ct_viable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Viable'
-        df.loc[ct_unviable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Unviable'
+        df.loc[ct_unviable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Non-Viable'
 
     # Evaluate NG columns
+    df['NG Index'] = pd.NA
+
     ng_cols = ['NG GAT', 'NG NED']
     df_ng = df.reindex(columns=ng_cols)
     ng_missing_mask = df_ng.apply(lambda row: all(pd.isna(x) for x in row), axis=1)
@@ -83,6 +90,8 @@ def test(path):
     if 'NG GAT' in ng_num.columns and 'NG NED' in ng_num.columns:
         delta_ng = ng_num['NG NED'] - ng_num['NG GAT']
         ng_index = (2 ** delta_ng) / 2
+        # Persist NG Index column
+        df['NG Index'] = ng_index
         # Only consider rows where both numeric NG values exist
         ng_both_numeric = (~ng_num['NG GAT'].isna()) & (~ng_num['NG NED'].isna())
         # Viable when index > threshold, Unviable when index <= threshold
@@ -91,7 +100,7 @@ def test(path):
         # Only set values where we haven't already set an interpretation (don't overwrite)
         empty_ng_field = df['Sample Interpretation for NG'].eq('')
         df.loc[ng_viable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Viable'
-        df.loc[ng_unviable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Unviable'
+        df.loc[ng_unviable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Non-Viable'
 
     # If any CT column exceeds its threshold mark as detected/indeterminate
     ct_detect_mask = pd.Series(False, index=df.index)
@@ -115,12 +124,12 @@ def test(path):
         df.loc[ec_missing_mask, 'Sample Interpretation for NG'] = msg
 
     # Round specified columns to configured decimal precision
-    columns_to_round = ['CT GAT', 'CT NED', 'EC', 'NG GAT', 'NG NED']
+    columns_to_round = ['CT GAT', 'CT NED', 'EC', 'NG GAT', 'NG NED', 'CT Index', 'NG Index']
     for col in columns_to_round:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce').round(DECIMAL_PRECISION)
 
-    print(df)
+    print(df.to_string(index=False))
     return df
 
 
