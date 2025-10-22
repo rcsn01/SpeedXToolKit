@@ -1,5 +1,6 @@
 import tkinter as tk
 import pandas as pd
+import os
 
 
 class PreviewPanel(tk.Frame):
@@ -14,15 +15,29 @@ class PreviewPanel(tk.Frame):
         """Setup the preview panel UI"""
         self.pack(side="left", fill="both", expand=True)
         
+        # Title frame to hold label and file path
+        self.title_frame = tk.Frame(self, bg=self.bg_color)
+        self.title_frame.pack(side="top", fill="x", padx=12, pady=(8, 0))
+        
         # Title label for the preview
         self.title_label = tk.Label(
-            self,
+            self.title_frame,
             text="File Preview",
             bg=self.bg_color,
             fg="black",
             font=("Arial", 11, "bold")
         )
-        self.title_label.pack(side="top", anchor="w", padx=12, pady=(8, 0))
+        self.title_label.pack(side="left")
+        
+        # File path label (initially empty)
+        self.file_path_label = tk.Label(
+            self.title_frame,
+            text="",
+            bg=self.bg_color,
+            fg="#555555",
+            font=("Arial", 9)
+        )
+        self.file_path_label.pack(side="left", padx=(10, 0))
 
         # Create scrollable text frame
         self.text_scroll_frame = tk.Frame(self, bg=self.bg_color)
@@ -67,13 +82,21 @@ class PreviewPanel(tk.Frame):
         self.y_scrollbar.config(command=self.preview_text.yview)
         self.x_scrollbar.config(command=self.preview_text.xview)
     
-    def update_preview(self, df=None, text=None):
+    def update_preview(self, df=None, text=None, file_path=None):
         """Update the preview content
         
         Args:
             df: pandas DataFrame to display
             text: Text string to display (if df is None)
+            file_path: File path to display in the header
         """
+        # Update file path label - show only filename
+        if file_path:
+            filename = os.path.basename(file_path)
+            self.file_path_label.config(text=f"({filename})")
+        else:
+            self.file_path_label.config(text="")
+        
         # Clear existing content
         self.preview_text.delete(1.0, tk.END)
         

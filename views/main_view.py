@@ -83,7 +83,10 @@ class MainView(tk.Frame):
 
     def display_dataframe_preview(self):
         """Update the preview panel with current dataframe"""
-        self.preview.update_preview(df=self.data.get_dataframe())
+        self.preview.update_preview(
+            df=self.data.get_dataframe(),
+            file_path=self.data.file_path
+        )
 
     def save_file(self):
         if self.data.has_data():
