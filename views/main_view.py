@@ -1,8 +1,11 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import pandas as pd
-from controllers.processing_controller import *
-from controllers.save_controller import *
+from controllers.data_controller import DataController
+from controllers.processing_controller import (
+    drop_column, rename_column, pivot_table, delta_calculation,
+    produce_output, keep_column, custom_code, remove_empty_rows
+)
 from .components import HeaderPanel, ToolbarPanel, SidebarPanel, PreviewPanel
 
 # Global variables
@@ -26,17 +29,8 @@ class MainView(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
         
-        # Initialize data attributes
-        self.file_path = None
-        self.df = None  # Currently loaded DataFrame
-        self.current_essay = None  # Current file metadata
-        
-        # Store holds current preset information
-        self.store = {
-            "name": None,           # preset name
-            "metadata": None,       # dataframe metadata
-            "functions": []         # list of applied functions
-        }
+        # Initialize data controller
+        self.data = DataController()
         
         # Setup UI components
         self._setup_ui()
@@ -78,16 +72,10 @@ class MainView(tk.Frame):
             if not file_path.lower().endswith((".xls", ".xlsx", ".csv")):
                 messagebox.showwarning("Unsupported", "Please select an .xls, .xlsx, or .csv file.")
                 return
-            self.file_path = file_path
-            result = import_files(file_path)
-            if result and isinstance(result, tuple) and len(result) == 2:
-                self.df, self.current_essay = result
-                # Update store metadata when a new file is loaded
-                self.store['metadata'] = self.current_essay
-                self.store['functions'] = []  # reset function history on new load
-            else:
-                self.df = None
-            if isinstance(self.df, pd.DataFrame):
+            
+            df = self.data.load_file(file_path)
+            
+            if isinstance(df, pd.DataFrame):
                 messagebox.showinfo("Success", "File loaded successfully!")
                 self.display_dataframe_preview()
             else:
@@ -95,24 +83,19 @@ class MainView(tk.Frame):
 
     def display_dataframe_preview(self):
         """Update the preview panel with current dataframe"""
-        self.preview.update_preview(df=self.df)
+        self.preview.update_preview(df=self.data.get_dataframe())
 
     def save_file(self):
-        if self.df is not None:
-            essay = getattr(self, 'current_essay', None)
-            self.store = save_file(self.df, essay, self.store)
-            self.current_essay = None
+        if self.data.has_data():
+            self.data.save()
         else:
             messagebox.showwarning("Warning", "No data to save!")
 
     def _apply_transform(self, transform_func):
         """Helper method to apply transformations and update preview"""
-        if self.df is not None:
-            results = transform_func(self.df, self.store)
-            tempdf, tempstore = results
-            print(tempdf)
-            if tempdf is not None:
-                self.df, self.store = results
+        if self.data.has_data():
+            result = self.data.apply_transform(transform_func)
+            if result is not None:
                 self.display_dataframe_preview()
         else:
             messagebox.showwarning("Warning", "No data loaded!")
@@ -136,11 +119,11 @@ class MainView(tk.Frame):
         self._apply_transform(keep_column)
 
     def manage_plugin(self):
-        manage_plugin()
+        self.data.manage_plugins()
 
     def save_plugin(self):
-        if self.df is not None:
-            self.store = save_plugin(self.store)
+        if self.data.has_data():
+            self.data.save_plugin_data()
 
     def custom_code(self):
         self._apply_transform(custom_code)
@@ -151,6 +134,6 @@ class MainView(tk.Frame):
 
     def combine_file(self):
         """Combine multiple files into one"""
-        self.df = combined_file()
-        if self.df is not None:
+        self.data.combine_files()
+        if self.data.has_data():
             self.display_dataframe_preview()

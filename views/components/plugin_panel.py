@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from controllers.processing_controller import show_plugins, apply_plugin
+from controllers.processing_controller import show_plugins
 import pandas as pd
 
 
@@ -110,18 +110,16 @@ class PluginPanel(tk.Frame):
             
             name = self.plugins_listbox.get(sel[0])
             
-            # Get dataframe from controller
-            df = getattr(self.controller, 'df', None)
-            if df is None:
+            # Check if data is loaded
+            if not self.controller.data.has_data():
                 messagebox.showwarning("No Data", "Please load a file first.")
                 return
             
-            # Apply plugin
-            new_df, new_store = apply_plugin(df, name)
-            if isinstance(new_df, pd.DataFrame):
-                # Update controller state
-                self.controller.df = new_df
-                self.controller.store = new_store
+            # Apply plugin through data controller
+            result = self.controller.data.apply_plugin_preset(name)
+            
+            if isinstance(result, pd.DataFrame):
+                # Update preview
                 if hasattr(self.controller, 'display_dataframe_preview'):
                     self.controller.display_dataframe_preview()
                 messagebox.showinfo("Plugin Applied", f"Plugin '{name}' applied.")
