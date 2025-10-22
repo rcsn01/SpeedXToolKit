@@ -14,10 +14,10 @@ COLOURS = {
     "blue_rgb": (32, 165, 221), #SDX Blue
     "purple_rgb": (89, 48, 133), #SDX Purple
     "white_rgb": (255, 255, 255), # White in RGB
-    "blue_hex": "#20a5dd", #SDX Blue
+    "blue_hex": "#0272BA", #SDX Blue
     "purple_hex": "#593085", #SDX Purple
     "white_hex": "#FFFFFF", # White in hex
-    "light_blue_hex": "#abd2ff" # Light blue for header
+    "light_blue_hex": "#0272BA" # Light blue for header
 }
 # Application version
 APP_VERSION = "3.3"

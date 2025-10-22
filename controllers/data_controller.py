@@ -3,6 +3,7 @@ Data Controller - Manages application data state and operations.
 Separates data management from UI concerns.
 """
 import pandas as pd
+import os
 from .processing_controller import (
     import_files, save_file, combined_file,
     drop_column, rename_column, pivot_table, delta_calculation,
@@ -57,8 +58,16 @@ class DataController:
         """
         if self.df is None:
             return None
+        
+        # Generate default filename from original file path
+        default_filename = None
+        if self.file_path:
+            # Get the original filename without extension
+            base_name = os.path.splitext(os.path.basename(self.file_path))[0]
+            # Append "_result" and add .csv extension
+            default_filename = f"{base_name}_result.csv"
             
-        self.store = save_file(self.df, self.current_essay, self.store)
+        self.store = save_file(self.df, self.current_essay, self.store, default_filename)
         self.current_essay = None
         return self.store
     

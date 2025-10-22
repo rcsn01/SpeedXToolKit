@@ -148,11 +148,11 @@ def import_files(file_path):
         print(type(processed_df))
         print("Model df is not a df.")
 
-def save_file(df, essay, store):
+def save_file(df, essay, store, original_filename=None):
     if df is None:
         messagebox.showwarning("Warning", "No data to save!")
         return store
-    save_dataframe(df)
+    save_dataframe(df, default_filename=original_filename)
     return store
 
 def combined_file():
