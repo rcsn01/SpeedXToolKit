@@ -126,7 +126,6 @@ def convert_csv_to_xls(csv_file, xls_file, encoding='utf-8', delimiter=None):
 def load_file_view(file_path):
     """Load Excel file (.xls or .xlsx), convert if needed, and allow user to confirm header row."""
     try:
-        original_path = file_path
 
         # Ensure cache folder exists
         cache_dir = os.path.join(os.path.dirname(__file__), "file_cache")
@@ -181,32 +180,6 @@ def load_file_view(file_path):
         header_input = tk.Entry(header_frame, width=5)
         header_input.insert(0, str(header_row))
         header_input.grid(row=0, column=1, padx=5, sticky="w")
-
-        # Columns to keep
-        # columns_frame = tk.LabelFrame(root, text="Columns to Keep")
-        # columns_frame.pack(pady=5, fill="x")
-        # check_vars = []
-
-        # def update_checkboxes():
-        #     for widget in columns_frame.winfo_children():
-        #         widget.destroy()
-
-        #     try:
-        #         selected_row = int(header_input.get())
-        #         raw_headers = df.iloc[selected_row].astype(str).tolist()
-        #         headers = _dedupe_headers(raw_headers)
-        #         check_vars.clear()
-
-        #         for i, col_name in enumerate(headers):
-        #             var = tk.BooleanVar(root, value=True)  # Pre-select every column
-        #             cb = tk.Checkbutton(columns_frame, text=col_name, variable=var)
-        #             cb.grid(row=i//5, column=i % 5, sticky="w", padx=5, pady=2)
-        #             check_vars.append((col_name, var))
-
-        #     except Exception as e:
-        #         messagebox.showerror("Error", f"Failed to generate checkboxes: {e}")
-
-        # update_checkboxes()
 
         result = {"header_row": None, "keep_input": []}
 

@@ -137,8 +137,6 @@ def import_files(file_path):
         try:
             df_with_format_slice = df_with_format[df.columns[:2]]
             essay_info = df_to_tuple(df_with_format_slice)
-            print("Essay Info:", essay_info)
-            print("Essay Type:", type(essay_info))
         except Exception:
             pass
 

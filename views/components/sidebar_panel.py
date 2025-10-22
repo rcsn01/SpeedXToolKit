@@ -1,11 +1,11 @@
-import tkinter as tk
+import customtkinter as ctk
 
 
-class SidebarPanel(tk.Frame):
+class SidebarPanel(ctk.CTkFrame):
     """Collapsible sidebar with transform buttons"""
     
     def __init__(self, parent, controller, bg_color="#FFFFFF"):
-        super().__init__(parent, bg=bg_color)
+        super().__init__(parent, fg_color=bg_color, width=220)
         self.controller = controller
         self.bg_color = bg_color
         self.side_visible = True
@@ -13,21 +13,19 @@ class SidebarPanel(tk.Frame):
     
     def _setup_ui(self):
         """Setup the sidebar UI"""
-        self.pack(side="left", fill="y")
+        self.pack(side="left", fill="y", padx=0, pady=0)
         
         # Create left container for grid layout
-        self.left_container = tk.Frame(self, bg=self.bg_color)
+        self.left_container = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.left_container.pack(side="left", fill="y")
         
         # Create the actual side menu
-        self.side_menu = tk.Frame(
+        self.side_menu = ctk.CTkFrame(
             self.left_container, 
-            width=200, 
-            padx=6, 
-            pady=6, 
-            bg=self.bg_color
+            width=200,
+            fg_color=self.bg_color
         )
-        self.side_menu.grid(row=0, column=0, sticky='ns')
+        self.side_menu.grid(row=0, column=0, sticky='ns', padx=6, pady=6)
         
         # Add plugin panel
         from .plugin_panel import PluginPanel
@@ -35,12 +33,11 @@ class SidebarPanel(tk.Frame):
         self.plugin_panel.pack(fill='x')
         
         # Add transform label
-        self.transform_label = tk.Label(
+        self.transform_label = ctk.CTkLabel(
             self.side_menu, 
             text="Transform:", 
-            bg="white",
-            fg="black",
-            font=("Arial", 11, "bold")
+            text_color="black",
+            font=("Arial", 18, "bold")
         )
         self.transform_label.pack(fill='x', pady=(8, 4))
         
@@ -48,11 +45,13 @@ class SidebarPanel(tk.Frame):
         self._create_transform_buttons()
         
         # Toggle button for collapsing sidebar
-        self.toggle_btn = tk.Button(
+        self.toggle_btn = ctk.CTkButton(
             self.left_container, 
             text="≡", 
-            width=3, 
-            command=self.toggle_side_panel
+            width=10,
+            command=self.toggle_side_panel,
+            fg_color="#ffffff",
+            hover_color="#b1b1b1"
         )
         self.toggle_btn.grid(row=0, column=1, sticky='ns', padx=(4, 8), pady=6)
         
@@ -71,14 +70,21 @@ class SidebarPanel(tk.Frame):
             ("Custom Code", self.controller.custom_code),
             ("Remove Empty Rows", self.controller.remove_empty_rows),
         ]
-        
+        # Match toolbar button styling: uniform size, white background with subtle hover
         for text, cmd in btn_specs:
-            tk.Button(
-                self.side_menu, 
-                text=text, 
-                command=cmd, 
-                width=20
-            ).pack(pady=2)
+            btn = ctk.CTkButton(
+                self.side_menu,
+                text=text,
+                command=cmd,
+                width=120,
+                height=30,
+                corner_radius=8,
+                fg_color="white",
+                hover_color="#f0f0f0",
+                text_color="black",
+                font=("Arial", 11)
+            )
+            btn.pack(fill='x', pady=6, padx=6)
     
     def get_selected_plugin(self):
         """Get selected plugin from the plugin panel"""
@@ -98,11 +104,17 @@ class SidebarPanel(tk.Frame):
     
     def _create_toggle_button(self):
         """Create sidebar toggle button"""
-        self.toggle_btn = tk.Button(
-            self.left_container, 
-            text="≡", 
-            width=3, 
-            command=self.toggle_side_panel
+        # Use CTkButton for consistency
+        self.toggle_btn = ctk.CTkButton(
+            self.left_container,
+            text="≡",
+            width=30,
+            height=30,
+            command=self.toggle_side_panel,
+            fg_color="#ffffff",
+            hover_color="#c0c0c0",
+            corner_radius=6,
+            font=("Arial", 11)
         )
         self.toggle_btn.grid(row=0, column=1, sticky='ns', padx=(4, 8), pady=6)
     

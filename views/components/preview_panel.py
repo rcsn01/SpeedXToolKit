@@ -1,13 +1,14 @@
-import tkinter as tk
+import customtkinter as ctk
+from tkinter import Text, Scrollbar
 import pandas as pd
 import os
 
 
-class PreviewPanel(tk.Frame):
+class PreviewPanel(ctk.CTkFrame):
     """Data preview panel with scrollable text widget"""
     
     def __init__(self, parent, bg_color="#FFFFFF"):
-        super().__init__(parent, bg=bg_color)
+        super().__init__(parent, fg_color=bg_color)
         self.bg_color = bg_color
         self._setup_ui()
     
@@ -16,31 +17,29 @@ class PreviewPanel(tk.Frame):
         self.pack(side="left", fill="both", expand=True)
         
         # Title frame to hold label and file path
-        self.title_frame = tk.Frame(self, bg=self.bg_color)
+        self.title_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.title_frame.pack(side="top", fill="x", padx=12, pady=(8, 0))
         
         # Title label for the preview
-        self.title_label = tk.Label(
+        self.title_label = ctk.CTkLabel(
             self.title_frame,
             text="File Preview",
-            bg=self.bg_color,
-            fg="black",
+            text_color="black",
             font=("Arial", 11, "bold")
         )
         self.title_label.pack(side="left")
         
         # File path label (initially empty)
-        self.file_path_label = tk.Label(
+        self.file_path_label = ctk.CTkLabel(
             self.title_frame,
             text="",
-            bg=self.bg_color,
-            fg="#555555",
+            text_color="#555555",
             font=("Arial", 9)
         )
         self.file_path_label.pack(side="left", padx=(10, 0))
 
         # Create scrollable text frame
-        self.text_scroll_frame = tk.Frame(self, bg=self.bg_color)
+        self.text_scroll_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.text_scroll_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
         # Create scrollbars
@@ -55,16 +54,16 @@ class PreviewPanel(tk.Frame):
     def _create_scrollbars(self):
         """Create vertical and horizontal scrollbars"""
         # Vertical scrollbar
-        self.y_scrollbar = tk.Scrollbar(self.text_scroll_frame)
+        self.y_scrollbar = Scrollbar(self.text_scroll_frame)
         self.y_scrollbar.pack(side="right", fill="y")
         
         # Horizontal scrollbar
-        self.x_scrollbar = tk.Scrollbar(self.text_scroll_frame, orient="horizontal")
+        self.x_scrollbar = Scrollbar(self.text_scroll_frame, orient="horizontal")
         self.x_scrollbar.pack(side="bottom", fill="x")
     
     def _create_text_widget(self):
         """Create the main text widget for data preview"""
-        self.preview_text = tk.Text(
+        self.preview_text = Text(
             self.text_scroll_frame,
             height=45,
             width=125,
@@ -93,28 +92,28 @@ class PreviewPanel(tk.Frame):
         # Update file path label - show only filename
         if file_path:
             filename = os.path.basename(file_path)
-            self.file_path_label.config(text=f"({filename})")
+            self.file_path_label.configure(text=f"({filename})")
         else:
-            self.file_path_label.config(text="")
+            self.file_path_label.configure(text="")
         
         # Clear existing content
-        self.preview_text.delete(1.0, tk.END)
+        self.preview_text.delete("1.0", "end")
         
         if df is not None and isinstance(df, pd.DataFrame):
             preview_text = df.to_string(index=False)
-            self.preview_text.insert(tk.END, preview_text)
+            self.preview_text.insert("end", preview_text)
         elif text is not None:
-            self.preview_text.insert(tk.END, text)
+            self.preview_text.insert("end", text)
         else:
-            self.preview_text.insert(tk.END, "No data loaded.")
+            self.preview_text.insert("end", "No data loaded.")
     
     def clear_preview(self):
         """Clear all preview content"""
-        self.preview_text.delete(1.0, tk.END)
+        self.preview_text.delete("1.0", "end")
     
     def get_preview_text(self):
         """Get current preview text content"""
-        return self.preview_text.get(1.0, tk.END)
+        return self.preview_text.get("1.0", "end")
     
     def set_font(self, font_family="Courier", font_size=10):
         """Set preview text font"""

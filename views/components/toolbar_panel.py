@@ -1,18 +1,18 @@
-import tkinter as tk
+import customtkinter as ctk
 
 
-class ToolbarPanel(tk.Frame):
+class ToolbarPanel(ctk.CTkFrame):
     """Top toolbar with main action buttons"""
     
     def __init__(self, parent, controller, bg_color="#FFFFFF"):
-        super().__init__(parent, height=40, padx=10, pady=4, bg=bg_color)
+        super().__init__(parent, fg_color=bg_color, height=50, corner_radius=0)
         self.controller = controller
         self.bg_color = bg_color
         self._setup_ui()
     
     def _setup_ui(self):
         """Setup the toolbar UI components"""
-        self.pack(side="top", fill="x")
+        self.pack(side="top", fill="x", padx=0, pady=0)
         
         # Define button configurations
         button_configs = [
@@ -24,26 +24,22 @@ class ToolbarPanel(tk.Frame):
             ("Save Plugin", self._on_save_plugin),
         ]
         
-        # Create buttons with custom styling
+        # Create buttons with custom styling (no shadow)
         self.buttons = {}
         for text, command in button_configs:
-            btn = tk.Button(
-                self, 
-                text=text, 
+            btn = ctk.CTkButton(
+                self,
+                text=text,
                 command=command,
-                # Button styling options:
-                #bg="#20a5dd",           # Background color
-                #fg="white",             # Text color
-                #font=("Arial", 10, "bold"),  # Font family, size, style
-                #relief="flat",        # Border style: flat, raised, sunken, ridge, groove, solid
-                #bd=2,                   # Border width
-                #padx=15,               # Internal horizontal padding
-                #pady=5,                # Internal vertical padding
-                #activebackground="#388194",  # Color when clicked
-                #activeforeground="white",     # Text color when clicked
-                #cursor="hand2"         # Cursor style when hovering
+                width=100,
+                height=30,
+                corner_radius=8,
+                fg_color="white",
+                hover_color="#f0f0f0",
+                text_color="black",
+                font=("Arial", 11)
             )
-            btn.pack(side="left", padx=4)
+            btn.pack(side="left", padx=6, pady=8)
             self.buttons[text.lower().replace(" ", "_")] = btn
     
     def _on_settings(self):

@@ -1,14 +1,14 @@
-import tkinter as tk
-from tkinter import messagebox
+import customtkinter as ctk
+from tkinter import messagebox, Listbox, END
 from controllers.processing_controller import show_plugins
 import pandas as pd
 
 
-class PluginPanel(tk.Frame):
+class PluginPanel(ctk.CTkFrame):
     """Plugin management panel with list and controls"""
     
     def __init__(self, parent, controller, bg_color="#FFFFFF"):
-        super().__init__(parent, bg=bg_color)
+        super().__init__(parent, fg_color=bg_color)
         self.controller = controller
         self.bg_color = bg_color
         self.plugins_listbox = None
@@ -18,17 +18,16 @@ class PluginPanel(tk.Frame):
     def _setup_ui(self):
         """Setup the plugin panel UI"""
         # Plugin label
-        self.plugins_label = tk.Label(
+        self.plugins_label = ctk.CTkLabel(
             self, 
             text="Plugins:", 
-            bg="white",
-            fg="black",
-            font=("Arial", 11, "bold")
+            text_color="black",
+            font=("Arial", 18, "bold")
         )
         self.plugins_label.pack(fill='x', pady=(8, 4))
         
         # Plugin content frame
-        self.plugins_frame = tk.Frame(self, bg=self.bg_color)
+        self.plugins_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.plugins_frame.pack(fill='x', pady=(0, 8))
         
         # Load initial plugins
@@ -62,38 +61,51 @@ class PluginPanel(tk.Frame):
             except Exception:
                 display_items.append(str(p))
         
-        # Create listbox
-        self.plugins_listbox = tk.Listbox(self.plugins_frame, height=5)
+        # Create listbox (using standard tkinter Listbox as CTk doesn't have one)
+        self.plugins_listbox = Listbox(self.plugins_frame, height=5)
         for item in display_items:
-            self.plugins_listbox.insert(tk.END, item)
+            self.plugins_listbox.insert(END, item)
         self.plugins_listbox.pack(fill='x')
     
     def _create_plugin_buttons(self):
         """Create Apply and Refresh buttons"""
-        btn_frame = tk.Frame(self.plugins_frame, bg=self.bg_color)
+        btn_frame = ctk.CTkFrame(self.plugins_frame, fg_color=self.bg_color)
         btn_frame.pack(pady=4)
         
-        self.apply_btn = tk.Button(
+        self.apply_btn = ctk.CTkButton(
             btn_frame, 
             text="Apply", 
-            command=self._on_apply_plugin
+            command=self._on_apply_plugin,
+            width=70,
+            height=30,
+            corner_radius=8,
+            fg_color="white",
+            hover_color="#f0f0f0",
+            text_color="black",
+            font=("Arial", 11)
         )
         self.apply_btn.pack(side='left', padx=4)
         
-        self.refresh_btn = tk.Button(
+        self.refresh_btn = ctk.CTkButton(
             btn_frame, 
             text="Refresh", 
-            command=self._on_refresh_plugins
+            command=self._on_refresh_plugins,
+            width=70,
+            height=30,
+            corner_radius=8,
+            fg_color="white",
+            hover_color="#f0f0f0",
+            text_color="black",
+            font=("Arial", 11)
         )
         self.refresh_btn.pack(side='left', padx=4)
     
     def _create_no_plugins_label(self):
         """Create 'no plugins' label"""
-        self.no_plugins_label = tk.Label(
+        self.no_plugins_label = ctk.CTkLabel(
             self.plugins_frame, 
             text="No plugins", 
-            bg=self.bg_color, 
-            fg="#777777"
+            text_color="#777777"
         )
         self.no_plugins_label.pack(fill='x')
     
@@ -155,9 +167,9 @@ class PluginPanel(tk.Frame):
             
             # Update or create listbox
             if self.plugins_listbox:
-                self.plugins_listbox.delete(0, tk.END)
+                self.plugins_listbox.delete(0, END)
                 for item in items:
-                    self.plugins_listbox.insert(tk.END, item)
+                    self.plugins_listbox.insert(END, item)
             else:
                 self._create_plugin_list(new_plugins)
                 if not hasattr(self, 'apply_btn'):

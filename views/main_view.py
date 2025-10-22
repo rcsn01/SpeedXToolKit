@@ -1,4 +1,4 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import filedialog, messagebox
 import pandas as pd
 from controllers.data_controller import DataController
@@ -17,17 +17,17 @@ COLOURS = {
     "blue_hex": "#0272BA", #SDX Blue
     "purple_hex": "#593085", #SDX Purple
     "white_hex": "#FFFFFF", # White in hex
-    "light_blue_hex": "#0272BA" # Light blue for header
+    "light_blue_hex": "#abd2ff" # Light blue for header
 }
 # Application version
-APP_VERSION = "3.3"
+APP_VERSION = "3.4"
 
 # Main application view using component-based architecture
-class MainView(tk.Frame):
+class MainView(ctk.CTkFrame):
     """Main application view using component-based architecture"""
     
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, fg_color="transparent")
         
         # Initialize data controller
         self.data = DataController()
@@ -38,7 +38,7 @@ class MainView(tk.Frame):
     def _setup_ui(self):
         """Setup the main UI using components"""
         # Header panel
-        self.header = HeaderPanel(self, title="ToolKit", version=APP_VERSION, bg_color=COLOURS["white_hex"])
+        self.header = HeaderPanel(self, title="SpeeDxToolKit", version=APP_VERSION, bg_color=COLOURS["white_hex"])
         
         # Toolbar panel
         self.toolbar = ToolbarPanel(self, controller=self, bg_color=COLOURS["light_blue_hex"])
