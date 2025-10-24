@@ -24,7 +24,17 @@ class HeaderPanel(ctk.CTkFrame):
             text_color="#000000", 
             font=("Arial", 30, "bold")
         )
-        self.title_label.pack(side="left", padx=10, pady=8)
+        self.title_label.pack(side="left", padx=(10, 6), pady=8)
+
+        # Small demo notice to the right of the title
+        self.demo_label = ctk.CTkLabel(
+            self,
+            text="    for demonstration purposes only",
+            text_color="#949494",
+            font=("Arial", 16, "italic")
+        )
+        # pack to the left so it appears immediately after the title
+        self.demo_label.pack(side="left", padx=(0, 6), pady=14)
         
         # Version label
         self.version_label = ctk.CTkLabel(
