@@ -1,112 +1,17 @@
 # Universal Data Processor (SpeedXToolKit)
-
-A Tkinter desktop application for loading, cleaning, transforming, and exporting assay / tabular data (Excel or CSV). Provides an interactive workflow to:
-- Load .xls, .xlsx, or .csv (CSV auto-converted with encoding + delimiter detection)
-- Select header row and columns to keep
-- Clean undefined/undetermined values
-- Keep / drop / rename columns
-- Generate pivot tables
-- Produce an Output column summarizing positive/non-null columns
-- Perform delta calculations with threshold-based Output adjustment
-- Combine two CSV files on selected common columns
-- Save processed datasets & reusable presets (record of transformations)
-
-## Features
-1. Robust File Import
-   - Auto conversion of .csv to temporary .xls for consistent parsing
-   - Encoding fallback: utf-8, utf-8-sig, cp1252, latin-1 (+ chardet guess)
-   - Delimiter sniffing
-   - Header row auto-detect (first row with >3 populated cells) + manual override
-   - Duplicate column names normalized to: Name, Name (1), Name (2), ...
-2. Column Operations
-   - Keep specific columns
-   - Drop selected columns
-   - Rename a column
-3. Pivot Table
-   - Select target (columns become headers) + value column
-4. Output Column Generation
-   - Builds comma-separated list of non-null/non-zero contributing columns
-5. Delta Calculation
-   - Computes column1 - column2 as 'delta'
-   - Optional threshold: if abs(delta) > threshold, removes lower contributor from Output
-6. Combine Files
-   - Select two CSVs, choose common columns to merge on, handles encoding fallback
-7. Presets System
-   - Preset (pickle) stores: name, metadata (essay_info), function history
-   - Reloading a preset replays transformations on newly loaded data
-8. Safe Processing
-   - Guards against None DataFrames and missing headers
-   - Graceful error dialogs
-9. UI/UX
-   - Gradient theming and scrollable preview (vertical + horizontal)
-10. Packaging
-   - PyInstaller support (add hidden imports if needed)
-
-## Project Structure (key parts)
-```
-main.py
-controllers/
-  processing_controller.py   # Orchestrates transformations & preset replay
-  save_controller.py         # Saving dataframes & presets
-models/                      # Pure data logic
-  dataframe_model.py
-  drop_column_model.py
-  keep_column_model.py
-  rename_column_model.py
-  pivot_table_model.py
-  produce_output_model.py
-  delta_calculation_model.py
-  essay_process_model.py
-  pickle.py                  # Preset persistence
-views/                       # Tkinter dialogs & UI components
-  main_view.py
-  load_file_view.py
-  combine_file_view.py
-  ... (other operation dialogs)
-presets/                     # Stored .pkl presets
-```
-
-## Data Flow
-1. User clicks Load File -> load_file_view
-2. CSV converted (if needed) -> DataFrame read -> header row chosen -> keep columns
-3. processing_controller.import_files:
-   - essay_process_model splits format vs data, sets header, deduplicates names
-   - keep_column_model filters kept headers
-   - clear_undefined cleans values
-   - essay_info extracted (first two original columns) for metadata
-4. Subsequent actions call models via processing_controller wrappers updating store['functions']
-5. Preset save stores store dict to presets/<name>.pkl
-6. Preset load replays function list on the currently loaded base DataFrame
-
-## Preset Function Encoding
-Each transformation appended to store['functions'] as:
-- drop_column_model!$!col1,col2
-- rename_column_model!$!OldName!$!NewName
-- pivot_table_model!$!Target!$!Value
-- delta_calculation_model!$!Col1!$!Col2!$!Threshold
-- produce_output_model!$!colA,colB
-- keep_column_model!$!colA,colB
-
-Replay maps names back to model functions.
-
 ## Installation
 ```
 python -m venv .venv
-# Windows
+```
+### Windows
+```
 .\.venv\Scripts\Activate.ps1
-# macOS/Linux
+```
+### macOS/Linux
+```
 source .venv/bin/activate
+```
 pip install -r requirements.txt
-```
-Ensure requirements include (example):
-```
-pandas
-openpyxl
-xlrd
-xlwt
-chardet
-numpy
-```
 
 ## Running
 ```
@@ -127,31 +32,6 @@ Recommended additions:
   ]
 - Add data (if distributing presets): datas=[('presets','presets')]
 
-## Common Issues & Fixes
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| UnicodeDecodeError 0x99 | Non-UTF8 CSV | Encoding fallback added; ensure chardet installed |
-| AttributeError df.iloc on None | Failed import/header detect | Added guards & error dialogs |
-| Duplicate columns overwrite | Same header names in file | Auto rename with (1), (2) |
-| Delta function disabled | 'Output' column missing | Run Produce Output first |
-| Presets missing on other PC | Not bundled | Copy presets folder or add to PyInstaller datas |
-| Some features missing in EXE | Hidden imports not collected | Add hiddenimports in .spec |
-
-## Logging / Debugging Tips
-- Run EXE from command line to view print diagnostics.
-- Inspect build/warn-*.txt after PyInstaller build for missing modules.
-- Add more try/except + messagebox.showerror where needed.
-
-## Extending
-Add a new transformation:
-1. Create model function in models/
-2. Create view for parameter input (if needed) in views/
-3. Add processing_controller wrapper appending a store['functions'] entry
-4. Update func_map in load_preset replay
-5. Adjust README if user-facing
-
-## Metadata (essay_info)
-Derived from first two original columns (tuple of tuples). Stored in store['metadata'] for potential identification or preset matching.
 
 ## Store Structure
 ```
@@ -162,23 +42,7 @@ store = {
 }
 ```
 
-## Safety Enhancements Implemented
-- Encoding fallback for CSV import & combine
-- Header detection guard
-- None guards throughout pipeline
-- Duplicate header disambiguation
-- Horizontal & vertical scrolling in previews
-
-## Roadmap Ideas
-- Add export to Excel
-- Add delimiter & encoding manual override dialog
-- Add undo stack (reverse function replay)
-- Persist recent files list
-- Logging to file instead of stdout
-
 ## License
 (Add desired license statement.)
 
-## Attribution
-Developed as a universal data processing helper for assay-style spreadsheets.
 
