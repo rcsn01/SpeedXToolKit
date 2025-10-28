@@ -8,121 +8,103 @@ path = CSV_PATH
 
 df = pd.read_csv(path)
 
+# DO NOT USE FUNCTIONS, DIRECTLY WRITE YOUR CODE BELOW
+
 # ========================================================================
 # ============================ START HERE ================================
 # ========================================================================
 
 # Editable variables
-# VIABILITY THRESHOLDS
-CT_GAT = 29.7
-CT_NED = 30.6
-NG_GAT = 30.6
-NG_NED = 32
-
-# INDEX THRESHOLDS
-CT_INDEX_THRESHOLD = 1.57
-NG_INDEX_THRESHOLD = 1.46
-
-# DECIMAL PRECISION
-DECIMAL_PRECISION = 2  # Number of decimal places to round CT/NG/EC values
+plugin_name = "PlexPCR VHS (LC480) v2.1"
+colour_compensation = "201210 SpeeDx Colour Comp.ixo (PlexPCR)"
+kit_lot_number = "25040026"
 
 # ========================================================================
 # DO NOT EDIT BELOW THIS LINE
 # ========================================================================
 
-# Evaluate CT columns
-df['CT Index'] = pd.NA
+# Select the Target_1 set
+df1 = df[['AssayCode', 'Target_1', 'Target_1_wells', 'Target_1_cq']].copy()
 
-ct_cols = ['CT GAT', 'CT NED']
-df_ct = df.reindex(columns=ct_cols)  # missing cols become NaN
-# A row is 'missing' if all CT columns are NaN
-ct_missing_mask = df_ct.apply(lambda row: all(pd.isna(x) for x in row), axis=1)
-# Start with empty values
-df['Sample Interpretation for CT'] = ''
-df.loc[ct_missing_mask, 'Sample Interpretation for CT'] = 'CT not detected'
+# Select the Target_2 set and rename columns so they match Target_1 column names
+df2 = df[['AssayCode', 'Target_2', 'Target_2_wells', 'Target_2_cq']].copy()
+df2 = df2.rename(columns={
+	'Target_2': 'Target_1',
+	'Target_2_wells': 'Target_1_wells',
+	'Target_2_cq': 'Target_1_cq'
+})
 
-# Now apply thresholds: convert CT columns to numeric (coerce errors -> NaN)
-ct_num = df_ct.apply(lambda col: pd.to_numeric(col, errors='coerce'))
+# Preserve original row order and ensure Target_1 row comes before Target_2 row
+df1['__orig_idx'] = df1.index
+df1['__kind'] = 1
+df2['__orig_idx'] = df2.index
+df2['__kind'] = 2
 
+# Concatenate and sort to interleave rows per original record
+df = pd.concat([df1, df2], ignore_index=True)
+df = df.sort_values(['__orig_idx', '__kind']).drop(columns=['__orig_idx', '__kind']).reset_index(drop=True)
 
-# Calculate delta between CT NED and CT GAT and compute index = (2^delta)/2
-# Use numeric Ct values (ct_num) so non-numeric become NaN
-if 'CT GAT' in ct_num.columns and 'CT NED' in ct_num.columns:
-    # delta = CT_NED - CT_GAT (positive delta means CT_NED larger)
-    delta = ct_num['CT NED'] - ct_num['CT GAT']
-    ct_index = (2 ** delta) / 2
-    # Persist CT Index column
-    df['CT Index'] = ct_index
-    # Only consider rows where both numeric Ct values exist
-    ct_both_numeric = (~ct_num['CT GAT'].isna()) & (~ct_num['CT NED'].isna())
-    # Viable when index > threshold, Unviable when index <= threshold
-    ct_viable_mask = ct_both_numeric & (ct_index > CT_INDEX_THRESHOLD)
-    ct_unviable_mask = ct_both_numeric & (ct_index <= CT_INDEX_THRESHOLD)
-    # Only set values where we haven't already set an interpretation (don't overwrite)
-    empty_ct_field = df['Sample Interpretation for CT'].eq('')
-    df.loc[ct_viable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Viable'
-    df.loc[ct_unviable_mask & empty_ct_field, 'Sample Interpretation for CT'] = 'CT detected, Non-Viable'
+# Remove duplicated entries where AssayCode, Target_1 and Target_1_wells are identical.
+# Keep the first occurrence so the original Target_1 row remains and Target_2
+# duplicates (if any) are removed.
+df = df.drop_duplicates(subset=['AssayCode', 'Target_1', 'Target_1_wells'], keep='first').reset_index(drop=True)
 
-# Evaluate NG columns
-df['NG Index'] = pd.NA
+# Rename Target_1-style columns to the requested names
+df = df.rename(columns={
+    'AssayCode': 'Mix',
+	'Target_1': 'Target',
+	'Target_1_wells': 'Well',
+	'Target_1_cq': 'Cq'
+})
+# Add requested empty columns and order the DataFrame columns as specified by the user
+desired_order = [
+	'Plugin', 'Mix', 'Colour compensation', 'Kit lot number', 'Well',
+	'Sample name', 'Fluor', 'Target', 'Cq', 'Sample comment',
+	'Audit trail', 'Warning', 'LIMS warning'
+]
 
-ng_cols = ['NG GAT', 'NG NED']
-df_ng = df.reindex(columns=ng_cols)
-ng_missing_mask = df_ng.apply(lambda row: all(pd.isna(x) for x in row), axis=1)
-# Start with empty values
-df['Sample Interpretation for NG'] = ''
-df.loc[ng_missing_mask, 'Sample Interpretation for NG'] = 'NG not detected'
+# Ensure all requested columns exist (fill with empty strings) then reorder
+for col in desired_order:
+	if col not in df.columns:
+		df[col] = ''
 
-# Thresholds for NG
-ng_num = df_ng.apply(lambda col: pd.to_numeric(col, errors='coerce'))
-ng_detect_mask = pd.Series(False, index=df.index)
+# Reorder the columns to match the requested order
+df = df[desired_order]
 
-# Calculate delta between NG NED and NG GAT and compute index = (2^delta)/2
-if 'NG GAT' in ng_num.columns and 'NG NED' in ng_num.columns:
-    delta_ng = ng_num['NG NED'] - ng_num['NG GAT']
-    ng_index = (2 ** delta_ng) / 2
-    # Persist NG Index column
-    df['NG Index'] = ng_index
-    # Only consider rows where both numeric NG values exist
-    ng_both_numeric = (~ng_num['NG GAT'].isna()) & (~ng_num['NG NED'].isna())
-    # Viable when index > threshold, Unviable when index <= threshold
-    ng_viable_mask = ng_both_numeric & (ng_index > NG_INDEX_THRESHOLD)
-    ng_unviable_mask = ng_both_numeric & (ng_index <= NG_INDEX_THRESHOLD)
-    # Only set values where we haven't already set an interpretation (don't overwrite)
-    empty_ng_field = df['Sample Interpretation for NG'].eq('')
-    df.loc[ng_viable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Viable'
-    df.loc[ng_unviable_mask & empty_ng_field, 'Sample Interpretation for NG'] = 'NG detected, Non-Viable'
+# Populate the columns with the variable values
+df['Plugin'] = plugin_name
+df['Colour compensation'] = colour_compensation
+df['Kit lot number'] = kit_lot_number
 
-# If any CT column exceeds its threshold mark as detected/indeterminate
-ct_detect_mask = pd.Series(False, index=df.index)
-if 'CT GAT' in ct_num.columns:
-    ct_detect_mask = ct_detect_mask | (ct_num['CT GAT'] > CT_GAT)
-if 'CT NED' in ct_num.columns:
-    ct_detect_mask = ct_detect_mask | (ct_num['CT NED'] > CT_NED)
-df.loc[ct_detect_mask, 'Sample Interpretation for CT'] = 'CT detected, Indeterminate Viability'
+# Add metadata rows at the top of the DataFrame
+metadata_rows = [
+    ['Runfile created by user', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['Analysis created by user', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['Run Started', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['Cycler Serial Number', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['FastFinder Version', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['Report created', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['Note', '', '', '', '', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '', '', '', '', ''],  # Empty line
+    # Add column headers as a data row
+    ['Plugin', 'Mix', 'Colour compensation', 'Kit lot number', 'Well', 
+     'Sample name', 'Fluor', 'Target', 'Cq', 'Sample comment', 
+     'Audit trail', 'Warning', 'LIMS warning']
+]
 
-if 'NG GAT' in ng_num.columns:
-    ng_detect_mask = ng_detect_mask | (ng_num['NG GAT'] > NG_GAT)
-if 'NG NED' in ng_num.columns:
-    ng_detect_mask = ng_detect_mask | (ng_num['NG NED'] > NG_NED)
-df.loc[ng_detect_mask, 'Sample Interpretation for NG'] = 'NG detected, Indeterminate Viability'
+# Create a metadata DataFrame with the same columns
+metadata_df = pd.DataFrame(metadata_rows, columns=desired_order)
 
-# If EC is NaN, mark both interpretations as invalid and request repeat/re-extraction
-if 'EC' in df.columns:
-    ec_missing_mask = df['EC'].isna()
-    msg = 'Invalid EC, repeat test/re-extract sample'
-    df.loc[ec_missing_mask, 'Sample Interpretation for CT'] = msg
-    df.loc[ec_missing_mask, 'Sample Interpretation for NG'] = msg
+# Concatenate metadata with the main dataframe
+df = pd.concat([metadata_df, df], ignore_index=True)
 
-# Round specified columns to configured decimal precision
-columns_to_round = ['CT GAT', 'CT NED', 'EC', 'NG GAT', 'NG NED', 'CT Index', 'NG Index']
-for col in columns_to_round:
-    if col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce').round(DECIMAL_PRECISION)
-
+# Rename first column to 'File Name' and set the rest to empty strings
+cols = ['File Name'] + [''] * (len(df.columns) - 1)
+df.columns = cols
 
 # ========================================================================
-# ============================ START HERE ================================
+# ============================= END HERE =================================
+# ========================= DO NOT EDIT BELOW ============================
 # ========================================================================
 
-print(df.to_string(index=False))
+print(df)
