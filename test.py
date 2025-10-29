@@ -24,10 +24,10 @@ kit_lot_number = "25040026"
 # ========================================================================
 
 # Select the Target_1 set
-df1 = df[['AssayCode', 'Target_1', 'Target_1_wells', 'Target_1_cq']].copy()
+df1 = df[['Sample ID', 'AssayCode', 'Target_1', 'Target_1_wells', 'Target_1_cq']].copy()
 
 # Select the Target_2 set and rename columns so they match Target_1 column names
-df2 = df[['AssayCode', 'Target_2', 'Target_2_wells', 'Target_2_cq']].copy()
+df2 = df[['Sample ID', 'AssayCode', 'Target_2', 'Target_2_wells', 'Target_2_cq']].copy()
 df2 = df2.rename(columns={
 	'Target_2': 'Target_1',
 	'Target_2_wells': 'Target_1_wells',
@@ -54,7 +54,8 @@ df = df.rename(columns={
     'AssayCode': 'Mix',
 	'Target_1': 'Target',
 	'Target_1_wells': 'Well',
-	'Target_1_cq': 'Cq'
+	'Target_1_cq': 'Cq',
+	'Sample ID': 'Sample name'
 })
 # Add requested empty columns and order the DataFrame columns as specified by the user
 desired_order = [
@@ -62,6 +63,7 @@ desired_order = [
 	'Sample name', 'Fluor', 'Target', 'Cq', 'Sample comment',
 	'Audit trail', 'Warning', 'LIMS warning'
 ]
+print(df)
 
 # Ensure all requested columns exist (fill with empty strings) then reorder
 for col in desired_order:
