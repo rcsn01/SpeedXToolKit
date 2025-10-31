@@ -58,7 +58,7 @@ class MainView(ctk.CTkFrame):
         self.header.demo_label.configure(text_color=AppColors.MEDIUM_GRAY)
         
         # Update toolbar
-        self.toolbar.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.toolbar.configure(fg_color=PanelStyles.TOOLBAR["fg_color"])
         # Update all toolbar buttons
         for btn_name, btn in self.toolbar.buttons.items():
             btn.configure(
@@ -68,9 +68,9 @@ class MainView(ctk.CTkFrame):
             )
         
         # Update sidebar
-        self.sidebar.configure(fg_color=AppColors.LIGHT_BLUE)
-        self.sidebar.left_container.configure(fg_color=AppColors.LIGHT_BLUE)
-        self.sidebar.side_menu.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.sidebar.configure(fg_color=PanelStyles.SIDEBAR["fg_color"])
+        self.sidebar.left_container.configure(fg_color=PanelStyles.SIDEBAR["fg_color"])
+        self.sidebar.side_menu.configure(fg_color=PanelStyles.SIDEBAR_MENU["fg_color"])
         self.sidebar.transform_label.configure(text_color=AppColors.BLACK)
         
         # Update sidebar toggle button

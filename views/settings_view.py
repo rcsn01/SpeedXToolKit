@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from styles import AppColors, AppFonts, ButtonStyles, AppConfig, ListboxStyles, TkinterDialogStyles
+from styles import AppColors, AppFonts, ButtonStyles, AppConfig, ListboxStyles, TkinterDialogStyles, RadioButtonStyles, PanelStyles
 
 
 class SettingsDialog(ctk.CTkToplevel):
@@ -72,10 +72,7 @@ class SettingsDialog(ctk.CTkToplevel):
                 text=text,
                 variable=self.appearance_var,
                 value=value,
-                font=AppFonts.BODY,
-                text_color=AppColors.BLACK,
-                fg_color=AppColors.BLUE,
-                hover_color=AppColors.DARK_GRAY
+                **RadioButtonStyles.DEFAULT
             )
             radio.pack(anchor="w", pady=3)
         
@@ -140,11 +137,17 @@ class SettingsDialog(ctk.CTkToplevel):
             # Update button styles for dark mode
             ButtonStyles.update_for_dark_mode()
             
+            # Update panel styles for dark mode (toolbar and sidebar colors)
+            PanelStyles.update_for_dark_mode()
+            
             # Update listbox styles for dark mode
             ListboxStyles.update_for_dark_mode()
             
             # Update Tkinter dialog styles for dark mode
             TkinterDialogStyles.update_for_dark_mode()
+            
+            # Update radio button styles for dark mode
+            RadioButtonStyles.update_for_dark_mode()
         else:
             # Light mode colors (restore defaults)
             AppColors.LIGHT_BLUE = "#abd2ff"
@@ -156,11 +159,17 @@ class SettingsDialog(ctk.CTkToplevel):
             # Update button styles for light mode
             ButtonStyles.update_for_light_mode()
             
+            # Update panel styles for light mode (toolbar and sidebar colors)
+            PanelStyles.update_for_light_mode()
+            
             # Update listbox styles for light mode
             ListboxStyles.update_for_light_mode()
             
             # Update Tkinter dialog styles for light mode
             TkinterDialogStyles.update_for_light_mode()
+            
+            # Update radio button styles for light mode
+            RadioButtonStyles.update_for_light_mode()
     
     def _on_cancel(self):
         """Cancel and close dialog"""

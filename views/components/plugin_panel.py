@@ -11,7 +11,7 @@ class PluginPanel(ctk.CTkFrame):
     def __init__(self, parent, controller, bg_color=None):
         if bg_color is None:
             bg_color = AppColors.LIGHT_BLUE
-        super().__init__(parent, fg_color=bg_color)
+        super().__init__(parent, fg_color="transparent")
         self.controller = controller
         self.bg_color = bg_color
         self.plugins_listbox = None
@@ -29,8 +29,8 @@ class PluginPanel(ctk.CTkFrame):
         )
         self.plugins_label.pack(fill='x', pady=(8, 4))
         
-        # Plugin content frame
-        self.plugins_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
+        # Plugin content frame (transparent to inherit sidebar color)
+        self.plugins_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.plugins_frame.pack(fill='x', pady=(0, 8))
         
         # Load initial plugins
@@ -75,8 +75,8 @@ class PluginPanel(ctk.CTkFrame):
     
     def _create_plugin_buttons(self):
         """Create Apply and Refresh buttons"""
-        # Use centralized colors for button frame
-        self.btn_frame = ctk.CTkFrame(self.plugins_frame, fg_color=AppColors.LIGHT_BLUE)
+        # Use transparent background to inherit sidebar color
+        self.btn_frame = ctk.CTkFrame(self.plugins_frame, fg_color="transparent")
         self.btn_frame.pack(pady=4)
         
         self.apply_btn = ctk.CTkButton(
@@ -106,13 +106,13 @@ class PluginPanel(ctk.CTkFrame):
     
     def refresh_colors(self):
         """Refresh colors when theme changes"""
-        self.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.configure(fg_color="transparent")
         self.plugins_label.configure(text_color=AppColors.BLACK)
-        self.plugins_frame.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.plugins_frame.configure(fg_color="transparent")
         
-        # Refresh button frame if it exists
+        # Refresh button frame if it exists (keep transparent)
         if hasattr(self, 'btn_frame') and self.btn_frame:
-            self.btn_frame.configure(fg_color=AppColors.LIGHT_BLUE)
+            self.btn_frame.configure(fg_color="transparent")
         
         # Refresh listbox colors if it exists using centralized styles
         if hasattr(self, 'plugins_listbox') and self.plugins_listbox:
