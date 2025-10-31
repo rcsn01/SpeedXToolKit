@@ -126,102 +126,85 @@ def convert_csv_to_xls(csv_file, xls_file, encoding='utf-8', delimiter=None):
 
 def load_file_view(file_path):
     """Load Excel file (.xls or .xlsx), convert if needed, and allow user to confirm header row."""
-    try:
+    # Ensure cache folder exists
+    cache_dir = os.path.join(os.path.dirname(__file__), "file_cache")
+    os.makedirs(cache_dir, exist_ok=True)
 
-        # Ensure cache folder exists
-        cache_dir = os.path.join(os.path.dirname(__file__), "file_cache")
-        os.makedirs(cache_dir, exist_ok=True)
+    # Convert and update path
+    converted_path = None
+    if file_path.lower().endswith(".csv"):
+        converted_path = os.path.join(cache_dir, os.path.basename(file_path).replace(".csv", "_converted.xls"))
+        convert_csv_to_xls(file_path, converted_path)
+        file_path = converted_path
+    elif file_path.lower().endswith(".xlsx"):
+        converted_path = os.path.join(cache_dir, os.path.basename(file_path).replace(".xlsx", "_converted.xls"))
+        convert_xlsx_to_xls(file_path, converted_path)
+        file_path = converted_path
 
-        # Convert and update path
-        converted_path = None
-        if file_path.lower().endswith(".csv"):
-            converted_path = os.path.join(cache_dir, os.path.basename(file_path).replace(".csv", "_converted.xls"))
-            convert_csv_to_xls(file_path, converted_path)
-            file_path = converted_path
-        elif file_path.lower().endswith(".xlsx"):
-            converted_path = os.path.join(cache_dir, os.path.basename(file_path).replace(".xlsx", "_converted.xls"))
-            convert_xlsx_to_xls(file_path, converted_path)
-            file_path = converted_path
+    df = pd.read_excel(file_path, engine="xlrd", header=None)
+    header_row = find_header_row(df)
+    if header_row is None:
+        messagebox.showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
+        return None, None, None
 
-        df = pd.read_excel(file_path, engine="xlrd", header=None)
-        header_row = find_header_row(df)
-        if header_row is None:
-            messagebox.showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
-            return None, None, None
+    root = ctk.CTk()
+    root.title("Header Row Preview")
+    root.geometry("1200x700")
+    root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
-        root = ctk.CTk()
-        root.title("Header Row Preview")
-        root.geometry("1200x700")
-        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+    df_truncated = format_dataframe(df, max_length=20)
 
-        df_truncated = format_dataframe(df)
+    # Create frame with scrollbar
+    frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
+    frame.pack(pady=5, padx=5, fill="both", expand=True)
 
-        # Create frame with scrollbar
-        frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
-        frame.pack(pady=5, padx=5, fill="both", expand=True)
+    # Use CTkTextbox with monospaced font for better alignment
+    text_widget = ctk.CTkTextbox(frame, wrap="none", height=400, width=1100,
+                      fg_color=TkinterDialogStyles.CANVAS_BG, 
+                      text_color=TkinterDialogStyles.LABEL_FG,
+                      font=("Courier New", 12))
+    # Format with better alignment - show first 50 rows
+    df_display = df_truncated.head(50)
+    text_widget.insert("1.0", df_display.to_string(index=True))
+    text_widget.configure(state="disabled")
+    text_widget.pack(side="left", fill="both", expand=True)
 
-        # Use CTkTextbox with monospaced font for better alignment
-        text_widget = ctk.CTkTextbox(frame, wrap="none", height=400, width=1100,
-                                      fg_color=TkinterDialogStyles.CANVAS_BG, 
-                                      text_color=TkinterDialogStyles.LABEL_FG,
-                                      font=("Courier New", 10))
-        
-        # Format with better alignment - show first 50 rows
-        df_display = df.head(50)
-        text_widget.insert("1.0", df_display.to_string(index=True, max_colwidth=15))
-        text_widget.configure(state="disabled")
-        text_widget.pack(side="left", fill="both", expand=True)
+    # Header selection
+    header_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
+    header_frame.pack(pady=5)
 
-        # Header selection
-        header_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
-        header_frame.pack(pady=5)
+    ctk.CTkLabel(header_frame, text="Header Row:", 
+                 text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+    header_input = ctk.CTkEntry(header_frame, width=50)
+    header_input.insert(0, str(header_row))
+    header_input.grid(row=0, column=1, padx=5, sticky="w")
 
-        ctk.CTkLabel(header_frame, text="Header Row:", 
-                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
-        header_input = ctk.CTkEntry(header_frame, width=50)
-        header_input.insert(0, str(header_row))
-        header_input.grid(row=0, column=1, padx=5, sticky="w")
+    result = {"header_row": None, "keep_input": []}
 
-        result = {"header_row": None, "keep_input": []}
+    def on_confirm():
+        try:
+            user_header_row = int(header_input.get())
+            selected_headers = _dedupe_headers(df.iloc[user_header_row].astype(str).tolist())  # Automatically select all columns
 
-        def on_confirm():
-            try:
-                user_header_row = int(header_input.get())
-                selected_headers = _dedupe_headers(df.iloc[user_header_row].astype(str).tolist())  # Automatically select all columns
-
-                result["header_row"] = user_header_row
-                result["keep_input"] = selected_headers
-                root.quit()
-                root.destroy()
-            except ValueError:
-                messagebox.showerror("Invalid Input", "Please select valid header.")
-
-
-        def on_cancel():
+            result["header_row"] = user_header_row
+            result["keep_input"] = selected_headers
             root.quit()
             root.destroy()
+        except ValueError:
+            messagebox.showerror("Invalid Input", "Please select valid header.")
 
-        # Buttons
-        button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
-        button_frame.pack(pady=10)
+    def on_cancel():
+        root.quit()
+        root.destroy()
 
-        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+    # Buttons
+    button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
+    button_frame.pack(pady=10)
 
-        root.mainloop()
+    ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
+    ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
-        return df, result["header_row"], result["keep_input"]
+    root.mainloop()
 
-    except Exception as e:
-        print(f"Error: {e}")
-        return None, None, None
-    
-    finally:
-        # Clean up temporary file
-        if converted_path and os.path.exists(converted_path):
-            try:
-                os.remove(converted_path)
-                print(f"Deleted temporary file: {converted_path}")
-            except Exception as cleanup_err:
-                print(f"Failed to delete temporary file: {cleanup_err}")
+    return df, result["header_row"], result["keep_input"]
 

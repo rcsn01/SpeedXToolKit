@@ -21,7 +21,7 @@ python main.py
 ## Building Executable (PyInstaller)
 Example spec/command (adjust name):
 ```
-pyinstaller --onefile --windowed --add-data "assets;assets" --name SpeedXToolKit-3.3 main.py
+pyinstaller --onefile --windowed --add-data "assets;assets" --name Pearl-3.5 --icon=assets/pearl.ico main.py
 ```
 Recommended additions:
 - Hidden imports if wildcard imports confuse analysis:

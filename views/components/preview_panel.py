@@ -64,6 +64,20 @@ class PreviewPanel(ctk.CTkFrame):
         self.preview_text.pack(side="left", fill="both", expand=True)
         self.preview_text.configure(font=("Courier New", 12))
     
+    def _truncate_text(self, value, max_length=20):
+        """Truncate text if it exceeds the max length, adding '...' at the end."""
+        value = str(value)
+        if len(value) > max_length:
+            return value[:max_length] + "..."
+        return value
+
+    def _format_dataframe(self, df, max_length=20):
+        """Apply truncation to all text values in the DataFrame."""
+        try:
+            return df.map(lambda x: self._truncate_text(x, max_length))
+        except Exception:
+            return df.applymap(lambda x: self._truncate_text(x, max_length))
+
     def update_preview(self, df=None, text=None, file_path=None):
         """Update the preview content
         
@@ -83,7 +97,8 @@ class PreviewPanel(ctk.CTkFrame):
         self.preview_text.delete("1.0", "end")
         
         if df is not None and isinstance(df, pd.DataFrame):
-            preview_text = df.to_string(index=False)
+            df_trunc = self._format_dataframe(df, max_length=20)
+            preview_text = df_trunc.to_string(index=False)
             self.preview_text.insert("end", preview_text)
         elif text is not None:
             self.preview_text.insert("end", text)
@@ -127,9 +142,6 @@ class PreviewPanel(ctk.CTkFrame):
         self.title_label.configure(text_color=fg)
         self.file_path_label.configure(text_color=AppColors.MEDIUM_GRAY)
         # Update text widget colors and font (monospaced)
-        self.preview_text.configure(fg_color=bg, text_color=fg, font=("Courier New", 10))
-        # Update scrollbar colors for theme
-        self.y_scrollbar.configure(fg_color=TkinterDialogStyles.CANVAS_BG)
-        self.x_scrollbar.configure(fg_color=TkinterDialogStyles.CANVAS_BG)
+        self.preview_text.configure(fg_color=bg, text_color=fg, font=("Courier New", 12))
         # Store updated bg_color
         self.bg_color = bg

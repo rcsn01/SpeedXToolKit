@@ -57,7 +57,7 @@ class AppFonts:
     # Font configurations as tuples: (family, size, weight)
     # Edit sizes (second number) to make text larger/smaller
     # Edit weight ("bold", "normal", "italic") to change text appearance
-    TITLE = (FAMILY, 30, "bold")        # Large header text (e.g., "SpeedXToolKit" logo)
+    TITLE = (FAMILY, 30, "italic", "bold")      # Large header text, slightly slanted
     SUBTITLE = (FAMILY, 18, "bold")     # Section headers
     BODY = (FAMILY, 12)                 # Normal text, buttons, labels
     BODY_LARGE = (FAMILY, 16, "italic") # Large body text
@@ -268,8 +268,8 @@ class AppConfig:
     """Application-wide configuration constants"""
     
     # Edit these to change basic app settings
-    VERSION = "3.4"                    # App version (displayed in UI)
-    TITLE = "SpeedXToolKit"            # Window title
+    VERSION = "3.5"                    # App version (displayed in UI)
+    TITLE = "Pearl "                    # Window title
     WINDOW_SIZE = "1280x780"           # Default window size (WIDTHxHEIGHT)
     APPEARANCE_MODE = "light"          # Default theme: "light", "dark", or "system"
     COLOR_THEME = "blue"               # CustomTkinter theme: "blue", "green", "dark-blue"

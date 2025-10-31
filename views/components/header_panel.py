@@ -33,7 +33,7 @@ class HeaderPanel(ctk.CTkFrame):
             text_color=AppColors.BLACK, 
             font=AppFonts.TITLE
         )
-        self.title_label.pack(side="left", padx=(10, 6), pady=8)
+        self.title_label.pack(side="left", padx=(20, 10), pady=8)
 
         # Small demo notice to the right of the title
         self.demo_label = ctk.CTkLabel(
