@@ -1,6 +1,6 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
 from tkinter.simpledialog import askinteger, askstring
 from openpyxl import load_workbook
 import xlwt
@@ -8,6 +8,7 @@ import os
 import tempfile
 import csv
 import chardet
+from styles import TkinterDialogStyles
 
 # Helper to deduplicate header names (Name, Name (1), Name (2) ...)
 def _dedupe_headers(raw_headers):
@@ -148,36 +149,36 @@ def load_file_view(file_path):
             messagebox.showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
             return None, None, None
 
-        root = tk.Tk()
+        root = ctk.CTk()
         root.title("Header Row Preview")
-        root.geometry("1000x700")
+        root.geometry("1200x700")
+        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         df_truncated = format_dataframe(df)
 
         # Create frame with scrollbar
-        frame = tk.Frame(root)
+        frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         frame.pack(pady=5, padx=5, fill="both", expand=True)
 
-        scrollbar = tk.Scrollbar(frame)
-        scrollbar.pack(side="right", fill="y")
-        # Added horizontal scrollbar
-        x_scrollbar = tk.Scrollbar(frame, orient="horizontal")
-        x_scrollbar.pack(side="bottom", fill="x")
-
-        text_widget = tk.Text(frame, wrap="none", height=20, width=80, yscrollcommand=scrollbar.set, xscrollcommand=x_scrollbar.set)
-        text_widget.insert("1.0", df_truncated.to_string(index=True))
-        text_widget.config(state="disabled")
+        # Use CTkTextbox with monospaced font for better alignment
+        text_widget = ctk.CTkTextbox(frame, wrap="none", height=400, width=1100,
+                                      fg_color=TkinterDialogStyles.CANVAS_BG, 
+                                      text_color=TkinterDialogStyles.LABEL_FG,
+                                      font=("Courier New", 10))
+        
+        # Format with better alignment - show first 50 rows
+        df_display = df.head(50)
+        text_widget.insert("1.0", df_display.to_string(index=True, max_colwidth=15))
+        text_widget.configure(state="disabled")
         text_widget.pack(side="left", fill="both", expand=True)
 
-        scrollbar.config(command=text_widget.yview)
-        x_scrollbar.config(command=text_widget.xview)
-
         # Header selection
-        header_frame = tk.Frame(root)
+        header_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         header_frame.pack(pady=5)
 
-        tk.Label(header_frame, text="Header Row:").grid(row=0, column=0, padx=5, sticky="w")
-        header_input = tk.Entry(header_frame, width=5)
+        ctk.CTkLabel(header_frame, text="Header Row:", 
+                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+        header_input = ctk.CTkEntry(header_frame, width=50)
         header_input.insert(0, str(header_row))
         header_input.grid(row=0, column=1, padx=5, sticky="w")
 
@@ -201,11 +202,11 @@ def load_file_view(file_path):
             root.destroy()
 
         # Buttons
-        button_frame = tk.Frame(root)
+        button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=10)
 
-        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 

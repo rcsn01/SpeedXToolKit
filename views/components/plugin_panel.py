@@ -2,12 +2,15 @@ import customtkinter as ctk
 from tkinter import messagebox, Listbox, END
 from controllers.processing_controller import show_plugins
 import pandas as pd
+from styles import AppColors, AppFonts, ButtonStyles, ListboxStyles
 
 
 class PluginPanel(ctk.CTkFrame):
     """Plugin management panel with list and controls"""
     
-    def __init__(self, parent, controller, bg_color="#FFFFFF"):
+    def __init__(self, parent, controller, bg_color=None):
+        if bg_color is None:
+            bg_color = AppColors.LIGHT_BLUE
         super().__init__(parent, fg_color=bg_color)
         self.controller = controller
         self.bg_color = bg_color
@@ -21,8 +24,8 @@ class PluginPanel(ctk.CTkFrame):
         self.plugins_label = ctk.CTkLabel(
             self, 
             text="Plugins:", 
-            text_color="black",
-            font=("Arial", 18, "bold")
+            text_color=AppColors.BLACK,
+            font=AppFonts.SUBTITLE
         )
         self.plugins_label.pack(fill='x', pady=(8, 4))
         
@@ -61,42 +64,34 @@ class PluginPanel(ctk.CTkFrame):
             except Exception:
                 display_items.append(str(p))
         
-        # Create listbox (using standard tkinter Listbox as CTk doesn't have one)
-        self.plugins_listbox = Listbox(self.plugins_frame, height=5)
+        # Create listbox using centralized ListboxStyles
+        self.plugins_listbox = Listbox(
+            self.plugins_frame, 
+            **ListboxStyles.PLUGIN_LIST
+        )
         for item in display_items:
             self.plugins_listbox.insert(END, item)
         self.plugins_listbox.pack(fill='x')
     
     def _create_plugin_buttons(self):
         """Create Apply and Refresh buttons"""
-        btn_frame = ctk.CTkFrame(self.plugins_frame, fg_color=self.bg_color)
-        btn_frame.pack(pady=4)
+        # Use centralized colors for button frame
+        self.btn_frame = ctk.CTkFrame(self.plugins_frame, fg_color=AppColors.LIGHT_BLUE)
+        self.btn_frame.pack(pady=4)
         
         self.apply_btn = ctk.CTkButton(
-            btn_frame, 
+            self.btn_frame, 
             text="Apply", 
             command=self._on_apply_plugin,
-            width=70,
-            height=30,
-            corner_radius=8,
-            fg_color="white",
-            hover_color="#f0f0f0",
-            text_color="black",
-            font=("Arial", 11)
+            **ButtonStyles.PLUGIN
         )
         self.apply_btn.pack(side='left', padx=4)
         
         self.refresh_btn = ctk.CTkButton(
-            btn_frame, 
+            self.btn_frame, 
             text="Refresh", 
             command=self._on_refresh_plugins,
-            width=70,
-            height=30,
-            corner_radius=8,
-            fg_color="white",
-            hover_color="#f0f0f0",
-            text_color="black",
-            font=("Arial", 11)
+            **ButtonStyles.PLUGIN
         )
         self.refresh_btn.pack(side='left', padx=4)
     
@@ -105,9 +100,41 @@ class PluginPanel(ctk.CTkFrame):
         self.no_plugins_label = ctk.CTkLabel(
             self.plugins_frame, 
             text="No plugins", 
-            text_color="#777777"
+            text_color=AppColors.MEDIUM_GRAY
         )
         self.no_plugins_label.pack(fill='x')
+    
+    def refresh_colors(self):
+        """Refresh colors when theme changes"""
+        self.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.plugins_label.configure(text_color=AppColors.BLACK)
+        self.plugins_frame.configure(fg_color=AppColors.LIGHT_BLUE)
+        
+        # Refresh button frame if it exists
+        if hasattr(self, 'btn_frame') and self.btn_frame:
+            self.btn_frame.configure(fg_color=AppColors.LIGHT_BLUE)
+        
+        # Refresh listbox colors if it exists using centralized styles
+        if hasattr(self, 'plugins_listbox') and self.plugins_listbox:
+            self.plugins_listbox.config(**ListboxStyles.PLUGIN_LIST)
+        
+        # Refresh button colors if they exist
+        if hasattr(self, 'apply_btn') and self.apply_btn:
+            self.apply_btn.configure(
+                fg_color=ButtonStyles.PLUGIN["fg_color"],
+                hover_color=ButtonStyles.PLUGIN["hover_color"],
+                text_color=ButtonStyles.PLUGIN["text_color"]
+            )
+        
+        if hasattr(self, 'refresh_btn') and self.refresh_btn:
+            self.refresh_btn.configure(
+                fg_color=ButtonStyles.PLUGIN["fg_color"],
+                hover_color=ButtonStyles.PLUGIN["hover_color"],
+                text_color=ButtonStyles.PLUGIN["text_color"]
+            )
+        
+        if self.no_plugins_label:
+            self.no_plugins_label.configure(text_color=AppColors.MEDIUM_GRAY)
     
     def _on_apply_plugin(self):
         """Handle apply plugin button click"""

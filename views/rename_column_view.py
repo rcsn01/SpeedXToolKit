@@ -1,32 +1,36 @@
 import pandas as pd
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
+from styles import TkinterDialogStyles
 
 def rename_column_view(df):
     """Allow the user to select a column from the DataFrame and rename it."""
     try:
-        root = tk.Tk()
+        root = ctk.CTk()
         root.title("Rename Column")
         root.geometry("600x200")
+        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         result = {"confirmed": False, "target_name": "", "new_name": ""}
 
         # Frame for selecting the column
-        select_frame = tk.Frame(root)
+        select_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         select_frame.pack(pady=10)
 
-        tk.Label(select_frame, text="Select Column to Rename").grid(row=0, column=0, padx=5, sticky="w")
+        ctk.CTkLabel(select_frame, text="Select Column to Rename", 
+                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
 
-        column_selector = ttk.Combobox(select_frame, values=list(df.columns), width=20)
+        column_selector = ctk.CTkComboBox(select_frame, values=list(df.columns), width=TkinterDialogStyles.INPUT_WIDTH * 8)
         column_selector.grid(row=0, column=1, padx=5, sticky="w")
         column_selector.set(df.columns[0])  # default selection
 
         # Frame for entering the new name
-        rename_frame = tk.Frame(root)
+        rename_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         rename_frame.pack(pady=10)
 
-        tk.Label(rename_frame, text="New Column Name").grid(row=0, column=0, padx=5, sticky="w")
-        new_name_entry = tk.Entry(rename_frame, width=20)
+        ctk.CTkLabel(rename_frame, text="New Column Name", 
+                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+        new_name_entry = ctk.CTkEntry(rename_frame, width=TkinterDialogStyles.INPUT_WIDTH * 8)
         new_name_entry.grid(row=0, column=1, padx=5, sticky="w")
 
         # Button actions
@@ -50,10 +54,10 @@ def rename_column_view(df):
             root.destroy()
 
         # Button Frame
-        button_frame = tk.Frame(root)
+        button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=20)
-        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 

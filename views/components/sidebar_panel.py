@@ -1,11 +1,15 @@
 import customtkinter as ctk
+from styles import ButtonStyles, PanelStyles, AppFonts, AppColors
 
 
 class SidebarPanel(ctk.CTkFrame):
     """Collapsible sidebar with transform buttons"""
     
-    def __init__(self, parent, controller, bg_color="#FFFFFF"):
-        super().__init__(parent, fg_color=bg_color, width=220)
+    def __init__(self, parent, controller, bg_color=None):
+        if bg_color is None:
+            bg_color = PanelStyles.SIDEBAR["fg_color"]
+            
+        super().__init__(parent, fg_color=bg_color, width=PanelStyles.SIDEBAR["width"])
         self.controller = controller
         self.bg_color = bg_color
         self.side_visible = True
@@ -22,8 +26,8 @@ class SidebarPanel(ctk.CTkFrame):
         # Create the actual side menu
         self.side_menu = ctk.CTkFrame(
             self.left_container, 
-            width=200,
-            fg_color=self.bg_color
+            width=PanelStyles.SIDEBAR_MENU["width"],
+            fg_color=PanelStyles.SIDEBAR_MENU["fg_color"]
         )
         self.side_menu.grid(row=0, column=0, sticky='ns', padx=6, pady=6)
         
@@ -36,8 +40,8 @@ class SidebarPanel(ctk.CTkFrame):
         self.transform_label = ctk.CTkLabel(
             self.side_menu, 
             text="Transform:", 
-            text_color="black",
-            font=("Arial", 18, "bold")
+            text_color=AppColors.BLACK,
+            font=AppFonts.SUBTITLE
         )
         self.transform_label.pack(fill='x', pady=(8, 4))
         
@@ -48,10 +52,8 @@ class SidebarPanel(ctk.CTkFrame):
         self.toggle_btn = ctk.CTkButton(
             self.left_container, 
             text="≡", 
-            width=10,
             command=self.toggle_side_panel,
-            fg_color="#ffffff",
-            hover_color="#b1b1b1"
+            **ButtonStyles.TOGGLE_ALT
         )
         self.toggle_btn.grid(row=0, column=1, sticky='ns', padx=(4, 8), pady=6)
         
@@ -70,19 +72,13 @@ class SidebarPanel(ctk.CTkFrame):
             ("Custom Code", self.controller.custom_code),
             ("Remove Empty Rows", self.controller.remove_empty_rows),
         ]
-        # Match toolbar button styling: uniform size, white background with subtle hover
+        # Use centralized sidebar button style
         for text, cmd in btn_specs:
             btn = ctk.CTkButton(
                 self.side_menu,
                 text=text,
                 command=cmd,
-                width=120,
-                height=30,
-                corner_radius=8,
-                fg_color="white",
-                hover_color="#f0f0f0",
-                text_color="black",
-                font=("Arial", 11)
+                **ButtonStyles.SIDEBAR
             )
             btn.pack(fill='x', pady=6, padx=6)
     
@@ -108,13 +104,8 @@ class SidebarPanel(ctk.CTkFrame):
         self.toggle_btn = ctk.CTkButton(
             self.left_container,
             text="≡",
-            width=30,
-            height=30,
             command=self.toggle_side_panel,
-            fg_color="#ffffff",
-            hover_color="#c0c0c0",
-            corner_radius=6,
-            font=("Arial", 11)
+            **ButtonStyles.TOGGLE
         )
         self.toggle_btn.grid(row=0, column=1, sticky='ns', padx=(4, 8), pady=6)
     

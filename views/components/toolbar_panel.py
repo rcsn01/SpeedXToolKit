@@ -1,11 +1,20 @@
 import customtkinter as ctk
+from styles import ButtonStyles, PanelStyles
 
 
 class ToolbarPanel(ctk.CTkFrame):
     """Top toolbar with main action buttons"""
     
-    def __init__(self, parent, controller, bg_color="#FFFFFF"):
-        super().__init__(parent, fg_color=bg_color, height=50, corner_radius=0)
+    def __init__(self, parent, controller, bg_color=None):
+        if bg_color is None:
+            bg_color = PanelStyles.TOOLBAR["fg_color"]
+            
+        super().__init__(
+            parent, 
+            fg_color=bg_color, 
+            height=PanelStyles.TOOLBAR["height"], 
+            corner_radius=PanelStyles.TOOLBAR["corner_radius"]
+        )
         self.controller = controller
         self.bg_color = bg_color
         self._setup_ui()
@@ -24,20 +33,14 @@ class ToolbarPanel(ctk.CTkFrame):
             ("Save Plugin", self._on_save_plugin),
         ]
         
-        # Create buttons with custom styling (no shadow)
+        # Create buttons using centralized button style
         self.buttons = {}
         for text, command in button_configs:
             btn = ctk.CTkButton(
                 self,
                 text=text,
                 command=command,
-                width=100,
-                height=30,
-                corner_radius=8,
-                fg_color="white",
-                hover_color="#f0f0f0",
-                text_color="black",
-                font=("Arial", 11)
+                **ButtonStyles.DEFAULT  # Use centralized style
             )
             btn.pack(side="left", padx=6, pady=8)
             self.buttons[text.lower().replace(" ", "_")] = btn

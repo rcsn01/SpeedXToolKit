@@ -1,12 +1,14 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
+from styles import TkinterDialogStyles
 
 def produce_output_view(df):
     try:
         """Display all columns with checkboxes and allow user to select which ones to keep."""
-        root = tk.Tk()  # Or use tk.Toplevel() if this is a popup in an existing Tkinter app
+        root = ctk.CTk()  # Or use ctk.CTkToplevel() if this is a popup in an existing Tkinter app
         root.title("Output Selection")
         root.geometry("500x500")
+        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -27,15 +29,16 @@ def produce_output_view(df):
             root.destroy()
 
         # Instruction label
-        tk.Label(root, text="Select columns to be included in output:", 
-                font=("Arial", 12, "bold")).pack(pady=10)
+        ctk.CTkLabel(root, text="Select columns to be included in output:", 
+                font=TkinterDialogStyles.LABEL_FONT, fg_color=TkinterDialogStyles.DIALOG_BG, 
+                text_color=TkinterDialogStyles.LABEL_FG).pack(pady=10)
 
         # Scrollable frame setup
-        checkbox_frame = tk.Frame(root)
+        checkbox_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         checkbox_frame.pack(fill=tk.BOTH, expand=True, padx=10)
-        canvas = tk.Canvas(checkbox_frame)
-        scrollbar = ttk.Scrollbar(checkbox_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas)
+        canvas = tk.Canvas(checkbox_frame, fg_color=TkinterDialogStyles.CANVAS_BG)
+        scrollbar = ctk.CTkScrollbar(checkbox_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ctk.CTkFrame(canvas, fg_color=TkinterDialogStyles.FRAME_BG)
         scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
@@ -47,16 +50,17 @@ def produce_output_view(df):
 
         # Add checkboxes for each column (each BooleanVar now explicitly attached to `root`)
         for col in df.columns:
-            var = tk.BooleanVar(master=root)  # explicitly bind to root
-            cb = tk.Checkbutton(scrollable_frame, text=col, variable=var, anchor='w', padx=10)
-            cb.pack(fill='x', anchor='w')
+            var = ctk.BooleanVar(master=root)  # explicitly bind to root
+            cb = ctk.CTkCheckBox(scrollable_frame, text=col, variable=var,
+                              text_color=TkinterDialogStyles.CHECKBOX_FG)
+            cb.pack(fill='x', anchor='w', pady=2)
             checkbox_vars[col] = var
 
         # Confirm/Cancel buttons
-        button_frame = tk.Frame(root)
+        button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=20)
-        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 

@@ -1,13 +1,22 @@
 import customtkinter as ctk
 from tkinter import PhotoImage
 from models.path_utils import get_resource_path
+from styles import AppColors, AppFonts, PanelStyles, AppConfig
 
 
 class HeaderPanel(ctk.CTkFrame):
     """Header panel with logo, title, and version"""
     
-    def __init__(self, parent, title="SpeedXToolKit", version="testing", bg_color="#abd2ff"):
-        super().__init__(parent, fg_color=bg_color, height=50)
+    def __init__(self, parent, title=None, version=None, bg_color=None):
+        # Use centralized config as defaults
+        if title is None:
+            title = AppConfig.TITLE
+        if version is None:
+            version = AppConfig.VERSION
+        if bg_color is None:
+            bg_color = PanelStyles.HEADER["fg_color"]
+            
+        super().__init__(parent, fg_color=bg_color, height=PanelStyles.HEADER["height"])
         self.title = title
         self.version = version
         self.bg_color = bg_color
@@ -21,8 +30,8 @@ class HeaderPanel(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(
             self, 
             text=self.title, 
-            text_color="#000000", 
-            font=("Arial", 30, "bold")
+            text_color=AppColors.BLACK, 
+            font=AppFonts.TITLE
         )
         self.title_label.pack(side="left", padx=(10, 6), pady=8)
 
@@ -30,8 +39,8 @@ class HeaderPanel(ctk.CTkFrame):
         self.demo_label = ctk.CTkLabel(
             self,
             text="    for demonstration purposes only",
-            text_color="#949494",
-            font=("Arial", 16, "italic")
+            text_color=AppColors.MEDIUM_GRAY,
+            font=AppFonts.BODY_LARGE
         )
         # pack to the left so it appears immediately after the title
         self.demo_label.pack(side="left", padx=(0, 6), pady=14)
@@ -40,8 +49,8 @@ class HeaderPanel(ctk.CTkFrame):
         self.version_label = ctk.CTkLabel(
             self, 
             text=self.version, 
-            text_color="#000000", 
-            font=("Arial", 10)
+            text_color=AppColors.BLACK, 
+            font=AppFonts.SMALL
         )
         self.version_label.pack(side="right", padx=10, pady=8)
         

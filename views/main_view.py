@@ -7,20 +7,8 @@ from controllers.processing_controller import (
     produce_output, keep_column, custom_code, remove_empty_rows
 )
 from .components import HeaderPanel, ToolbarPanel, SidebarPanel, PreviewPanel
-
-# Global variables
-# Define colour constants used in the app (SpeeDX colors)
-COLOURS = {
-    "blue_rgb": (32, 165, 221), #SDX Blue
-    "purple_rgb": (89, 48, 133), #SDX Purple
-    "white_rgb": (255, 255, 255), # White in RGB
-    "blue_hex": "#0272BA", #SDX Blue
-    "purple_hex": "#593085", #SDX Purple
-    "white_hex": "#FFFFFF", # White in hex
-    "light_blue_hex": "#abd2ff" # Light blue for header
-}
-# Application version
-APP_VERSION = "3.4"
+from .settings_view import SettingsDialog
+from styles import AppColors, PanelStyles, AppConfig, ButtonStyles
 
 # Main application view using component-based architecture
 class MainView(ctk.CTkFrame):
@@ -38,21 +26,75 @@ class MainView(ctk.CTkFrame):
     def _setup_ui(self):
         """Setup the main UI using components"""
         # Header panel
-        self.header = HeaderPanel(self, title="SpeeDxToolKit", version=APP_VERSION, bg_color=COLOURS["white_hex"])
+        self.header = HeaderPanel(self, title=AppConfig.TITLE, version=AppConfig.VERSION, bg_color=AppColors.WHITE)
         
         # Toolbar panel
-        self.toolbar = ToolbarPanel(self, controller=self, bg_color=COLOURS["light_blue_hex"])
+        self.toolbar = ToolbarPanel(self, controller=self, bg_color=AppColors.LIGHT_BLUE)
         
         # Sidebar panel
-        self.sidebar = SidebarPanel(self, controller=self, bg_color=COLOURS["light_blue_hex"])
+        self.sidebar = SidebarPanel(self, controller=self, bg_color=AppColors.LIGHT_BLUE)
         
         # Preview panel
-        self.preview = PreviewPanel(self, bg_color=COLOURS["white_hex"])
+        self.preview = PreviewPanel(self, bg_color=AppColors.WHITE)
 
     # ================= Data Functions =================
     def settings(self):
-        """Open settings dialog (placeholder for now)."""
-        messagebox.showinfo("Settings", "Settings dialog coming soon!")
+        """Open settings dialog"""
+        dialog = SettingsDialog(self.winfo_toplevel(), on_apply_callback=self._on_settings_applied)
+        self.wait_window(dialog)
+    
+    def _on_settings_applied(self, settings_result):
+        """Handle settings changes"""
+        if settings_result:
+            # Refresh UI components to apply new colors
+            self._refresh_ui_colors()
+    
+    def _refresh_ui_colors(self):
+        """Refresh all UI components to apply new colors from styles"""
+        # Update header
+        self.header.configure(fg_color=AppColors.WHITE)
+        self.header.title_label.configure(text_color=AppColors.BLACK)
+        self.header.version_label.configure(text_color=AppColors.BLACK)
+        self.header.demo_label.configure(text_color=AppColors.MEDIUM_GRAY)
+        
+        # Update toolbar
+        self.toolbar.configure(fg_color=AppColors.LIGHT_BLUE)
+        # Update all toolbar buttons
+        for btn_name, btn in self.toolbar.buttons.items():
+            btn.configure(
+                fg_color=ButtonStyles.DEFAULT["fg_color"],
+                hover_color=ButtonStyles.DEFAULT["hover_color"],
+                text_color=ButtonStyles.DEFAULT["text_color"]
+            )
+        
+        # Update sidebar
+        self.sidebar.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.sidebar.left_container.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.sidebar.side_menu.configure(fg_color=AppColors.LIGHT_BLUE)
+        self.sidebar.transform_label.configure(text_color=AppColors.BLACK)
+        
+        # Update sidebar toggle button
+        if hasattr(self.sidebar, 'toggle_btn'):
+            self.sidebar.toggle_btn.configure(
+                fg_color=ButtonStyles.TOGGLE_ALT["fg_color"],
+                hover_color=ButtonStyles.TOGGLE_ALT["hover_color"]
+            )
+        
+        # Update all sidebar transform buttons
+        for widget in self.sidebar.side_menu.winfo_children():
+            if isinstance(widget, ctk.CTkButton) and widget != self.sidebar.toggle_btn:
+                widget.configure(
+                    fg_color=ButtonStyles.SIDEBAR["fg_color"],
+                    hover_color=ButtonStyles.SIDEBAR["hover_color"],
+                    text_color=ButtonStyles.SIDEBAR["text_color"]
+                )
+        
+        # Update plugin panel
+        if hasattr(self.sidebar, 'plugin_panel'):
+            self.sidebar.plugin_panel.refresh_colors()
+        
+        # Update preview panel
+        self.preview.refresh_colors()
 
     # Load an Excel file and display it in preview
     def load_file(self):

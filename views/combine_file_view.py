@@ -1,7 +1,8 @@
-import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+import customtkinter as ctk
+from tkinter import messagebox, filedialog
 import pandas as pd
 import csv
+from styles import TkinterDialogStyles
 
 def combine_file_view():
     try:
@@ -65,9 +66,10 @@ def combine_file_view():
             return None
 
         """Display all columns with checkboxes and allow user to select which ones to keep."""
-        root = tk.Tk()  # Or use tk.Toplevel() if embedded
+        root = ctk.CTk()
         root.title("Combine Files - Select Join Columns")
         root.geometry("520x560")
+        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -87,42 +89,35 @@ def combine_file_view():
             root.destroy()
 
         # File info display
-        info_frame = tk.Frame(root)
+        info_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         info_frame.pack(fill='x', padx=10, pady=(10,4))
-        tk.Label(info_frame, text=f"File 1: {file1}", anchor='w', wraplength=480, justify='left').pack(fill='x')
-        tk.Label(info_frame, text=f"File 2: {file2}", anchor='w', wraplength=480, justify='left').pack(fill='x', pady=(2,6))
+        ctk.CTkLabel(info_frame, text=f"File 1: {file1}", anchor='w', wraplength=480, justify='left',
+                     text_color=TkinterDialogStyles.LABEL_FG).pack(fill='x')
+        ctk.CTkLabel(info_frame, text=f"File 2: {file2}", anchor='w', wraplength=480, justify='left',
+                     text_color=TkinterDialogStyles.LABEL_FG).pack(fill='x', pady=(2,6))
 
         # Instruction label
-        tk.Label(root, text="Select the columns to merge on (only common columns listed):", 
-                 font=("Arial", 11, "bold"), wraplength=480, justify='left').pack(pady=4, padx=10, anchor='w')
+        ctk.CTkLabel(root, text="Select the columns to merge on (only common columns listed):", 
+                     font=TkinterDialogStyles.LABEL_FONT, wraplength=480, justify='left',
+                     text_color=TkinterDialogStyles.LABEL_FG).pack(pady=4, padx=10, anchor='w')
 
         # Scrollable frame setup
-        checkbox_frame = tk.Frame(root)
-        checkbox_frame.pack(fill=tk.BOTH, expand=True, padx=10)
-        canvas = tk.Canvas(checkbox_frame)
-        scrollbar = ttk.Scrollbar(checkbox_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas)
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        scrollable_frame = ctk.CTkScrollableFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
+        scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Add checkboxes for each column (each BooleanVar now explicitly attached to `root`)
+        # Add checkboxes for each column
         for col in common_cols:
-            var = tk.BooleanVar(master=root)
-            cb = tk.Checkbutton(scrollable_frame, text=col, variable=var, anchor='w', padx=10)
-            cb.pack(fill='x', anchor='w')
+            var = ctk.BooleanVar(master=root)
+            cb = ctk.CTkCheckBox(scrollable_frame, text=col, variable=var, 
+                                text_color=TkinterDialogStyles.CHECKBOX_FG)
+            cb.pack(fill='x', anchor='w', pady=2)
             checkbox_vars[col] = var
 
         # Confirm/Cancel buttons
-        button_frame = tk.Frame(root)
+        button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=20)
-        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_confirm).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 

@@ -2,12 +2,15 @@ import customtkinter as ctk
 from tkinter import Text, Scrollbar
 import pandas as pd
 import os
+from styles import AppColors, AppFonts, PanelStyles
 
 
 class PreviewPanel(ctk.CTkFrame):
     """Data preview panel with scrollable text widget"""
     
-    def __init__(self, parent, bg_color="#FFFFFF"):
+    def __init__(self, parent, bg_color=None):
+        if bg_color is None:
+            bg_color = PanelStyles.PREVIEW["fg_color"]
         super().__init__(parent, fg_color=bg_color)
         self.bg_color = bg_color
         self._setup_ui()
@@ -24,8 +27,8 @@ class PreviewPanel(ctk.CTkFrame):
         self.title_label = ctk.CTkLabel(
             self.title_frame,
             text="File Preview",
-            text_color="black",
-            font=("Arial", 11, "bold")
+            text_color=AppColors.BLACK,
+            font=AppFonts.BODY
         )
         self.title_label.pack(side="left")
         
@@ -33,8 +36,8 @@ class PreviewPanel(ctk.CTkFrame):
         self.file_path_label = ctk.CTkLabel(
             self.title_frame,
             text="",
-            text_color="#555555",
-            font=("Arial", 9)
+            text_color=AppColors.MEDIUM_GRAY,
+            font=AppFonts.SMALL
         )
         self.file_path_label.pack(side="left", padx=(10, 0))
 
@@ -63,12 +66,16 @@ class PreviewPanel(ctk.CTkFrame):
     
     def _create_text_widget(self):
         """Create the main text widget for data preview"""
+        # Determine text colors based on current theme
+        bg_color = AppColors.WHITE
+        fg_color = AppColors.BLACK
+        
         self.preview_text = Text(
             self.text_scroll_frame,
             height=45,
             width=125,
-            bg=self.bg_color,
-            fg="black",
+            bg=bg_color,
+            fg=fg_color,
             highlightthickness=0,
             yscrollcommand=self.y_scrollbar.set,
             xscrollcommand=self.x_scrollbar.set,
@@ -125,3 +132,23 @@ class PreviewPanel(ctk.CTkFrame):
         self.config(bg=color)
         self.text_scroll_frame.config(bg=color)
         self.preview_text.config(bg=color)
+    
+    def refresh_colors(self):
+        """Refresh colors when theme changes"""
+        # Update panel backgrounds
+        self.configure(fg_color=AppColors.WHITE)
+        self.title_frame.configure(fg_color=AppColors.WHITE)
+        self.text_scroll_frame.configure(fg_color=AppColors.WHITE)
+        
+        # Update labels
+        self.title_label.configure(text_color=AppColors.BLACK)
+        self.file_path_label.configure(text_color=AppColors.MEDIUM_GRAY)
+        
+        # Update text widget colors
+        self.preview_text.config(
+            bg=AppColors.WHITE,
+            fg=AppColors.BLACK
+        )
+        
+        # Store updated bg_color
+        self.bg_color = AppColors.WHITE

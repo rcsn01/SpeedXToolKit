@@ -1,36 +1,41 @@
+import customtkinter as ctk
 import pandas as pd
-import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
 from models.pivot_table_model import *
 from models.delta_calculation_model import *
+from styles import TkinterDialogStyles
 
 def delta_calculation_view(df):
     """Load Excel file and allow the user to confirm the header row."""
     try:
-        root = tk.Tk()
+        root = ctk.CTk()
         root.title("Delta Calculation")
         root.geometry("300x200")
+        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         # Create the main frame
-        first_frame = tk.Frame(root)
+        first_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         first_frame.pack(pady=5)
         
         # Add title and dropdown for first column
-        tk.Label(first_frame, text="First Column").grid(row=0, column=0, padx=5, sticky="w")
-        var1 = ttk.Combobox(first_frame, values=list(df.columns), width=15, state="readonly")
+        ctk.CTkLabel(first_frame, text="First Column", fg_color=TkinterDialogStyles.FRAME_BG, 
+                 text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+        var1 = ctk.CTkComboBox(first_frame, values=list(df.columns), width=15, state="readonly")
         var1.grid(row=0, column=1, padx=5, sticky="w")
 
         # Add title and dropdown for second column
-        tk.Label(first_frame, text="Second Column").grid(row=1, column=0, padx=5, sticky="w")
-        var2 = ttk.Combobox(first_frame, values=list(df.columns), width=15, state="readonly")
+        ctk.CTkLabel(first_frame, text="Second Column", fg_color=TkinterDialogStyles.FRAME_BG, 
+                 text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=1, column=0, padx=5, sticky="w")
+        var2 = ctk.CTkComboBox(first_frame, values=list(df.columns), width=15, state="readonly")
         var2.grid(row=1, column=1, padx=5, sticky="w")
 
         # Add title and input field for delta value
-        tk.Label(first_frame, text="Difference in value").grid(row=2, column=0, padx=5, sticky="w")
-        var3 = tk.Entry(first_frame, width=15)
+        ctk.CTkLabel(first_frame, text="Difference in value", fg_color=TkinterDialogStyles.FRAME_BG, 
+                 text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=2, column=0, padx=5, sticky="w")
+        var3 = ctk.CTkEntry(first_frame, width=15)
         var3.insert(0, '')  # Initialize the entry with empty string
         var3.grid(row=2, column=1, padx=5, sticky="w")
 
@@ -55,11 +60,11 @@ def delta_calculation_view(df):
             root.destroy()
 
         # Buttons
-        button_frame = tk.Frame(root)
+        button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=10)
 
-        ttk.Button(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ttk.Button(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
 
         # Run the window
         root.mainloop()

@@ -1,11 +1,11 @@
-import tkinter as tk
-from tkinter import ttk
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 import os
 import shutil
 import pickle
 import json
-from tkinter import filedialog, messagebox
 from models.path_utils import *
+from styles import TkinterDialogStyles
 
 def manage_plugin_view(tuple_list):
     """Display a GUI to select one tuple from a list of tuples."""
@@ -30,32 +30,41 @@ def manage_plugin_view(tuple_list):
                     edit_window = tk.Toplevel(root)
                     edit_window.title(f"Edit Plugin: {plugin_name}")
                     edit_window.geometry("900x600")
+                    edit_window.configure(bg=TkinterDialogStyles.DIALOG_BG)
                     
                     # Plugin Name (read-only display)
-                    name_frame = tk.Frame(edit_window)
+                    name_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
                     name_frame.pack(fill="x", padx=10, pady=5)
-                    tk.Label(name_frame, text="Plugin Name:", width=15, anchor="w", font=('TkDefaultFont', 9, 'bold')).pack(side="left")
-                    tk.Label(name_frame, text=plugin_data.get('name', 'Unknown'), anchor="w").pack(side="left")
+                    tk.Label(name_frame, text="Plugin Name:", width=15, anchor="w", 
+                            font=('TkDefaultFont', 9, 'bold'), bg=TkinterDialogStyles.FRAME_BG, 
+                            fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
+                    tk.Label(name_frame, text=plugin_data.get('name', 'Unknown'), anchor="w",
+                            bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
                     
                     # Metadata (read-only display)
-                    metadata_frame = tk.Frame(edit_window)
+                    metadata_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
                     metadata_frame.pack(fill="x", padx=10, pady=5)
-                    tk.Label(metadata_frame, text="Metadata:", width=15, anchor="w", font=('TkDefaultFont', 9, 'bold')).pack(side="left")
-                    tk.Label(metadata_frame, text=plugin_data.get('metadata', 'None'), anchor="w").pack(side="left")
+                    tk.Label(metadata_frame, text="Metadata:", width=15, anchor="w", 
+                            font=('TkDefaultFont', 9, 'bold'), bg=TkinterDialogStyles.FRAME_BG, 
+                            fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
+                    tk.Label(metadata_frame, text=plugin_data.get('metadata', 'None'), anchor="w",
+                            bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
                     
                     # Separator
                     ttk.Separator(edit_window, orient='horizontal').pack(fill='x', padx=10, pady=10)
                     
                     # Functions header
-                    tk.Label(edit_window, text="Edit Function Parameters:", font=('TkDefaultFont', 10, 'bold')).pack(padx=10, pady=(5, 10), anchor="w")
+                    tk.Label(edit_window, text="Edit Function Parameters:", 
+                            font=('TkDefaultFont', 10, 'bold'), bg=TkinterDialogStyles.DIALOG_BG, 
+                            fg=TkinterDialogStyles.LABEL_FG).pack(padx=10, pady=(5, 10), anchor="w")
                     
                     # Create scrollable frame for functions
-                    canvas_frame = tk.Frame(edit_window)
+                    canvas_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
                     canvas_frame.pack(fill="both", expand=True, padx=10, pady=5)
                     
-                    canvas = tk.Canvas(canvas_frame)
+                    canvas = tk.Canvas(canvas_frame, bg=TkinterDialogStyles.CANVAS_BG)
                     scrollbar = tk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
-                    scrollable_frame = tk.Frame(canvas)
+                    scrollable_frame = tk.Frame(canvas, bg=TkinterDialogStyles.FRAME_BG)
                     
                     scrollable_frame.bind(
                         "<Configure>",
@@ -79,7 +88,9 @@ def manage_plugin_view(tuple_list):
                             func_args = func[1:] if len(func) > 1 else []
                             
                             # Function container
-                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func_name}", padx=10, pady=10)
+                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func_name}", 
+                                                      padx=10, pady=10, bg=TkinterDialogStyles.FRAME_BG, 
+                                                      fg=TkinterDialogStyles.LABEL_FG)
                             func_frame.pack(fill="x", padx=5, pady=5)
                             
                             # Store function name
@@ -90,10 +101,11 @@ def manage_plugin_view(tuple_list):
                             
                             # Display each argument
                             for arg_idx, arg in enumerate(func_args):
-                                arg_frame = tk.Frame(func_frame)
+                                arg_frame = tk.Frame(func_frame, bg=TkinterDialogStyles.FRAME_BG)
                                 arg_frame.pack(fill="x", pady=3)
                                 
-                                tk.Label(arg_frame, text=f"Argument {arg_idx + 1}:", width=12, anchor="w").pack(side="left")
+                                tk.Label(arg_frame, text=f"Argument {arg_idx + 1}:", width=12, anchor="w",
+                                        bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
                                 
                                 # Insert the argument value (as JSON for complex types)
                                 try:
@@ -107,7 +119,8 @@ def manage_plugin_view(tuple_list):
                                 text_height = max(2, min(20, line_count))
                                 
                                 # Create text widget for the argument (supports multi-line)
-                                arg_text = tk.Text(arg_frame, height=text_height, wrap="word")
+                                arg_text = tk.Text(arg_frame, height=text_height, wrap="word",
+                                                  bg=TkinterDialogStyles.CANVAS_BG, fg=TkinterDialogStyles.LABEL_FG)
                                 arg_text.pack(side="left", fill="both", expand=True, padx=5)
                                 
                                 # Add scrollbar for text widget
@@ -121,9 +134,12 @@ def manage_plugin_view(tuple_list):
                                 function_widgets[-1]['args'].append(arg_text)
                         else:
                             # Handle non-list functions
-                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func}", padx=10, pady=10)
+                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func}", 
+                                                      padx=10, pady=10, bg=TkinterDialogStyles.FRAME_BG, 
+                                                      fg=TkinterDialogStyles.LABEL_FG)
                             func_frame.pack(fill="x", padx=5, pady=5)
-                            tk.Label(func_frame, text="(No editable parameters)", font=('TkDefaultFont', 8, 'italic')).pack()
+                            tk.Label(func_frame, text="(No editable parameters)", font=('TkDefaultFont', 8, 'italic'),
+                                    bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack()
                             function_widgets.append({
                                 'name': str(func),
                                 'args': []
@@ -173,13 +189,15 @@ def manage_plugin_view(tuple_list):
                             messagebox.showerror("Error", f"Failed to save plugin: {e}")
                     
                     # Buttons
-                    button_frame = tk.Frame(edit_window)
+                    button_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
                     button_frame.pack(pady=10)
                     
-                    save_btn = ttk.Button(button_frame, text="Save Changes", command=save_changes)
+                    save_btn = ttk.Button(button_frame, text="Save Changes", command=save_changes, 
+                                         padding=TkinterDialogStyles.BUTTON_PADDING)
                     save_btn.pack(side="left", padx=5)
                     
-                    cancel_btn = ttk.Button(button_frame, text="Cancel", command=edit_window.destroy)
+                    cancel_btn = ttk.Button(button_frame, text="Cancel", command=edit_window.destroy, 
+                                           padding=TkinterDialogStyles.BUTTON_PADDING)
                     cancel_btn.pack(side="left", padx=5)
                     
                 else:
@@ -232,35 +250,42 @@ def manage_plugin_view(tuple_list):
     # Create the main window
     root = tk.Tk()
     root.title("Manage Plugins")
+    root.configure(bg=TkinterDialogStyles.DIALOG_BG)
 
     # Create a label
     if tuple_list:
         label_text = "Select a plugin from the list:"
     else:
         label_text = "No plugins found. Use 'Add' to import a plugin:"
-    label = ttk.Label(root, text=label_text)
+    label = tk.Label(root, text=label_text, bg=TkinterDialogStyles.DIALOG_BG, 
+                    fg=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT)
     label.pack(pady=10)
 
     # Create a listbox with the names (first item of each tuple)
-    listbox = tk.Listbox(root, width=40, height=10)
+    listbox = tk.Listbox(root, width=40, height=10, bg=TkinterDialogStyles.CANVAS_BG, 
+                        fg=TkinterDialogStyles.LABEL_FG)
     for item in tuple_list:
         listbox.insert(tk.END, item[0])  # Insert just the name (first element)
     listbox.pack(pady=10, padx=10)
 
     # Create buttons
-    button_frame = tk.Frame(root)
+    button_frame = tk.Frame(root, bg=TkinterDialogStyles.FRAME_BG)
     button_frame.pack(pady=10)
 
-    edit_button = ttk.Button(button_frame, text="Edit", command=on_edit)
+    edit_button = ttk.Button(button_frame, text="Edit", command=on_edit, 
+                            padding=TkinterDialogStyles.BUTTON_PADDING)
     edit_button.grid(row=0, column=0, padx=5)
 
-    add_button = ttk.Button(button_frame, text="Import", command=on_add)
+    add_button = ttk.Button(button_frame, text="Import", command=on_add, 
+                           padding=TkinterDialogStyles.BUTTON_PADDING)
     add_button.grid(row=0, column=1, padx=5)
 
-    remove_button = ttk.Button(button_frame, text="Remove", command=on_remove)
+    remove_button = ttk.Button(button_frame, text="Remove", command=on_remove, 
+                              padding=TkinterDialogStyles.BUTTON_PADDING)
     remove_button.grid(row=0, column=2, padx=5)
 
-    close_button = ttk.Button(button_frame, text="Close", command=on_cancel)
+    close_button = ttk.Button(button_frame, text="Close", command=on_cancel, 
+                             padding=TkinterDialogStyles.BUTTON_PADDING)
     close_button.grid(row=0, column=3, padx=5)
 
     # Run the GUI
