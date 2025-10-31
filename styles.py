@@ -265,6 +265,83 @@ class PanelStyles:
 # Edit this section to change app settings, version, window size, defaults
 # ============================================================================
 class AppConfig:
+    @staticmethod
+    def load_appearance_mode():
+        """Load appearance mode.
+
+        Behavior:
+        - Prefer a user-writable config stored in the user's AppData (Windows) or home directory.
+        - When not present, fall back to a bundled config next to the code or inside the PyInstaller
+          onefile temp directory (sys._MEIPASS).
+        This makes the app work correctly when packaged with PyInstaller (onefile)
+        and still persist user changes.
+        """
+        import json, os, sys
+
+        # User config (writable) - prefer this for persistence
+        user_dir = os.getenv("APPDATA") or os.path.expanduser("~")
+        user_config_dir = os.path.join(user_dir, "SpeedXToolKit")
+        user_config_path = os.path.join(user_config_dir, "app_config.json")
+
+        # Check user config first
+        try:
+            if os.path.exists(user_config_path):
+                with open(user_config_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    return data.get("appearance_mode", "light")
+        except Exception:
+            # ignore and try bundled config
+            pass
+
+        # If running frozen by PyInstaller, bundled files are extracted to _MEIPASS
+        try:
+            if getattr(sys, "frozen", False):
+                bundled = os.path.join(sys._MEIPASS, "app_config.json")
+            else:
+                bundled = os.path.join(os.path.dirname(__file__), "app_config.json")
+
+            if os.path.exists(bundled):
+                with open(bundled, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    return data.get("appearance_mode", "light")
+        except Exception:
+            pass
+
+        return "light"
+
+    @staticmethod
+    def save_appearance_mode(mode):
+        """Save appearance mode to a user-writable location.
+
+        When the app is packaged with PyInstaller the application bundle is read-only,
+        so we persist settings to a per-user config directory instead.
+        """
+        import json, os
+
+        user_dir = os.getenv("APPDATA") or os.path.expanduser("~")
+        user_config_dir = os.path.join(user_dir, "SpeedXToolKit")
+        user_config_path = os.path.join(user_config_dir, "app_config.json")
+        try:
+            os.makedirs(user_config_dir, exist_ok=True)
+            with open(user_config_path, "w", encoding="utf-8") as f:
+                json.dump({"appearance_mode": mode}, f)
+        except Exception:
+            # Last resort: try to write next to module (may fail in frozen exe)
+            try:
+                config_path = os.path.join(os.path.dirname(__file__), "app_config.json")
+                with open(config_path, "w", encoding="utf-8") as f:
+                    json.dump({"appearance_mode": mode}, f)
+            except Exception:
+                pass
+    LOGO_PATH = "assets/logo.png"
+    LOGO_DARK_PATH = "assets/logo-darkmode.png"
+
+    @staticmethod
+    def get_logo_path():
+        # Use dark mode logo if current mode is dark
+        if AppColors.WHITE == "#1a1a1a" or AppColors.BLACK == "#ffffff":
+            return AppConfig.LOGO_DARK_PATH
+        return AppConfig.LOGO_PATH
     """Application-wide configuration constants"""
     
     # Edit these to change basic app settings
@@ -400,8 +477,9 @@ class RadioButtonStyles:
     @staticmethod
     def update_for_dark_mode():
         """Update radio button styles for dark mode - Auto-called when switching"""
-        RadioButtonStyles.DEFAULT["text_color"] = AppColors.BLACK  # Updates to white in dark mode
-        RadioButtonStyles.DEFAULT["fg_color"] = AppColors.PURPLE
+        # In dark mode make the radio indicator and text white for better contrast
+        RadioButtonStyles.DEFAULT["text_color"] = "white"
+        RadioButtonStyles.DEFAULT["fg_color"] = "white"
         RadioButtonStyles.DEFAULT["hover_color"] = AppColors.LIGHT_GRAY
     
     @staticmethod

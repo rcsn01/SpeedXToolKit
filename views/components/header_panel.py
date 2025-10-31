@@ -5,6 +5,16 @@ from styles import AppColors, AppFonts, PanelStyles, AppConfig
 
 
 class HeaderPanel(ctk.CTkFrame):
+    def configure(self, *args, **kwargs):
+        super().configure(*args, **kwargs)
+        # Always refresh logo when configure is called (e.g., after theme change)
+        self.refresh_logo()
+    def refresh_logo(self):
+        """Reload the logo based on current theme (dark/light)"""
+        # Remove old logo label if exists
+        if hasattr(self, 'logo_label'):
+            self.logo_label.destroy()
+        self._load_logo()
     """Header panel with logo, title, and version"""
     
     def __init__(self, parent, title=None, version=None, bg_color=None):
@@ -58,9 +68,12 @@ class HeaderPanel(ctk.CTkFrame):
         self._load_logo()
     
     def _load_logo(self):
-        """Try to load and display logo"""
+        """Try to load and display logo, using dark mode logo if needed"""
         try:
-            logo_path = get_resource_path("assets/logo.png")
+            # Detect dark mode
+            is_dark = AppColors.WHITE == "#1a1a1a" or AppColors.BLACK == "#ffffff"
+            logo_file = "logo-darkmode.png" if is_dark else "logo.png"
+            logo_path = get_resource_path(f"assets/{logo_file}")
             if logo_path.exists():
                 logo_img = PhotoImage(file=str(logo_path))
                 # subsample reduces size by integer factor

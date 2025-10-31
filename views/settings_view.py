@@ -57,15 +57,20 @@ class SettingsDialog(ctk.CTkToplevel):
         appearance_label.pack(anchor="w", padx=15, pady=(15, 5))
         
         # Radio buttons for appearance mode
-        self.appearance_var = ctk.StringVar(value=ctk.get_appearance_mode())
+        # Use a safe default: if the runtime returns 'System', fall back to the saved config
+        current_mode = ctk.get_appearance_mode().lower()
+        if current_mode == "system":
+            current_mode = AppConfig.load_appearance_mode()
+        # Convert to Title case for display ('light' -> 'Light')
+        self.appearance_var = ctk.StringVar(value=current_mode.title())
         
         radio_frame = ctk.CTkFrame(appearance_frame, fg_color=TkinterDialogStyles.FRAME_BG)
         radio_frame.pack(fill="x", padx=15, pady=(5, 15))
         
+        # Only offer Light and Dark options (remove 'System')
         modes = [
             ("Light", "Light"),
             ("Dark", "Dark"),
-            ("System", "System")
         ]
         
         for text, value in modes:
@@ -110,8 +115,9 @@ class SettingsDialog(ctk.CTkToplevel):
         # Apply appearance mode
         ctk.set_appearance_mode(selected_mode)
         
-        # Update config
+        # Update config and persist
         AppConfig.APPEARANCE_MODE = selected_mode.lower()
+        AppConfig.save_appearance_mode(selected_mode.lower())
         
         # Update colors in styles.py based on mode
         self._update_colors_for_mode(selected_mode)
