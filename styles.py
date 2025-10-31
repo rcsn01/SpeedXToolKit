@@ -59,7 +59,7 @@ class AppFonts:
     # Edit weight ("bold", "normal", "italic") to change text appearance
     TITLE = (FAMILY, 30, "bold")        # Large header text (e.g., "SpeedXToolKit" logo)
     SUBTITLE = (FAMILY, 18, "bold")     # Section headers
-    BODY = (FAMILY, 11)                 # Normal text, buttons, labels
+    BODY = (FAMILY, 12)                 # Normal text, buttons, labels
     BODY_LARGE = (FAMILY, 16, "italic") # Large body text
     SMALL = (FAMILY, 10)                # Small labels, footnotes
 
@@ -82,7 +82,7 @@ class ButtonStyles:
         "fg_color": "white",     # Background color (changes for dark mode)
         "hover_color": "#f0f0f0", # Color when mouse hovers over
         "text_color": "black",   # Text color (changes for dark mode)
-        "font": AppFonts.BODY    # Font style
+    "font": AppFonts.BODY    # Font style
     }
     
     # Sidebar transform button style - Used for: Transform operation buttons
@@ -94,7 +94,7 @@ class ButtonStyles:
         "fg_color": "white",
         "hover_color": "#f0f0f0",
         "text_color": "black",
-        "font": AppFonts.BODY
+    "font": AppFonts.BODY
     }
     
     # Sidebar toggle button style - Used for: Expand/collapse sidebar button
@@ -105,7 +105,7 @@ class ButtonStyles:
         "corner_radius": 6,
         "fg_color": "white",
         "hover_color": "#c0c0c0",
-        "font": AppFonts.BODY
+    "font": AppFonts.BODY
     }
     
     # Toolbar toggle button (alternate style) - Used for: Various toolbar toggles
@@ -114,7 +114,7 @@ class ButtonStyles:
         "corner_radius": 8,
         "fg_color": "white",
         "hover_color": "#b1b1b1",
-        "font": AppFonts.BODY
+    "font": AppFonts.BODY
     }
     
     # Plugin panel buttons - Used for: Apply/Refresh buttons in plugin panel
@@ -126,7 +126,7 @@ class ButtonStyles:
         "fg_color": "white",
         "hover_color": "#f0f0f0",
         "text_color": "black",
-        "font": AppFonts.BODY
+    "font": AppFonts.BODY
     }
     
     # Primary action button - Used for: Apply in settings, confirm dialogs
@@ -138,7 +138,7 @@ class ButtonStyles:
         "fg_color": AppColors.BLUE,     # Brand blue - makes it stand out
         "hover_color": AppColors.PURPLE, # Changes to purple on hover
         "text_color": "white",
-        "font": AppFonts.BODY
+    "font": AppFonts.BODY
     }
     
     # ========================================================================

@@ -1,8 +1,7 @@
 import customtkinter as ctk
-from tkinter import Text, Scrollbar
-import pandas as pd
 import os
-from styles import AppColors, AppFonts, PanelStyles
+import pandas as pd
+from styles import AppColors, AppFonts, PanelStyles, TkinterDialogStyles
 
 
 class PreviewPanel(ctk.CTkFrame):
@@ -45,48 +44,25 @@ class PreviewPanel(ctk.CTkFrame):
         self.text_scroll_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.text_scroll_frame.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Create scrollbars
-        self._create_scrollbars()
-        
-        # Create text widget
+        # Create text widget (no external scrollbars)
         self._create_text_widget()
-        
-        # Configure scrollbars
-        self._configure_scrollbars()
-    
-    def _create_scrollbars(self):
-        """Create vertical and horizontal scrollbars"""
-        # Vertical scrollbar
-        self.y_scrollbar = Scrollbar(self.text_scroll_frame)
-        self.y_scrollbar.pack(side="right", fill="y")
-        
-        # Horizontal scrollbar
-        self.x_scrollbar = Scrollbar(self.text_scroll_frame, orient="horizontal")
-        self.x_scrollbar.pack(side="bottom", fill="x")
     
     def _create_text_widget(self):
-        """Create the main text widget for data preview"""
+        """Create the main CTkTextbox widget for data preview"""
         # Determine text colors based on current theme
         bg_color = AppColors.WHITE
         fg_color = AppColors.BLACK
         
-        self.preview_text = Text(
+        self.preview_text = ctk.CTkTextbox(
             self.text_scroll_frame,
             height=45,
             width=125,
-            bg=bg_color,
-            fg=fg_color,
-            highlightthickness=0,
-            yscrollcommand=self.y_scrollbar.set,
-            xscrollcommand=self.x_scrollbar.set,
+            fg_color=bg_color,
+            text_color=fg_color,
             wrap="none"
         )
         self.preview_text.pack(side="left", fill="both", expand=True)
-    
-    def _configure_scrollbars(self):
-        """Configure scrollbar commands"""
-        self.y_scrollbar.config(command=self.preview_text.yview)
-        self.x_scrollbar.config(command=self.preview_text.xview)
+        self.preview_text.configure(font=("Courier New", 12))
     
     def update_preview(self, df=None, text=None, file_path=None):
         """Update the preview content
@@ -135,20 +111,25 @@ class PreviewPanel(ctk.CTkFrame):
     
     def refresh_colors(self):
         """Refresh colors when theme changes"""
+        # Detect dark mode
+        is_dark = AppColors.WHITE == "#1a1a1a" or AppColors.BLACK == "#ffffff"
+        if is_dark:
+            bg = TkinterDialogStyles.DIALOG_BG  # dark background
+            fg = TkinterDialogStyles.DIALOG_FG  # light text
+        else:
+            bg = AppColors.WHITE
+            fg = AppColors.BLACK
         # Update panel backgrounds
-        self.configure(fg_color=AppColors.WHITE)
-        self.title_frame.configure(fg_color=AppColors.WHITE)
-        self.text_scroll_frame.configure(fg_color=AppColors.WHITE)
-        
+        self.configure(fg_color=bg)
+        self.title_frame.configure(fg_color=bg)
+        self.text_scroll_frame.configure(fg_color=bg)
         # Update labels
-        self.title_label.configure(text_color=AppColors.BLACK)
+        self.title_label.configure(text_color=fg)
         self.file_path_label.configure(text_color=AppColors.MEDIUM_GRAY)
-        
-        # Update text widget colors
-        self.preview_text.config(
-            bg=AppColors.WHITE,
-            fg=AppColors.BLACK
-        )
-        
+        # Update text widget colors and font (monospaced)
+        self.preview_text.configure(fg_color=bg, text_color=fg, font=("Courier New", 10))
+        # Update scrollbar colors for theme
+        self.y_scrollbar.configure(fg_color=TkinterDialogStyles.CANVAS_BG)
+        self.x_scrollbar.configure(fg_color=TkinterDialogStyles.CANVAS_BG)
         # Store updated bg_color
-        self.bg_color = AppColors.WHITE
+        self.bg_color = bg

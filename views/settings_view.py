@@ -11,10 +11,11 @@ class SettingsDialog(ctk.CTkToplevel):
         self.on_apply_callback = on_apply_callback
         self.result = None
         
-        # Configure dialog window
+        # Configure dialog window - using centralized styling
         self.title("Settings")
         self.geometry("400x300")
         self.resizable(False, False)
+        self.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
         
         # Make dialog modal
         self.transient(parent)
@@ -30,34 +31,35 @@ class SettingsDialog(ctk.CTkToplevel):
     
     def _setup_ui(self):
         """Setup the settings dialog UI"""
-        # Main container
-        container = ctk.CTkFrame(self, fg_color="transparent")
+        # Main container - using centralized styling
+        container = ctk.CTkFrame(self, fg_color=TkinterDialogStyles.FRAME_BG)
         container.pack(fill="both", expand=True, padx=20, pady=20)
         
-        # Title
+        # Title - using centralized styling
         title_label = ctk.CTkLabel(
             container,
             text="Application Settings",
-            font=AppFonts.SUBTITLE
+            font=TkinterDialogStyles.LABEL_BOLD_FONT,
+            text_color=TkinterDialogStyles.LABEL_FG
         )
         title_label.pack(pady=(0, 20))
         
-        # Appearance Mode Section
-        appearance_frame = ctk.CTkFrame(container, fg_color=AppColors.LIGHT_BLUE)
+        # Appearance Mode Section - using centralized styling
+        appearance_frame = ctk.CTkFrame(container, fg_color=TkinterDialogStyles.FRAME_BG)
         appearance_frame.pack(fill="x", pady=(0, 20))
         
         appearance_label = ctk.CTkLabel(
             appearance_frame,
             text="Appearance Mode:",
-            font=AppFonts.BODY,
-            text_color=AppColors.BLACK
+            font=TkinterDialogStyles.LABEL_FONT,
+            text_color=TkinterDialogStyles.LABEL_FG
         )
         appearance_label.pack(anchor="w", padx=15, pady=(15, 5))
         
         # Radio buttons for appearance mode
         self.appearance_var = ctk.StringVar(value=ctk.get_appearance_mode())
         
-        radio_frame = ctk.CTkFrame(appearance_frame, fg_color="transparent")
+        radio_frame = ctk.CTkFrame(appearance_frame, fg_color=TkinterDialogStyles.FRAME_BG)
         radio_frame.pack(fill="x", padx=15, pady=(5, 15))
         
         modes = [
@@ -76,8 +78,8 @@ class SettingsDialog(ctk.CTkToplevel):
             )
             radio.pack(anchor="w", pady=3)
         
-        # Buttons frame
-        button_frame = ctk.CTkFrame(container, fg_color="transparent")
+        # Buttons frame - using centralized styling
+        button_frame = ctk.CTkFrame(container, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(fill="x", pady=(20, 0))
         
         # Cancel button
