@@ -1,0 +1,2 @@
+RequirementID,RequirementText,DesignRef,CodeRef,TestRef,TestResult,EvidenceRef,Status
+RQ-001,"Accept CSV with header","docs/srs.md#functional-requirements","speedxtoolkit/parser.py::parse","UT-001,TC-001",Pass,"docs/releases/3.4/tests/tc-001.log",Implemented
