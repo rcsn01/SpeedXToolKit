@@ -23,18 +23,15 @@ kit_lot_number = "25040026"
 # DO NOT EDIT BELOW THIS LINE
 # ========================================================================
 
-# Select the Target_1 set (only keep rows where Target_1 has a value)
-df1 = df[['Sample ID', 'AssayCode', 'Target_1', 'Target_1_wells', 'Target_1_result']].copy()
-df1 = df1[df1['Target_1'].notna() & (df1['Target_1'].astype(str).str.strip() != '')]
+# Select the Target_1 set
+df1 = df[['Sample ID', 'AssayCode', 'Target_1', 'Target_1_wells', 'Target_1_cq']].copy()
 
 # Select the Target_2 set and rename columns so they match Target_1 column names
-df2 = df[['Sample ID', 'AssayCode', 'Target_2', 'Target_2_wells', 'Target_2_result']].copy()
-# Drop rows where Target_2 is missing (handle CSVs with missing target columns)
-df2 = df2[df2['Target_2'].notna() & (df2['Target_2'].astype(str).str.strip() != '')]
+df2 = df[['Sample ID', 'AssayCode', 'Target_2', 'Target_2_wells', 'Target_2_cq']].copy()
 df2 = df2.rename(columns={
-    'Target_2': 'Target_1',
-    'Target_2_wells': 'Target_1_wells',
-    'Target_2_result': 'Target_1_result'
+	'Target_2': 'Target_1',
+	'Target_2_wells': 'Target_1_wells',
+	'Target_2_cq': 'Target_1_cq'
 })
 
 # Preserve original row order and ensure Target_1 row comes before Target_2 row
@@ -57,7 +54,7 @@ df = df.rename(columns={
     'AssayCode': 'Mix',
 	'Target_1': 'Target',
 	'Target_1_wells': 'Well',
-    'Target_1_result': 'Cq',
+	'Target_1_cq': 'Cq',
 	'Sample ID': 'Sample name'
 })
 # Add requested empty columns and order the DataFrame columns as specified by the user

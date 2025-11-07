@@ -13,17 +13,20 @@ def save_plugin_view():
     try:
         root = ctk.CTk()
         root.title("Plugin Name")
-        root.geometry("300x120")
+        # Make window slightly wider so plugin name field can be larger and more usable
+        root.geometry("420x140")
         root.resizable(False, False)
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         first_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         first_frame.pack(pady=10, padx=10)
 
-        ctk.CTkLabel(first_frame, text="Plugin Name", fg_color=TkinterDialogStyles.FRAME_BG, 
-                 text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
-        target_name = ctk.CTkEntry(first_frame, width=26)
-        target_name.grid(row=0, column=1, padx=5, sticky="w")
+        ctk.CTkLabel(first_frame, text="Plugin Name", fg_color=TkinterDialogStyles.FRAME_BG,
+                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+        # Allow the entry to be wider and expand horizontally if frame layout changes
+        target_name = ctk.CTkEntry(first_frame, width=280)
+        first_frame.grid_columnconfigure(1, weight=1)
+        target_name.grid(row=0, column=1, padx=5, sticky="ew")
 
         canceled = {"value": False}
 

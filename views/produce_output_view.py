@@ -33,20 +33,12 @@ def produce_output_view(df):
                 font=TkinterDialogStyles.LABEL_FONT, fg_color=TkinterDialogStyles.DIALOG_BG, 
                 text_color=TkinterDialogStyles.LABEL_FG).pack(pady=10)
 
-        # Scrollable frame setup
+        # Scrollable frame setup using customtkinter's CTkScrollableFrame
         checkbox_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
-        checkbox_frame.pack(fill=tk.BOTH, expand=True, padx=10)
-        canvas = tk.Canvas(checkbox_frame, fg_color=TkinterDialogStyles.CANVAS_BG)
-        scrollbar = ctk.CTkScrollbar(checkbox_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = ctk.CTkFrame(canvas, fg_color=TkinterDialogStyles.FRAME_BG)
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        checkbox_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        # CTkScrollableFrame provides an internal scrollable area and scrollbar
+        scrollable_frame = ctk.CTkScrollableFrame(checkbox_frame, fg_color=TkinterDialogStyles.FRAME_BG)
+        scrollable_frame.pack(fill="both", expand=True)
 
         # Add checkboxes for each column (each BooleanVar now explicitly attached to `root`)
         for col in df.columns:

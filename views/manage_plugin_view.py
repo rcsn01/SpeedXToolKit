@@ -1,5 +1,7 @@
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
+import tkinter as tk
+from tkinter import ttk
 import os
 import shutil
 import pickle
@@ -27,55 +29,34 @@ def manage_plugin_view(tuple_list):
                         plugin_data = pickle.load(f)
 
                     # Create edit window
-                    edit_window = tk.Toplevel(root)
+                    edit_window = ctk.CTkToplevel(root)
                     edit_window.title(f"Edit Plugin: {plugin_name}")
                     edit_window.geometry("900x600")
-                    edit_window.configure(bg=TkinterDialogStyles.DIALOG_BG)
                     
                     # Plugin Name (read-only display)
-                    name_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
+                    name_frame = ctk.CTkFrame(edit_window)
                     name_frame.pack(fill="x", padx=10, pady=5)
-                    tk.Label(name_frame, text="Plugin Name:", width=15, anchor="w", 
-                            font=('TkDefaultFont', 9, 'bold'), bg=TkinterDialogStyles.FRAME_BG, 
-                            fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
-                    tk.Label(name_frame, text=plugin_data.get('name', 'Unknown'), anchor="w",
-                            bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
+                    ctk.CTkLabel(name_frame, text="Plugin Name:", width=15, anchor="w", 
+                            font=('TkDefaultFont', 9, 'bold')).pack(side="left")
+                    ctk.CTkLabel(name_frame, text=plugin_data.get('name', 'Unknown'), anchor="w").pack(side="left")
                     
                     # Metadata (read-only display)
-                    metadata_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
+                    metadata_frame = ctk.CTkFrame(edit_window)
                     metadata_frame.pack(fill="x", padx=10, pady=5)
-                    tk.Label(metadata_frame, text="Metadata:", width=15, anchor="w", 
-                            font=('TkDefaultFont', 9, 'bold'), bg=TkinterDialogStyles.FRAME_BG, 
-                            fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
-                    tk.Label(metadata_frame, text=plugin_data.get('metadata', 'None'), anchor="w",
-                            bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
+                    ctk.CTkLabel(metadata_frame, text="Metadata:", width=15, anchor="w", 
+                            font=('TkDefaultFont', 9, 'bold')).pack(side="left")
+                    ctk.CTkLabel(metadata_frame, text=plugin_data.get('metadata', 'None'), anchor="w").pack(side="left")
                     
                     # Separator
                     ttk.Separator(edit_window, orient='horizontal').pack(fill='x', padx=10, pady=10)
                     
                     # Functions header
-                    tk.Label(edit_window, text="Edit Function Parameters:", 
-                            font=('TkDefaultFont', 10, 'bold'), bg=TkinterDialogStyles.DIALOG_BG, 
-                            fg=TkinterDialogStyles.LABEL_FG).pack(padx=10, pady=(5, 10), anchor="w")
+                    ctk.CTkLabel(edit_window, text="Edit Function Parameters:", 
+                            font=('TkDefaultFont', 10, 'bold')).pack(padx=10, pady=(5, 10), anchor="w")
                     
                     # Create scrollable frame for functions
-                    canvas_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
-                    canvas_frame.pack(fill="both", expand=True, padx=10, pady=5)
-                    
-                    canvas = tk.Canvas(canvas_frame, bg=TkinterDialogStyles.CANVAS_BG)
-                    scrollbar = tk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
-                    scrollable_frame = tk.Frame(canvas, bg=TkinterDialogStyles.FRAME_BG)
-                    
-                    scrollable_frame.bind(
-                        "<Configure>",
-                        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-                    )
-                    
-                    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-                    canvas.configure(yscrollcommand=scrollbar.set)
-                    
-                    canvas.pack(side="left", fill="both", expand=True)
-                    scrollbar.pack(side="right", fill="y")
+                    scrollable_frame = ctk.CTkScrollableFrame(edit_window)
+                    scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
                     
                     # Store text widgets for each argument
                     function_widgets = []
@@ -88,10 +69,10 @@ def manage_plugin_view(tuple_list):
                             func_args = func[1:] if len(func) > 1 else []
                             
                             # Function container
-                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func_name}", 
-                                                      padx=10, pady=10, bg=TkinterDialogStyles.FRAME_BG, 
-                                                      fg=TkinterDialogStyles.LABEL_FG)
+                            func_frame = ctk.CTkFrame(scrollable_frame)
                             func_frame.pack(fill="x", padx=5, pady=5)
+                            ctk.CTkLabel(func_frame, text=f"Function {func_idx + 1}: {func_name}", 
+                                        font=('TkDefaultFont', 9, 'bold')).pack(anchor="w", padx=10, pady=(10, 5))
                             
                             # Store function name
                             function_widgets.append({
@@ -101,11 +82,10 @@ def manage_plugin_view(tuple_list):
                             
                             # Display each argument
                             for arg_idx, arg in enumerate(func_args):
-                                arg_frame = tk.Frame(func_frame, bg=TkinterDialogStyles.FRAME_BG)
-                                arg_frame.pack(fill="x", pady=3)
+                                arg_frame = ctk.CTkFrame(func_frame)
+                                arg_frame.pack(fill="x", pady=3, padx=10)
                                 
-                                tk.Label(arg_frame, text=f"Argument {arg_idx + 1}:", width=12, anchor="w",
-                                        bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack(side="left")
+                                ctk.CTkLabel(arg_frame, text=f"Argument {arg_idx + 1}:", width=12, anchor="w").pack(side="left")
                                 
                                 # Insert the argument value (as JSON for complex types)
                                 try:
@@ -119,14 +99,8 @@ def manage_plugin_view(tuple_list):
                                 text_height = max(2, min(20, line_count))
                                 
                                 # Create text widget for the argument (supports multi-line)
-                                arg_text = tk.Text(arg_frame, height=text_height, wrap="word",
-                                                  bg=TkinterDialogStyles.CANVAS_BG, fg=TkinterDialogStyles.LABEL_FG)
+                                arg_text = ctk.CTkTextbox(arg_frame, height=text_height * 20, wrap="word")
                                 arg_text.pack(side="left", fill="both", expand=True, padx=5)
-                                
-                                # Add scrollbar for text widget
-                                arg_scrollbar = tk.Scrollbar(arg_frame, command=arg_text.yview)
-                                arg_scrollbar.pack(side="right", fill="y")
-                                arg_text.config(yscrollcommand=arg_scrollbar.set)
                                 
                                 arg_text.insert("1.0", arg_str)
                                 
@@ -134,12 +108,11 @@ def manage_plugin_view(tuple_list):
                                 function_widgets[-1]['args'].append(arg_text)
                         else:
                             # Handle non-list functions
-                            func_frame = tk.LabelFrame(scrollable_frame, text=f"Function {func_idx + 1}: {func}", 
-                                                      padx=10, pady=10, bg=TkinterDialogStyles.FRAME_BG, 
-                                                      fg=TkinterDialogStyles.LABEL_FG)
+                            func_frame = ctk.CTkFrame(scrollable_frame)
                             func_frame.pack(fill="x", padx=5, pady=5)
-                            tk.Label(func_frame, text="(No editable parameters)", font=('TkDefaultFont', 8, 'italic'),
-                                    bg=TkinterDialogStyles.FRAME_BG, fg=TkinterDialogStyles.LABEL_FG).pack()
+                            ctk.CTkLabel(func_frame, text=f"Function {func_idx + 1}: {func}", 
+                                        font=('TkDefaultFont', 9, 'bold')).pack(anchor="w", padx=10, pady=(10, 5))
+                            ctk.CTkLabel(func_frame, text="(No editable parameters)", font=('TkDefaultFont', 8, 'italic')).pack(padx=10, pady=5)
                             function_widgets.append({
                                 'name': str(func),
                                 'args': []
@@ -155,7 +128,7 @@ def manage_plugin_view(tuple_list):
                                 
                                 # Get values from text widgets
                                 for arg_text_widget in func_widget['args']:
-                                    arg_value = arg_text_widget.get("1.0", tk.END).strip()
+                                    arg_value = arg_text_widget.get("1.0", "end").strip()
                                     
                                     # Try to parse as JSON for complex types
                                     try:
@@ -189,15 +162,13 @@ def manage_plugin_view(tuple_list):
                             messagebox.showerror("Error", f"Failed to save plugin: {e}")
                     
                     # Buttons
-                    button_frame = tk.Frame(edit_window, bg=TkinterDialogStyles.FRAME_BG)
+                    button_frame = ctk.CTkFrame(edit_window)
                     button_frame.pack(pady=10)
                     
-                    save_btn = ttk.Button(button_frame, text="Save Changes", command=save_changes, 
-                                         padding=TkinterDialogStyles.BUTTON_PADDING)
+                    save_btn = ctk.CTkButton(button_frame, text="Save Changes", command=save_changes)
                     save_btn.pack(side="left", padx=5)
                     
-                    cancel_btn = ttk.Button(button_frame, text="Cancel", command=edit_window.destroy, 
-                                           padding=TkinterDialogStyles.BUTTON_PADDING)
+                    cancel_btn = ctk.CTkButton(button_frame, text="Cancel", command=edit_window.destroy)
                     cancel_btn.pack(side="left", padx=5)
                     
                 else:
@@ -219,7 +190,7 @@ def manage_plugin_view(tuple_list):
                 plugin_name = os.path.splitext(os.path.basename(file_path))[0]
                 messagebox.showinfo("Success", f"Plugin added: {plugin_name}")
                 # Add to the listbox display
-                listbox.insert(tk.END, plugin_name)
+                listbox.insert("end", plugin_name)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to add plugin: {e}")
 
@@ -248,44 +219,46 @@ def manage_plugin_view(tuple_list):
         root.destroy()
 
     # Create the main window
-    root = tk.Tk()
+    root = ctk.CTk()
     root.title("Manage Plugins")
-    root.configure(bg=TkinterDialogStyles.DIALOG_BG)
 
     # Create a label
     if tuple_list:
         label_text = "Select a plugin from the list:"
     else:
         label_text = "No plugins found. Use 'Add' to import a plugin:"
-    label = tk.Label(root, text=label_text, bg=TkinterDialogStyles.DIALOG_BG, 
-                    fg=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT)
+    label = ctk.CTkLabel(root, text=label_text, font=TkinterDialogStyles.LABEL_FONT)
     label.pack(pady=10)
 
     # Create a listbox with the names (first item of each tuple)
-    listbox = tk.Listbox(root, width=40, height=10, bg=TkinterDialogStyles.CANVAS_BG, 
-                        fg=TkinterDialogStyles.LABEL_FG)
+    # Note: CTk doesn't have a native Listbox, using tkinter Listbox
+    listbox_frame = ctk.CTkFrame(root)
+    listbox_frame.pack(pady=10, padx=10, fill="both", expand=True)
+    
+    listbox = tk.Listbox(listbox_frame, width=40, height=10)
+    listbox_scrollbar = ctk.CTkScrollbar(listbox_frame, command=listbox.yview)
+    listbox.configure(yscrollcommand=listbox_scrollbar.set)
+    
+    listbox.pack(side="left", fill="both", expand=True)
+    listbox_scrollbar.pack(side="right", fill="y")
+    
     for item in tuple_list:
-        listbox.insert(tk.END, item[0])  # Insert just the name (first element)
-    listbox.pack(pady=10, padx=10)
+        listbox.insert("end", item[0])  # Insert just the name (first element)
 
     # Create buttons
-    button_frame = tk.Frame(root, bg=TkinterDialogStyles.FRAME_BG)
+    button_frame = ctk.CTkFrame(root)
     button_frame.pack(pady=10)
 
-    edit_button = ttk.Button(button_frame, text="Edit", command=on_edit, 
-                            padding=TkinterDialogStyles.BUTTON_PADDING)
+    edit_button = ctk.CTkButton(button_frame, text="Edit", command=on_edit)
     edit_button.grid(row=0, column=0, padx=5)
 
-    add_button = ttk.Button(button_frame, text="Import", command=on_add, 
-                           padding=TkinterDialogStyles.BUTTON_PADDING)
+    add_button = ctk.CTkButton(button_frame, text="Import", command=on_add)
     add_button.grid(row=0, column=1, padx=5)
 
-    remove_button = ttk.Button(button_frame, text="Remove", command=on_remove, 
-                              padding=TkinterDialogStyles.BUTTON_PADDING)
+    remove_button = ctk.CTkButton(button_frame, text="Remove", command=on_remove)
     remove_button.grid(row=0, column=2, padx=5)
 
-    close_button = ttk.Button(button_frame, text="Close", command=on_cancel, 
-                             padding=TkinterDialogStyles.BUTTON_PADDING)
+    close_button = ctk.CTkButton(button_frame, text="Close", command=on_cancel)
     close_button.grid(row=0, column=3, padx=5)
 
     # Run the GUI
