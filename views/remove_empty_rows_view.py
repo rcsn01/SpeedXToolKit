@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import pandas as pd
-from tkinter import messagebox
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
 from styles import TkinterDialogStyles
 
 def remove_empty_rows_view(df):
@@ -38,7 +38,7 @@ def remove_empty_rows_view(df):
             selected_column = column_selector.get()
 
             if not selected_column:
-                messagebox.showerror("Invalid Input", "You must select a column.")
+                showerror("Invalid Input", "You must select a column.")
                 return
 
             result["confirmed"] = True
@@ -68,5 +68,5 @@ def remove_empty_rows_view(df):
             return None, None
 
     except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
+        showerror("Error", f"An error occurred: {e}")
         return None, None

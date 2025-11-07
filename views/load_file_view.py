@@ -1,7 +1,7 @@
 import pandas as pd
 import customtkinter as ctk
-from tkinter import messagebox
-from tkinter.simpledialog import askinteger, askstring
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
+from styles import TkinterDialogStyles, AppColors, AppFonts, ButtonStyles
 from openpyxl import load_workbook
 import xlwt
 import os
@@ -234,7 +234,7 @@ def load_file_view(file_path):
         df = pd.read_excel(file_path, engine="xlrd", header=None)
     header_row = find_header_row(df)
     if header_row is None:
-        messagebox.showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
+        showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
         return None, None, None
 
     root = ctk.CTk()
@@ -281,7 +281,7 @@ def load_file_view(file_path):
             root.quit()
             root.destroy()
         except ValueError:
-            messagebox.showerror("Invalid Input", "Please select valid header.")
+            showerror("Invalid Input", "Please select valid header.")
 
     def on_cancel():
         root.quit()

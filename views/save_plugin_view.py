@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import pandas as pd
-from tkinter import messagebox
-from tkinter.simpledialog import askinteger, askstring
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
 from models.dataframe_model import *
 import numpy as np
 from models.rename_column_model import *

@@ -1,5 +1,5 @@
 import pandas as pd
-from tkinter import messagebox, filedialog
+from views.ctk_dialogs import showinfo, showwarning, showerror, filedialog
 import os
 
 def save_dataframe(df, default_filename=None):
@@ -16,7 +16,7 @@ def save_dataframe(df, default_filename=None):
     """
     try:
         if df is None or df.empty:
-            messagebox.showwarning("Save", "No data to save.")
+            showwarning("Save", "No data to save.")
             return None
 
         # Setup save dialog parameters
@@ -40,8 +40,8 @@ def save_dataframe(df, default_filename=None):
             file_path += '.csv'
 
         df.to_csv(file_path, index=False)
-        messagebox.showinfo("Success", f"File saved: {file_path}")
+        showinfo("Success", f"File saved: {file_path}")
         return True
     except Exception as e:
-        messagebox.showerror("Error", f"Error saving file: {e}")
+        showerror("Error", f"Error saving file: {e}")
         return False

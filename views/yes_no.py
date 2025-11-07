@@ -1,9 +1,8 @@
 import customtkinter as ctk
 import pandas as pd
-from tkinter import messagebox
-from tkinter.simpledialog import askinteger, askstring
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
+from styles import TkinterDialogStyles, AppFonts, ButtonStyles
 import numpy as np
-from styles import TkinterDialogStyles
 
 def yes_no_gui(question):
     """Load Excel file and allow the user to confirm the header row."""
@@ -20,8 +19,12 @@ def yes_no_gui(question):
         # Add title and input field for columns to drop
         ctk.CTkLabel(first_frame, text=question, fg_color=TkinterDialogStyles.FRAME_BG, 
                  text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
-        target_name = ctk.CTkEntry(first_frame, width=70)
-        target_name.insert(0, '')  # Initialize the entry with empty string
+        target_name = ctk.CTkEntry(
+            first_frame,
+            width=TkinterDialogStyles.INPUT_WIDTH * 4,
+            font=AppFonts.BODY,
+        )
+        target_name.insert(0, "")  # Initialize the entry with empty string
         target_name.grid(row=0, column=1, padx=5, sticky="w")
         
         # Process the user's input
@@ -37,7 +40,7 @@ def yes_no_gui(question):
                 root.quit()
                 root.destroy()
             except ValueError:
-                messagebox.showerror("Invalid Input", "Please enter a valid integer for the header row.")
+                showerror("Invalid Input", "Please enter a valid integer for the header row.")
 
         def on_cancel():
             root.quit()
@@ -47,8 +50,18 @@ def yes_no_gui(question):
         button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=10)
 
-        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(
+            button_frame,
+            text="Confirm",
+            command=on_confirm,
+            **ButtonStyles.PRIMARY,
+        ).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=on_cancel,
+            **ButtonStyles.DEFAULT,
+        ).grid(row=0, column=1, padx=10)
 
         # Run the window
         root.mainloop()

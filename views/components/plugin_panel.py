@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
 from controllers.processing_controller import show_plugins
 import pandas as pd
 from styles import AppColors, AppFonts, ButtonStyles, ListboxStyles
@@ -231,28 +231,28 @@ class PluginPanel(ctk.CTkFrame):
         try:
             sel = self.plugins_listbox.curselection()
             if not sel:
-                messagebox.showwarning("No selection", "Please select a plugin to apply.")
+                showwarning("No selection", "Please select a plugin to apply.")
                 return
             
             name = self.plugins_listbox.get(sel[0])
             
             # Check if data is loaded
             if not self.controller.data.has_data():
-                messagebox.showwarning("No Data", "Please load a file first.")
+                showwarning("No Data", "Please load a file first.")
                 return
             
             # Apply plugin through data controller
             result = self.controller.data.apply_plugin_preset(name)
-            
+
             if isinstance(result, pd.DataFrame):
                 # Update preview
                 if hasattr(self.controller, 'display_dataframe_preview'):
                     self.controller.display_dataframe_preview()
-                messagebox.showinfo("Plugin Applied", f"Plugin '{name}' applied.")
+                showinfo("Plugin Applied", f"Plugin '{name}' applied.")
             else:
-                messagebox.showwarning("Apply Failed", f"Plugin '{name}' did not produce a valid DataFrame.")
+                showwarning("Apply Failed", f"Plugin '{name}' did not produce a valid DataFrame.")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to apply plugin: {e}")
+            showerror("Error", f"Failed to apply plugin: {e}")
     
     def _on_refresh_plugins(self):
         """Handle refresh plugins button click"""
@@ -291,7 +291,7 @@ class PluginPanel(ctk.CTkFrame):
                     self._create_plugin_buttons()
         
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to refresh plugins: {e}")
+            showerror("Error", f"Failed to refresh plugins: {e}")
     
     def get_selected_plugin(self):
         """Get the currently selected plugin"""

@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
 from styles import TkinterDialogStyles, ButtonStyles, AppFonts, PanelStyles
 
 
@@ -19,7 +19,7 @@ def produce_output_view(df):
         def on_confirm():
             selected = [col for col, var in checkbox_vars.items() if var.get()]
             if not selected:
-                messagebox.showwarning("No columns selected", "Please select at least one column to keep.")
+                showwarning("No columns selected", "Please select at least one column to keep.")
                 return
             result["confirmed"] = True
             result["selected_columns"] = selected
@@ -102,5 +102,5 @@ def produce_output_view(df):
         else:
             return None, None
     except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
+        showerror("Error", f"An error occurred: {e}")
         return None

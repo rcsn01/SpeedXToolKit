@@ -57,12 +57,13 @@ class SettingsDialog(ctk.CTkToplevel):
         appearance_label.pack(anchor="w", padx=15, pady=(15, 5))
         
         # Radio buttons for appearance mode
-        # Use a safe default: if the runtime returns 'System', fall back to the saved config
+        # Use a safe default: if the runtime returns 'system', fall back to the saved config
         current_mode = ctk.get_appearance_mode().lower()
         if current_mode == "system":
             current_mode = AppConfig.load_appearance_mode()
-        # Convert to Title case for display ('light' -> 'Light')
-        self.appearance_var = ctk.StringVar(value=current_mode.title())
+        # Normalize to 'Light' or 'Dark' for the radio values
+        normalized = "Light" if current_mode.lower() not in ("dark", "light") else current_mode.title()
+        self.appearance_var = ctk.StringVar(value=normalized)
         
         radio_frame = ctk.CTkFrame(appearance_frame, fg_color=TkinterDialogStyles.FRAME_BG)
         radio_frame.pack(fill="x", padx=15, pady=(5, 15))
@@ -79,9 +80,9 @@ class SettingsDialog(ctk.CTkToplevel):
                 text=text,
                 variable=self.appearance_var,
                 value=value,
-                **RadioButtonStyles.DEFAULT
+                **RadioButtonStyles.DEFAULT,
             )
-            radio.pack(anchor="w", pady=3)
+            radio.pack(anchor="w", pady=3, padx=4)
         
         # Buttons frame - using centralized styling
         button_frame = ctk.CTkFrame(container, fg_color=TkinterDialogStyles.FRAME_BG)
@@ -104,6 +105,9 @@ class SettingsDialog(ctk.CTkToplevel):
             **ButtonStyles.PRIMARY
         )
         apply_btn.pack(side="right")
+        # Accessibility: allow Enter to trigger Apply and set focus to the Apply button
+        apply_btn.focus_set()
+        self.bind("<Return>", lambda e: self._on_apply())
         
         # Bind escape key to cancel
         self.bind("<Escape>", lambda e: self._on_cancel())

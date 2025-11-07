@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
 from styles import TkinterDialogStyles
 
 def custom_code_view():
@@ -15,7 +15,7 @@ def custom_code_view():
     def on_confirm():
         code = code_text.get("1.0", "end-1c").strip()
         if not code:
-            messagebox.showwarning("No code entered", "Please enter some Python code to execute.")
+            showwarning("No code entered", "Please enter some Python code to execute.")
             return
         result["confirmed"] = True
         result["code"] = code

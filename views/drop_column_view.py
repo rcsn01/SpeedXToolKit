@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
 from styles import TkinterDialogStyles, AppColors, AppFonts, ButtonStyles
 
 def drop_column_view(df):
@@ -16,7 +16,7 @@ def drop_column_view(df):
         def on_confirm():
             selected = [col for col, var in checkbox_vars.items() if var.get()]
             if not selected:
-                messagebox.showwarning("No columns selected", "Please select at least one column to remove.")
+                showwarning("No columns selected", "Please select at least one column to remove.")
                 return
             result["confirmed"] = True
             result["selected_columns"] = selected
@@ -58,5 +58,5 @@ def drop_column_view(df):
         else:
             return None, None
     except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
+        showerror("Error", f"An error occurred: {e}")
         return None, None

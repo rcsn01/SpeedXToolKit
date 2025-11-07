@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import filedialog, messagebox
+from views.ctk_dialogs import filedialog, showinfo, showwarning, showerror, askstring, askinteger, askyesno
 import pandas as pd
 from controllers.data_controller import DataController
 from controllers.processing_controller import (
@@ -108,16 +108,16 @@ class MainView(ctk.CTkFrame):
         if file_path:
             # Basic validation (in case user picked unsupported type via All files)
             if not file_path.lower().endswith((".xls", ".xlsx", ".csv")):
-                messagebox.showwarning("Unsupported", "Please select an .xls, .xlsx, or .csv file.")
+                showwarning("Unsupported", "Please select an .xls, .xlsx, or .csv file.")
                 return
             
             df = self.data.load_file(file_path)
             
             if isinstance(df, pd.DataFrame):
-                messagebox.showinfo("Success", "File loaded successfully!")
+                showinfo("Success", "File loaded successfully!")
                 self.display_dataframe_preview()
             else:
-                messagebox.showwarning("Load Failed", "Could not load a valid dataset.")
+                showwarning("Load Failed", "Could not load a valid dataset.")
 
     def display_dataframe_preview(self):
         """Update the preview panel with current dataframe"""
@@ -130,7 +130,7 @@ class MainView(ctk.CTkFrame):
         if self.data.has_data():
             self.data.save()
         else:
-            messagebox.showwarning("Warning", "No data to save!")
+            showwarning("Warning", "No data to save!")
 
     def _apply_transform(self, transform_func):
         """Helper method to apply transformations and update preview"""
@@ -139,7 +139,7 @@ class MainView(ctk.CTkFrame):
             if result is not None:
                 self.display_dataframe_preview()
         else:
-            messagebox.showwarning("Warning", "No data loaded!")
+            showwarning("Warning", "No data loaded!")
 
     def drop_column(self):
         self._apply_transform(drop_column)

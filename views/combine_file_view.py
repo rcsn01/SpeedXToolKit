@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox, filedialog
+from views.ctk_dialogs import filedialog, showinfo, showwarning, showerror, askstring, askinteger, askyesno
 import pandas as pd
 import csv
 from styles import TkinterDialogStyles, ButtonStyles, AppFonts, PanelStyles
@@ -9,13 +9,13 @@ def combine_file_view():
         # Prompt for first file
         file1 = filedialog.askopenfilename(title="Select First CSV File", filetypes=[("CSV files", "*.csv")])
         if not file1:
-            messagebox.showinfo("Cancelled", "No file selected.")
+            showinfo("Cancelled", "No file selected.")
             return None
 
         # Prompt for second file
         file2 = filedialog.askopenfilename(title="Select Second CSV File", filetypes=[("CSV files", "*.csv")])
         if not file2:
-            messagebox.showinfo("Cancelled", "No second file selected.")
+            showinfo("Cancelled", "No second file selected.")
             return None
                 
         def _read_csv_with_fallback(path):
@@ -62,7 +62,7 @@ def combine_file_view():
 
         common_cols = list(set(df1.columns).intersection(set(df2.columns)))
         if not common_cols:
-            messagebox.showerror("No Common Columns", "The selected files share no column names to merge on.")
+            showerror("No Common Columns", "The selected files share no column names to merge on.")
             return None
 
         """Display all columns with checkboxes and allow user to select which ones to keep."""
@@ -78,7 +78,7 @@ def combine_file_view():
         def on_confirm():
             selected = [col for col, var in checkbox_vars.items() if var.get()]
             if not selected:
-                messagebox.showwarning("No columns selected", "Please select at least one column to merge on.")
+                showwarning("No columns selected", "Please select at least one column to merge on.")
                 return
             result["confirmed"] = True
             result["selected_columns"] = selected
@@ -180,7 +180,7 @@ def combine_file_view():
         print("OHHH NOOOOOOOOO")
         print(f"Error: {e}")
         try:
-            messagebox.showerror("Combine Failed", f"Failed to combine files:\n{e}")
+            showerror("Combine Failed", f"Failed to combine files:\n{e}")
         except Exception:
             pass
         return None

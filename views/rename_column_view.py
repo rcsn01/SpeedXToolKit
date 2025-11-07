@@ -1,7 +1,7 @@
 import pandas as pd
 import customtkinter as ctk
-from tkinter import messagebox
-from styles import TkinterDialogStyles
+from views.ctk_dialogs import showinfo, showwarning, showerror, askstring, askinteger, askyesno
+from styles import TkinterDialogStyles, AppFonts, ButtonStyles
 
 def rename_column_view(df):
     """Allow the user to select a column from the DataFrame and rename it."""
@@ -17,10 +17,19 @@ def rename_column_view(df):
         select_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         select_frame.pack(pady=10)
 
-        ctk.CTkLabel(select_frame, text="Select Column to Rename", 
-                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+        ctk.CTkLabel(
+            select_frame,
+            text="Select Column to Rename",
+            text_color=TkinterDialogStyles.LABEL_FG,
+            font=TkinterDialogStyles.LABEL_FONT,
+        ).grid(row=0, column=0, padx=5, sticky="w")
 
-        column_selector = ctk.CTkComboBox(select_frame, values=list(df.columns), width=TkinterDialogStyles.INPUT_WIDTH * 8)
+        column_selector = ctk.CTkComboBox(
+            select_frame,
+            values=list(df.columns),
+            width=TkinterDialogStyles.INPUT_WIDTH * 8,
+            font=AppFonts.BODY,
+        )
         column_selector.grid(row=0, column=1, padx=5, sticky="w")
         column_selector.set(df.columns[0])  # default selection
 
@@ -28,9 +37,17 @@ def rename_column_view(df):
         rename_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         rename_frame.pack(pady=10)
 
-        ctk.CTkLabel(rename_frame, text="New Column Name", 
-                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
-        new_name_entry = ctk.CTkEntry(rename_frame, width=TkinterDialogStyles.INPUT_WIDTH * 8)
+        ctk.CTkLabel(
+            rename_frame,
+            text="New Column Name",
+            text_color=TkinterDialogStyles.LABEL_FG,
+            font=TkinterDialogStyles.LABEL_FONT,
+        ).grid(row=0, column=0, padx=5, sticky="w")
+        new_name_entry = ctk.CTkEntry(
+            rename_frame,
+            width=TkinterDialogStyles.INPUT_WIDTH * 8,
+            font=AppFonts.BODY,
+        )
         new_name_entry.grid(row=0, column=1, padx=5, sticky="w")
 
         # Button actions
@@ -39,7 +56,7 @@ def rename_column_view(df):
             new_name = new_name_entry.get().strip()
 
             if not new_name:
-                messagebox.showerror("Invalid Input", "New column name cannot be empty.")
+                showerror("Invalid Input", "New column name cannot be empty.")
                 return
 
             result["confirmed"] = True
@@ -56,8 +73,18 @@ def rename_column_view(df):
         # Button Frame
         button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=20)
-        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+        ctk.CTkButton(
+            button_frame,
+            text="Confirm",
+            command=on_confirm,
+            **ButtonStyles.PRIMARY,
+        ).grid(row=0, column=0, padx=10)
+        ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=on_cancel,
+            **ButtonStyles.DEFAULT,
+        ).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 
