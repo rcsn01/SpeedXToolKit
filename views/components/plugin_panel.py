@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import messagebox, Listbox, END
+from tkinter import messagebox
 from controllers.processing_controller import show_plugins
 import pandas as pd
 from styles import AppColors, AppFonts, ButtonStyles, ListboxStyles
@@ -64,13 +64,100 @@ class PluginPanel(ctk.CTkFrame):
             except Exception:
                 display_items.append(str(p))
         
-        # Create listbox using centralized ListboxStyles
-        self.plugins_listbox = Listbox(
-            self.plugins_frame, 
-            **ListboxStyles.PLUGIN_LIST
-        )
+        # Create a CTk-backed selectable list (adapter) to replace Tk Listbox
+        class _CTkListAdapter:
+            def __init__(self, parent, styles):
+                self.container = ctk.CTkScrollableFrame(parent, fg_color="transparent")
+                # hold rows as dicts: {'frame': frame, 'label': label, 'text': text}
+                self._rows = []
+                self._selected = None
+                self.styles = styles
+
+            def pack(self, **kwargs):
+                self.container.pack(**kwargs)
+
+            def insert(self, index, text):
+                # append only (index ignored except for numeric 0)
+                row_frame = ctk.CTkFrame(self.container, fg_color="transparent")
+                lbl = ctk.CTkLabel(row_frame, text=text, anchor="w", width=1)
+                lbl.pack(fill='x', padx=4, pady=2)
+
+                def on_click(event=None, idx=len(self._rows)):
+                    self.select(idx)
+
+                lbl.bind("<Button-1>", on_click)
+                row_frame.pack(fill='x')
+                self._rows.append({'frame': row_frame, 'label': lbl, 'text': text})
+
+            def delete(self, start, end=None):
+                # support delete(0, END) to clear all or delete(index) to remove a single row
+                try:
+                    if isinstance(start, int) and (end is None):
+                        # delete single index
+                        if 0 <= start < len(self._rows):
+                            row = self._rows.pop(start)
+                            try:
+                                row['frame'].destroy()
+                            except Exception:
+                                pass
+                            # adjust selection
+                            if self._selected == start:
+                                self._selected = None
+                            elif isinstance(self._selected, int) and self._selected > start:
+                                self._selected -= 1
+                    else:
+                        # clear all
+                        for r in self._rows:
+                            try:
+                                r['frame'].destroy()
+                            except Exception:
+                                pass
+                        self._rows = []
+                        self._selected = None
+                except Exception:
+                    # fallback: clear all on any error
+                    for r in self._rows:
+                        try:
+                            r['frame'].destroy()
+                        except Exception:
+                            pass
+                    self._rows = []
+                    self._selected = None
+
+            def curselection(self):
+                return (self._selected,) if self._selected is not None else ()
+
+            def get(self, index):
+                try:
+                    return self._rows[index]['text']
+                except Exception:
+                    return None
+
+            def select(self, index):
+                # update visual selection
+                if self._selected is not None and 0 <= self._selected < len(self._rows):
+                    prev = self._rows[self._selected]
+                    prev['label'].configure(text_color=self.styles.get('fg', 'black'), fg_color="transparent")
+                if 0 <= index < len(self._rows):
+                    self._selected = index
+                    cur = self._rows[index]
+                    cur['label'].configure(text_color=self.styles.get('selectforeground', 'white'), fg_color=self.styles.get('selectbackground', AppColors.BLUE))
+                else:
+                    self._selected = None
+
+            def config(self, **kwargs):
+                # apply background color to container if provided
+                bg = kwargs.get('bg') or kwargs.get('background')
+                if bg:
+                    try:
+                        self.container.configure(fg_color=bg)
+                    except Exception:
+                        pass
+
+        # instantiate adapter and populate
+        self.plugins_listbox = _CTkListAdapter(self.plugins_frame, ListboxStyles.PLUGIN_LIST)
         for item in display_items:
-            self.plugins_listbox.insert(END, item)
+            self.plugins_listbox.insert('end', item)
         self.plugins_listbox.pack(fill='x')
     
     def _create_plugin_buttons(self):
@@ -194,9 +281,10 @@ class PluginPanel(ctk.CTkFrame):
             
             # Update or create listbox
             if self.plugins_listbox:
-                self.plugins_listbox.delete(0, END)
+                # adapter supports delete(start, end) but END constant not used
+                self.plugins_listbox.delete(0, None)
                 for item in items:
-                    self.plugins_listbox.insert(END, item)
+                    self.plugins_listbox.insert('end', item)
             else:
                 self._create_plugin_list(new_plugins)
                 if not hasattr(self, 'apply_btn'):

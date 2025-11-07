@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import PhotoImage
+from PIL import Image, ImageTk
 from models.path_utils import get_resource_path
 from styles import AppColors, AppFonts, PanelStyles, AppConfig
 
@@ -75,9 +75,16 @@ class HeaderPanel(ctk.CTkFrame):
             logo_file = "logo-darkmode.png" if is_dark else "logo.png"
             logo_path = get_resource_path(f"assets/{logo_file}")
             if logo_path.exists():
-                logo_img = PhotoImage(file=str(logo_path))
-                # subsample reduces size by integer factor
-                logo_img = logo_img.subsample(3, 3)
+                # Use PIL to load and resize image for consistent behavior across platforms
+                img = Image.open(logo_path)
+                # Resize to roughly one third using integer math to mimic subsample
+                try:
+                    new_size = (max(1, img.width // 3), max(1, img.height // 3))
+                    img = img.resize(new_size, Image.LANCZOS)
+                except Exception:
+                    # If image doesn't expose width/height, skip resizing
+                    pass
+                logo_img = ImageTk.PhotoImage(img)
                 self.logo_label = ctk.CTkLabel(self, image=logo_img, text="")
                 self.logo_label.image = logo_img  # Keep reference
                 self.logo_label.pack(side="right", padx=(6, 8), pady=8)

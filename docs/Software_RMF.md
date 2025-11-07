@@ -7,14 +7,7 @@ This document records the risk management activities for SpeedXToolKit. It maps 
 - Limitations: Not for clinical interpretation, diagnosis, or treatment decisions. Outputs must be validated by qualified downstream systems and staff.
 
 ## 2. Hazard Analysis
-Below is a non-exhaustive hazard log template. Expand per product version and deployment.
-
-| Hazard ID | Hazard Description | Intended Use Impact | Severity (S) | Likelihood (L) | Risk Level (R) | Mitigations | Owner | Status |
-|---|---|---:|---:|---:|---:|---|---:|---:|
-| H001 | Column mismatch leading to mis-mapped results | Downstream data misalignment | High | Medium | High | Input schema validation, explicit mapping, checksum validation | Dev Lead | Open |
-| H002 | Data corruption during processing | Loss or alteration of PHI/test results | High | Low | Medium | Unit tests, file checksums, transactional processing | QA Lead | Open |
-| H003 | Unauthorized data access (insider) | PHI exposure | High | Medium | High | Role-based access, audit logging, MFA | CISO | In progress |
-| H004 | Failure to notify customer of processing failures | Operator unaware of bad outputs | Medium | Medium | Medium | Clear error reporting, monitoring, auto-retry with alerts | Ops | Open |
+See SpeedXToolKit Logs for a detailed hazard log.
 
 ## 3. Risk Evaluation Method
 - Severity: evaluate harm potential to individuals or systems (Low/Medium/High).

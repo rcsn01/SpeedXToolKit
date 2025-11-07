@@ -1,0 +1,10 @@
+pytest==7.4.0
+pytest-cov==4.1.0
+pytest-mock==3.10.0
+requests-mock==1.11.0
+
+# Optional / useful tools (uncomment if you want them installed into the venv):
+# coverage==6.5.0
+# black==24.3.0
+# ruff==0.20.0
+# safety==1.13.3

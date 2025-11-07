@@ -22,8 +22,7 @@ class XLSProcessorApp(ctk.CTk):
         # Call the internal method to update all colors/styles
         SettingsDialog._update_colors_for_mode(None, appearance_mode)
 
-        # Set application icon (window and taskbar)
-        import tkinter as tk
+    # Set application icon (window and taskbar)
         icon_png_path = os.path.join(os.path.dirname(__file__), "assets", "pearl.png")
         icon_ico_path = os.path.join(os.path.dirname(__file__), "assets", "pearl.ico")
         try:

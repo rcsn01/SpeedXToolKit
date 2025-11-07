@@ -2,7 +2,6 @@ from views import *
 from controllers.save_controller import *
 from models import *
 import pandas as pd
-import tkinter as tk
 from tkinter import messagebox
 
 #=====================================================================

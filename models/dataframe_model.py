@@ -1,9 +1,5 @@
 import pandas as pd
 import numpy as np
-import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
-from tkinter.simpledialog import askstring
 
 def filter_columns(df, input):
     """Filter specific columns from the DataFrame."""

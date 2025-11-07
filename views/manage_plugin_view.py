@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
-import tkinter as tk
 from tkinter import ttk
+from styles import TkinterDialogStyles, AppColors
 import os
 import shutil
 import pickle
@@ -190,7 +190,7 @@ def manage_plugin_view(tuple_list):
                 plugin_name = os.path.splitext(os.path.basename(file_path))[0]
                 messagebox.showinfo("Success", f"Plugin added: {plugin_name}")
                 # Add to the listbox display
-                listbox.insert("end", plugin_name)
+                listbox.insert('end', plugin_name)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to add plugin: {e}")
 
@@ -234,16 +234,85 @@ def manage_plugin_view(tuple_list):
     # Note: CTk doesn't have a native Listbox, using tkinter Listbox
     listbox_frame = ctk.CTkFrame(root)
     listbox_frame.pack(pady=10, padx=10, fill="both", expand=True)
-    
-    listbox = tk.Listbox(listbox_frame, width=40, height=10)
-    listbox_scrollbar = ctk.CTkScrollbar(listbox_frame, command=listbox.yview)
-    listbox.configure(yscrollcommand=listbox_scrollbar.set)
-    
-    listbox.pack(side="left", fill="both", expand=True)
-    listbox_scrollbar.pack(side="right", fill="y")
-    
+
+    # CTk-backed selectable list adapter
+    class _CTkListAdapter:
+        def __init__(self, parent, styles=None):
+            self.container = ctk.CTkScrollableFrame(parent, fg_color="transparent")
+            self._rows = []
+            self._selected = None
+            self.styles = styles or {}
+
+        def pack(self, **kwargs):
+            self.container.pack(**kwargs)
+
+        def insert(self, index, text):
+            row_frame = ctk.CTkFrame(self.container, fg_color="transparent")
+            lbl = ctk.CTkLabel(row_frame, text=text, anchor="w")
+            lbl.pack(fill='x', padx=4, pady=2)
+
+            def on_click(event=None, idx=len(self._rows)):
+                self.select(idx)
+
+            lbl.bind("<Button-1>", on_click)
+            row_frame.pack(fill='x')
+            self._rows.append({'frame': row_frame, 'label': lbl, 'text': text})
+
+        def delete(self, start, end=None):
+            try:
+                if isinstance(start, int) and (end is None):
+                    if 0 <= start < len(self._rows):
+                        row = self._rows.pop(start)
+                        try:
+                            row['frame'].destroy()
+                        except Exception:
+                            pass
+                        if self._selected == start:
+                            self._selected = None
+                        elif isinstance(self._selected, int) and self._selected > start:
+                            self._selected -= 1
+                else:
+                    for r in self._rows:
+                        try:
+                            r['frame'].destroy()
+                        except Exception:
+                            pass
+                    self._rows = []
+                    self._selected = None
+            except Exception:
+                for r in self._rows:
+                    try:
+                        r['frame'].destroy()
+                    except Exception:
+                        pass
+                self._rows = []
+                self._selected = None
+
+        def curselection(self):
+            return (self._selected,) if self._selected is not None else ()
+
+        def get(self, index):
+            try:
+                return self._rows[index]['text']
+            except Exception:
+                return None
+
+        def select(self, index):
+            if self._selected is not None and 0 <= self._selected < len(self._rows):
+                prev = self._rows[self._selected]
+                prev['label'].configure(text_color=self.styles.get('fg', 'black'), fg_color="transparent")
+            if 0 <= index < len(self._rows):
+                self._selected = index
+                cur = self._rows[index]
+                cur['label'].configure(text_color=self.styles.get('selectforeground', 'white'), fg_color=self.styles.get('selectbackground', AppColors.BLUE))
+            else:
+                self._selected = None
+
+    listbox = _CTkListAdapter(listbox_frame)
+    listbox.pack(fill="both", expand=True)
+
     for item in tuple_list:
-        listbox.insert("end", item[0])  # Insert just the name (first element)
+        listbox.insert('end', item[0])  # Insert just the name (first element)
 
     # Create buttons
     button_frame = ctk.CTkFrame(root)
