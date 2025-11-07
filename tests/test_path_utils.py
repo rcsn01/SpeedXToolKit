@@ -22,10 +22,11 @@ def test_ensure_plugins_dir_uses_custom_base(monkeypatch, tmp_path):
 
 def test_get_resource_path_frozen(monkeypatch, tmp_path):
     # Simulate PyInstaller frozen exe where external resource exists
-    monkeypatch.setattr(pu.sys, 'frozen', True)
+    from types import SimpleNamespace
     fake_exe = tmp_path / 'app.exe'
     fake_exe.write_text('')
-    monkeypatch.setattr(pu.sys, 'executable', str(fake_exe))
+    fake_sys = SimpleNamespace(frozen=True, executable=str(fake_exe), _MEIPASS=str(tmp_path / 'meipass'))
+    monkeypatch.setattr(pu, 'sys', fake_sys)
     # create an external resource next to exe
     external = fake_exe.parent / 'assets' / 'f.txt'
     external.parent.mkdir(parents=True, exist_ok=True)
@@ -35,10 +36,11 @@ def test_get_resource_path_frozen(monkeypatch, tmp_path):
     assert res == external
 
 def test_get_plugins_dir_frozen(monkeypatch, tmp_path):
-    monkeypatch.setattr(pu.sys, 'frozen', True)
+    from types import SimpleNamespace
     fake_exe = tmp_path / 'app.exe'
     fake_exe.write_text('')
-    monkeypatch.setattr(pu.sys, 'executable', str(fake_exe))
+    fake_sys = SimpleNamespace(frozen=True, executable=str(fake_exe), _MEIPASS=str(tmp_path / 'meipass'))
+    monkeypatch.setattr(pu, 'sys', fake_sys)
     # If external plugins dir doesn't exist, get_plugins_dir should fall back
     res = pu.get_plugins_dir()
     assert isinstance(res, Path)

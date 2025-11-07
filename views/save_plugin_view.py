@@ -5,7 +5,7 @@ from tkinter.simpledialog import askinteger, askstring
 from models.dataframe_model import *
 import numpy as np
 from models.rename_column_model import *
-from styles import TkinterDialogStyles
+from styles import TkinterDialogStyles, AppColors, AppFonts, ButtonStyles
 
 # ...existing code...
 def save_plugin_view():
@@ -19,12 +19,12 @@ def save_plugin_view():
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
         first_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
-        first_frame.pack(pady=10, padx=10)
+        first_frame.pack(pady=10, padx=10, fill='x')
 
-        ctk.CTkLabel(first_frame, text="Plugin Name", fg_color=TkinterDialogStyles.FRAME_BG,
-                     text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
+        ctk.CTkLabel(first_frame, text="Plugin Name",
+                     text_color=AppColors.BLACK, font=AppFonts.BODY).grid(row=0, column=0, padx=5, sticky="w")
         # Allow the entry to be wider and expand horizontally if frame layout changes
-        target_name = ctk.CTkEntry(first_frame, width=280)
+        target_name = ctk.CTkEntry(first_frame, width=TkinterDialogStyles.INPUT_WIDTH or 280)
         first_frame.grid_columnconfigure(1, weight=1)
         target_name.grid(row=0, column=1, padx=5, sticky="ew")
 
@@ -39,8 +39,8 @@ def save_plugin_view():
 
         button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=8)
-        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=6)
-        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=6)
+        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm, **ButtonStyles.DEFAULT).grid(row=0, column=0, padx=6)
+        ctk.CTkButton(button_frame, text="Cancel", command=on_cancel, **ButtonStyles.DEFAULT).grid(row=0, column=1, padx=6)
 
         root.mainloop()
 

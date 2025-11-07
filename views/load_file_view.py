@@ -9,7 +9,7 @@ import tempfile
 import csv
 import chardet
 import io
-from styles import TkinterDialogStyles
+from styles import TkinterDialogStyles, AppColors, AppFonts, ButtonStyles
 
 # Helper to deduplicate header names (Name, Name (1), Name (2) ...)
 def _dedupe_headers(raw_headers):
@@ -248,10 +248,10 @@ def load_file_view(file_path):
     frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
     frame.pack(pady=5, padx=5, fill="both", expand=True)
 
-    # Use CTkTextbox with monospaced font for better alignment
+    # Use CTkTextbox with monospaced font for better alignment; colors from styles
     text_widget = ctk.CTkTextbox(frame, wrap="none", height=400, width=1100,
-                      fg_color=TkinterDialogStyles.CANVAS_BG, 
-                      text_color=TkinterDialogStyles.LABEL_FG,
+                      fg_color=TkinterDialogStyles.CANVAS_BG,
+                      text_color=AppColors.BLACK,
                       font=("Courier New", 12))
     # Format with better alignment - show first 50 rows
     df_display = df_truncated.head(50)
@@ -263,9 +263,9 @@ def load_file_view(file_path):
     header_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
     header_frame.pack(pady=5)
 
-    ctk.CTkLabel(header_frame, text="Header Row:", 
-                 text_color=TkinterDialogStyles.LABEL_FG, font=TkinterDialogStyles.LABEL_FONT).grid(row=0, column=0, padx=5, sticky="w")
-    header_input = ctk.CTkEntry(header_frame, width=50)
+    ctk.CTkLabel(header_frame, text="Header Row:",
+                 text_color=AppColors.BLACK, font=AppFonts.BODY).grid(row=0, column=0, padx=5, sticky="w")
+    header_input = ctk.CTkEntry(header_frame, width=TkinterDialogStyles.INPUT_WIDTH)
     header_input.insert(0, str(header_row))
     header_input.grid(row=0, column=1, padx=5, sticky="w")
 
@@ -291,8 +291,8 @@ def load_file_view(file_path):
     button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
     button_frame.pack(pady=10)
 
-    ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-    ctk.CTkButton(button_frame, text="Cancel", command=on_cancel).grid(row=0, column=1, padx=10)
+    ctk.CTkButton(button_frame, text="Confirm", command=on_confirm, **ButtonStyles.DEFAULT).grid(row=0, column=0, padx=10)
+    ctk.CTkButton(button_frame, text="Cancel", command=on_cancel, **ButtonStyles.DEFAULT).grid(row=0, column=1, padx=10)
 
     root.mainloop()
 

@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox, filedialog
 import pandas as pd
 import csv
-from styles import TkinterDialogStyles
+from styles import TkinterDialogStyles, ButtonStyles, AppFonts, PanelStyles
 
 def combine_file_view():
     try:
@@ -69,7 +69,8 @@ def combine_file_view():
         root = ctk.CTk()
         root.title("Combine Files - Select Join Columns")
         root.geometry("520x560")
-        root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+        # Use centralized panel/dialog colors
+        root.configure(fg_color=PanelStyles.PREVIEW.get("fg_color", TkinterDialogStyles.DIALOG_BG))
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -77,7 +78,7 @@ def combine_file_view():
         def on_confirm():
             selected = [col for col, var in checkbox_vars.items() if var.get()]
             if not selected:
-                messagebox.showwarning("No columns selected", "Please select at least one column to remove.")
+                messagebox.showwarning("No columns selected", "Please select at least one column to merge on.")
                 return
             result["confirmed"] = True
             result["selected_columns"] = selected
@@ -91,15 +92,34 @@ def combine_file_view():
         # File info display
         info_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         info_frame.pack(fill='x', padx=10, pady=(10,4))
-        ctk.CTkLabel(info_frame, text=f"File 1: {file1}", anchor='w', wraplength=480, justify='left',
-                     text_color=TkinterDialogStyles.LABEL_FG).pack(fill='x')
-        ctk.CTkLabel(info_frame, text=f"File 2: {file2}", anchor='w', wraplength=480, justify='left',
-                     text_color=TkinterDialogStyles.LABEL_FG).pack(fill='x', pady=(2,6))
+        ctk.CTkLabel(
+            info_frame,
+            text=f"File 1: {file1}",
+            anchor='w',
+            wraplength=480,
+            justify='left',
+            text_color=TkinterDialogStyles.LABEL_FG,
+            font=AppFonts.SMALL,
+        ).pack(fill='x')
+        ctk.CTkLabel(
+            info_frame,
+            text=f"File 2: {file2}",
+            anchor='w',
+            wraplength=480,
+            justify='left',
+            text_color=TkinterDialogStyles.LABEL_FG,
+            font=AppFonts.SMALL,
+        ).pack(fill='x', pady=(2,6))
 
         # Instruction label
-        ctk.CTkLabel(root, text="Select the columns to merge on (only common columns listed):", 
-                     font=TkinterDialogStyles.LABEL_FONT, wraplength=480, justify='left',
-                     text_color=TkinterDialogStyles.LABEL_FG).pack(pady=4, padx=10, anchor='w')
+        ctk.CTkLabel(
+            root,
+            text="Select the columns to merge on (only common columns listed):",
+            font=AppFonts.BODY,
+            wraplength=480,
+            justify='left',
+            text_color=TkinterDialogStyles.LABEL_FG,
+        ).pack(pady=4, padx=10, anchor='w')
 
         # Scrollable frame setup
         scrollable_frame = ctk.CTkScrollableFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
@@ -108,16 +128,48 @@ def combine_file_view():
         # Add checkboxes for each column
         for col in common_cols:
             var = ctk.BooleanVar(master=root)
-            cb = ctk.CTkCheckBox(scrollable_frame, text=col, variable=var, 
-                                text_color=TkinterDialogStyles.CHECKBOX_FG)
+            cb = ctk.CTkCheckBox(
+                scrollable_frame,
+                text=col,
+                variable=var,
+                text_color=TkinterDialogStyles.CHECKBOX_FG,
+                anchor='w',
+            )
             cb.pack(fill='x', anchor='w', pady=2)
             checkbox_vars[col] = var
 
         # Confirm/Cancel buttons
         button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
         button_frame.pack(pady=20)
-        ctk.CTkButton(button_frame, text="Confirm", command=on_confirm).grid(row=0, column=0, padx=10)
-        ctk.CTkButton(button_frame, text="Cancel", command=on_confirm).grid(row=0, column=1, padx=10)
+
+        primary = ButtonStyles.PRIMARY
+        default = ButtonStyles.DEFAULT
+
+        ctk.CTkButton(
+            button_frame,
+            text="Confirm",
+            command=on_confirm,
+            width=primary.get("width"),
+            height=primary.get("height"),
+            corner_radius=primary.get("corner_radius"),
+            fg_color=primary.get("fg_color"),
+            hover_color=primary.get("hover_color"),
+            text_color=primary.get("text_color"),
+            font=primary.get("font"),
+        ).grid(row=0, column=0, padx=10)
+
+        ctk.CTkButton(
+            button_frame,
+            text="Cancel",
+            command=on_cancel,
+            width=default.get("width"),
+            height=default.get("height"),
+            corner_radius=default.get("corner_radius"),
+            fg_color=default.get("fg_color"),
+            hover_color=default.get("hover_color"),
+            text_color=default.get("text_color"),
+            font=default.get("font"),
+        ).grid(row=0, column=1, padx=10)
 
         root.mainloop()
 
