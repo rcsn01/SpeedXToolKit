@@ -1,4 +1,4 @@
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 
 
 def keep_column_model(df, input_columns):

@@ -1,4 +1,4 @@
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 
 
 def drop_column_model(df, drop_input):

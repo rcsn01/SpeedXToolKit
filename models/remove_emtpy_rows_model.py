@@ -1,5 +1,5 @@
 # ...existing code...
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 import pandas as pd
 
 def remove_empty_rows_model(df: pd.DataFrame, column: str) -> pd.DataFrame:

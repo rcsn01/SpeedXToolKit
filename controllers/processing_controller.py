@@ -2,7 +2,7 @@ from views import *
 from controllers.save_controller import *
 from models import *
 import pandas as pd
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 
 #=====================================================================
 #======================= Data Transformations ========================

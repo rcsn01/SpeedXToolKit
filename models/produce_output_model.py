@@ -1,4 +1,4 @@
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 
 
 def produce_output_model(df, input_columns):

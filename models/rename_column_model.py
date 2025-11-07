@@ -1,5 +1,5 @@
 import pandas as pd
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 from models.dataframe_model import *
 
 def rename_column_model(df, target_name, new_name):

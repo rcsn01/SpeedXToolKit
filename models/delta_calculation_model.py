@@ -1,5 +1,5 @@
 import pandas as pd
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 
 def delta_calculation_model(df, column1, column2, delta):
     """

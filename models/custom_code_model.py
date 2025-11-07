@@ -1,4 +1,4 @@
-from tkinter import messagebox
+from views.ctk_dialogs import messagebox
 import pandas as pd
 
 def custom_code_model(df, code):
