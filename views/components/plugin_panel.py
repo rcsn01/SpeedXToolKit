@@ -282,7 +282,20 @@ class PluginPanel(ctk.CTkFrame):
             # Update or create listbox
             if self.plugins_listbox:
                 # adapter supports delete(start, end) but END constant not used
-                self.plugins_listbox.delete(0, None)
+                # pass a non-None end value to trigger the 'clear all' branch
+                try:
+                    self.plugins_listbox.delete(0, 'end')
+                except Exception:
+                    # fallback: if adapter behaves differently, try clearing by
+                    # deleting all rows via a non-int start to hit the clear-all path
+                    try:
+                        self.plugins_listbox.delete('all', None)
+                    except Exception:
+                        # as ultimate fallback, recreate the listbox
+                        try:
+                            self.plugins_listbox.delete(0, None)
+                        except Exception:
+                            pass
                 for item in items:
                     self.plugins_listbox.insert('end', item)
             else:

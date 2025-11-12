@@ -45,7 +45,7 @@ class SidebarPanel(ctk.CTkFrame):
         )
         self.transform_label.pack(fill='x', pady=(8, 4))
         
-        # Add transform buttons
+        # Add transform buttons inside a scrollable frame so they are all accessible
         self._create_transform_buttons()
         
         # Toggle button for collapsing sidebar
@@ -72,15 +72,33 @@ class SidebarPanel(ctk.CTkFrame):
             ("Custom Code", self.controller.custom_code),
             ("Remove Empty Rows", self.controller.remove_empty_rows),
         ]
-        # Use centralized sidebar button style
-        for text, cmd in btn_specs:
-            btn = ctk.CTkButton(
-                self.side_menu,
-                text=text,
-                command=cmd,
-                **ButtonStyles.SIDEBAR
-            )
-            btn.pack(fill='x', pady=6, padx=6)
+        # Put transform buttons in a scrollable area so long lists can be scrolled
+        try:
+            # CTkScrollableFrame provides an internal scrollbar and handles
+            # vertical scrolling for contents. Use transparent bg to inherit
+            # sidebar color.
+            self.transform_scroll = ctk.CTkScrollableFrame(self.side_menu, fg_color="transparent")
+            # Give it some padding and allow it to expand vertically inside side_menu
+            self.transform_scroll.pack(fill='both', expand=True, pady=(0, 8))
+
+            for text, cmd in btn_specs:
+                btn = ctk.CTkButton(
+                    self.transform_scroll,
+                    text=text,
+                    command=cmd,
+                    **ButtonStyles.SIDEBAR
+                )
+                btn.pack(fill='x', pady=6, padx=6)
+        except Exception:
+            # Fallback to previous simple layout if CTkScrollableFrame isn't available
+            for text, cmd in btn_specs:
+                btn = ctk.CTkButton(
+                    self.side_menu,
+                    text=text,
+                    command=cmd,
+                    **ButtonStyles.SIDEBAR
+                )
+                btn.pack(fill='x', pady=6, padx=6)
     
     def get_selected_plugin(self):
         """Get selected plugin from the plugin panel"""

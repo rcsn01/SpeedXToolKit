@@ -345,7 +345,7 @@ class AppConfig:
     """Application-wide configuration constants"""
     
     # Edit these to change basic app settings
-    VERSION = "3.6"                    # App version (displayed in UI)
+    VERSION = "3.5.1"                    # App version (displayed in UI)
     TITLE = "Pearl "                    # Window title
     WINDOW_SIZE = "1280x780"           # Default window size (WIDTHxHEIGHT)
     APPEARANCE_MODE = "light"          # Default theme: "light", "dark", or "system"
