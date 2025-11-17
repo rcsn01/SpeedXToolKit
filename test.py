@@ -30,6 +30,7 @@ customisable_metadata: dict[str, str] = {
 # DO NOT EDIT BELOW THIS LINE
 # ========================================================================
 
+# Metadata columns (auto keep no need to list in manual keep)
 metadata: dict[str, str] = {"File Name": "Filename(s)", 
                             "Runfilecreated by user": "",
                             "Analysis cread by user": "Analysis created by",
@@ -67,10 +68,8 @@ if 'Target_1_wells' in df.columns:
     # Drop exact duplicates in the Target_1_wells column while preserving row order
     df = df[~df['Target_1_wells'].duplicated(keep='first')].reset_index(drop=True)
 
-
-
 # ========================================================================
-# CORE LOGIC
+# Result Interpretation and Main Table Building
 # ========================================================================
 
 # Build the `main_df` with the requested columns and mappings.
@@ -134,6 +133,8 @@ if 'SampleType' in df.columns:
     regular_mask = pd.Series(regular_mask.values, index=df.index)
     # Also create mask for PositiveControl samples and a combined apply mask
     positive_mask = pd.Series((df['SampleType'] == 'PositiveControl').values, index=df.index)
+    positive_mask = pd.Series((df['SampleType'] == 'Negative control').values, index=df.index)
+
 
 else:
     regular_mask = pd.Series([False] * n, index=df.index)
@@ -163,6 +164,8 @@ overall_series.loc[mask3] = "M. genitalium not detected. IC valid"
 mask6 = regular_mask & (~t3)
 result_series.loc[mask6] = "Invalid"
 overall_series.loc[mask6] = "IC invalid"
+
+# ==================== Positive Control ========================
 
 # Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
 mask6 = positive_mask & t1
