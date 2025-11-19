@@ -46,11 +46,12 @@ class MainView(ctk.CTkFrame):
     def _refresh_ui_colors(self):
         """Refresh all UI components to apply new colors from styles"""
         # Update header
-        self.header.configure(fg_color=PanelStyles.HEADER["fg_color"])
+        # self.header.configure(fg_color=PanelStyles.HEADER["fg_color"]) # Auto-handled by CTk
+        
         # Dynamically set text colors based on theme
-        is_dark = AppColors.WHITE == "#1a1a1a" or AppColors.BLACK == "#ffffff"
-        header_text_color = AppColors.BLACK if not is_dark else AppColors.BLACK
-        version_text_color = AppColors.BLACK if not is_dark else AppColors.BLACK
+        is_dark = ctk.get_appearance_mode().lower() == "dark"
+        header_text_color = "white" if is_dark else "black"
+        version_text_color = "white" if is_dark else "black"
         demo_text_color = AppColors.MEDIUM_GRAY
         self.header.title_label.configure(text_color=header_text_color)
         self.header.version_label.configure(text_color=version_text_color)
@@ -58,33 +59,15 @@ class MainView(ctk.CTkFrame):
         self.header.refresh_logo()
 
         # Update toolbar
-        self.toolbar.configure(fg_color=PanelStyles.TOOLBAR["fg_color"])
-        for btn_name, btn in self.toolbar.buttons.items():
-            btn.configure(
-                fg_color=ButtonStyles.DEFAULT["fg_color"],
-                hover_color=ButtonStyles.DEFAULT["hover_color"],
-                text_color=ButtonStyles.DEFAULT["text_color"]
-            )
-
+        # self.toolbar.configure(fg_color=PanelStyles.TOOLBAR["fg_color"]) # Auto-handled by CTk
+        
         # Update sidebar
-        self.sidebar.configure(fg_color=PanelStyles.SIDEBAR["fg_color"])
-        self.sidebar.left_container.configure(fg_color=PanelStyles.SIDEBAR["fg_color"])
-        self.sidebar.side_menu.configure(fg_color=PanelStyles.SIDEBAR_MENU["fg_color"])
-        self.sidebar.transform_label.configure(text_color=AppColors.BLACK)
-
-        if hasattr(self.sidebar, 'toggle_btn'):
-            self.sidebar.toggle_btn.configure(
-                fg_color=ButtonStyles.TOGGLE_ALT["fg_color"],
-                hover_color=ButtonStyles.TOGGLE_ALT["hover_color"]
-            )
-
-        for widget in self.sidebar.side_menu.winfo_children():
-            if isinstance(widget, ctk.CTkButton) and widget != self.sidebar.toggle_btn:
-                widget.configure(
-                    fg_color=ButtonStyles.SIDEBAR["fg_color"],
-                    hover_color=ButtonStyles.SIDEBAR["hover_color"],
-                    text_color=ButtonStyles.SIDEBAR["text_color"]
-                )
+        # self.sidebar.configure(fg_color=PanelStyles.SIDEBAR["fg_color"]) # Auto-handled by CTk
+        # self.sidebar.left_container.configure(fg_color=PanelStyles.SIDEBAR["fg_color"]) # Auto-handled by CTk
+        # self.sidebar.side_menu.configure(fg_color=PanelStyles.SIDEBAR_MENU["fg_color"]) # Auto-handled by CTk
+        
+        # Sidebar label text color needs manual update if not using tuple in style
+        self.sidebar.transform_label.configure(text_color="white" if is_dark else "black")
 
         if hasattr(self.sidebar, 'plugin_panel'):
             self.sidebar.plugin_panel.refresh_colors()

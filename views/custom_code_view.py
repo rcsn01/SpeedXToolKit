@@ -10,6 +10,19 @@ def custom_code_view():
     root.resizable(True, True)
     root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
 
+    # Ensure window is on top and modal
+    root.lift()
+    root.focus_force()
+    root.grab_set()
+    try:
+        # Try to attach to the main window if available
+        if hasattr(ctk, "_get_ancestor_window"):
+            parent = ctk._get_ancestor_window()
+            if parent:
+                root.transient(parent)
+    except Exception:
+        pass
+
     result = {"confirmed": False, "code": ""}
 
     def on_confirm():

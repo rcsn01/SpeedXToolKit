@@ -39,7 +39,7 @@ def test_drop_rename_pivot_keep_produce_custom_remove(monkeypatch):
     assert 'Output' in out_df.columns
 
     # custom_code
-    monkeypatch.setattr(pc, 'custom_code_view', lambda: {'code': "df['D']=1"})
+    monkeypatch.setattr(pc, 'custom_code_view', lambda: {'code': "df['D']=1", 'confirmed': True})
     out_df, out_store = pc.custom_code(df.copy(), store.copy())
     assert 'D' in out_df.columns
 

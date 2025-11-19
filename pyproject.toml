@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SpeedXToolKit"
+version = "0.1.0"
+description = "A tool for processing Excel and CSV files with custom plugins."
+readme = "readme.md"
+requires-python = ">=3.8"
+authors = [
+  { name = "rcsn01" },
+]
+dependencies = [
+    "et_xmlfile==2.0.0",
+    "numpy==2.3.2",
+    "openpyxl==3.1.5",
+    "Pillow==12.0.0",
+    "pandas==2.3.1",
+    "python-dateutil==2.9.0.post0",
+    "pytz==2025.2",
+    "six==1.17.0",
+    "tzdata==2025.2",
+    "xlrd==2.0.2",
+    "xlwt==1.3.0",
+    "chardet==5.2.0",
+    "customtkinter>=5.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==7.4.0",
+    "pytest-cov==4.1.0",
+    "pytest-mock==3.10.0",
+    "requests-mock==1.11.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["controllers*", "models*", "views*", "styles.py", "main.py"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

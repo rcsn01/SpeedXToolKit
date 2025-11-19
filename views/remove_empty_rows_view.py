@@ -6,11 +6,23 @@ from styles import TkinterDialogStyles
 def remove_empty_rows_view(df):
     """Allow the user to select a column from the DataFrame and rename it."""
     try:
-        root = ctk.CTk()
+        root = ctk.CTkToplevel()
         root.title("Remove Empty Rows")
         # Slightly smaller window but allow selector to be wider and expand
         root.geometry("480x150")
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         result = {"confirmed": False, "target_name": ""}
 
@@ -44,11 +56,9 @@ def remove_empty_rows_view(df):
             result["confirmed"] = True
             result["target_name"] = selected_column
 
-            root.quit()
             root.destroy()
 
         def on_cancel():
-            root.quit()
             root.destroy()
 
         # Button Frame
@@ -60,7 +70,7 @@ def remove_empty_rows_view(df):
         ctk.CTkButton(btn_fr, text="Confirm", command=on_confirm, width=90).grid(row=0, column=0, padx=8)
         ctk.CTkButton(btn_fr, text="Cancel", command=on_cancel, width=90).grid(row=0, column=1, padx=8)
 
-        root.mainloop()
+        root.wait_window()
 
         if result["confirmed"]:
             return df, result["target_name"]

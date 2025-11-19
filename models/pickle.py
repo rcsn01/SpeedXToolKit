@@ -56,9 +56,11 @@ def pickle_to_essay(collection):
                 working.append(loaded)
                 existing_names.add(loaded.get('name'))
         except (pickle.PickleError, EOFError) as e:
-            print(f"Error loading {file.name}: {e}")
+            # Log error or re-raise if critical. For now, we skip corrupted files.
+            pass 
         except Exception as e:
-            print(f"Unexpected error with {file.name}: {e}")
+            # Log error or re-raise if critical.
+            pass
 
     if input_was_dict:
         return {item.get('name'): item for item in working if item.get('name')}

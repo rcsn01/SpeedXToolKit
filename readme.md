@@ -11,11 +11,24 @@ python -m venv .venv
 ```
 source .venv/bin/activate
 ```
-pip install -r requirements.txt
+
+# Install dependencies (uses pyproject.toml)
+pip install .
+
+# For development (editable mode with dev dependencies)
+pip install -e .[dev]
 
 ## Running
 ```
 python main.py
+```
+
+## Testing
+To run the test suite, ensure you have installed the dev dependencies (`pip install -e .[dev]`).
+
+Run tests using pytest:
+```bash
+pytest
 ```
 
 ## Building Executable (PyInstaller)

@@ -5,10 +5,22 @@ from styles import TkinterDialogStyles, AppColors, AppFonts, ButtonStyles
 def drop_column_view(df):
     """Display all columns with checkboxes and allow user to select which ones to keep."""
     try:
-        root = ctk.CTk()
+        root = ctk.CTkToplevel()
         root.title("Remove Columns")
         root.geometry("460x420")
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -22,10 +34,8 @@ def drop_column_view(df):
             result["selected_columns"] = selected
             # Closing the window
             root.destroy()
-            root.quit()
 
         def on_cancel():
-            root.quit()
             root.destroy()
 
         # Instruction label (use centralized fonts/colors)
@@ -50,7 +60,7 @@ def drop_column_view(df):
         ctk.CTkButton(button_frame, text="Confirm", command=on_confirm, **ButtonStyles.DEFAULT).grid(row=0, column=0, padx=8)
         ctk.CTkButton(button_frame, text="Cancel", command=on_cancel, **ButtonStyles.DEFAULT).grid(row=0, column=1, padx=8)
 
-        root.mainloop()
+        root.wait_window()
 
         if result["confirmed"]:
             rstring = ", ".join(result["selected_columns"])

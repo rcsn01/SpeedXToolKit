@@ -6,10 +6,22 @@ from styles import TkinterDialogStyles, AppFonts, ButtonStyles
 def rename_column_view(df):
     """Allow the user to select a column from the DataFrame and rename it."""
     try:
-        root = ctk.CTk()
+        root = ctk.CTkToplevel()
         root.title("Rename Column")
         root.geometry("600x200")
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         result = {"confirmed": False, "target_name": "", "new_name": ""}
 
@@ -63,11 +75,9 @@ def rename_column_view(df):
             result["target_name"] = selected_column
             result["new_name"] = new_name
 
-            root.quit()
             root.destroy()
 
         def on_cancel():
-            root.quit()
             root.destroy()
 
         # Button Frame
@@ -86,7 +96,7 @@ def rename_column_view(df):
             **ButtonStyles.DEFAULT,
         ).grid(row=0, column=1, padx=10)
 
-        root.mainloop()
+        root.wait_window()
 
         if result["confirmed"]:
             return df, result["target_name"], result["new_name"]

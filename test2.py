@@ -15,9 +15,7 @@ df = pd.read_csv(path)
 # ========================================================================
 
 # Editable variables
-target_1 = "MgPa"
-target_2 = "23S rRNA mutation"
-target_3 = "IC"
+# None
 
 # ========================================================================
 # DO NOT EDIT BELOW THIS LINE
@@ -128,78 +126,86 @@ df.insert(3, 'Overall Result', '')
 # ========================================================================
 # Result Interpretation
 # ========================================================================
+# Build a stable list of target names detected earlier (from the long->wide conversion)
+# `all_targets` was collected before pivoting; fall back to scanning columns if missing.
+try:
+    target_names = sorted(all_targets)
+except NameError:
+    # Derive from dataframe columns like "<target> Cq"
+    target_names = sorted({col.rsplit(' ', 1)[0] for col in df.columns if col.endswith(' Cq')})
 
-# Helper to determine whether a series cell 'has a value' (non-null and not empty)
-def _has_value(series: pd.Series) -> pd.Series:
-    return series.notna() & (series.astype(str).str.strip() != "")
+# Helper to check whole-word membership without using `re`.
+def _has_word(s, words):
+    if not isinstance(s, str):
+        return False
+    low = s.lower()
+    # Replace non-alphanumeric characters with spaces, then check tokens
+    tokens = ''.join(ch if ch.isalnum() else ' ' for ch in low).split()
+    for w in words:
+        if w.lower() in tokens:
+            return True
+    return False
 
-# Get number of rows
-n = len(df)
+# Identify internal-control-like targets (names containing 'ic', 'internal', or 'control')
+ic_candidates = [t for t in target_names if _has_word(t, ['ic', 'internal', 'control'])]
 
-if f'{target_1} Cq' in df.columns:
-    t1 = _has_value(df[f'{target_1} Cq'])
-else:
-    # Create with df.index so boolean mask aligns with original rows
-    t1 = pd.Series([False] * n, index=df.index)
+def interpret_row(row):
+    detected = []
+    non_ic_targets = [t for t in target_names if t not in ic_candidates]
 
-if f'{target_2} Cq' in df.columns:
-    t2 = _has_value(df[f'{target_2} Cq'])
-else:
-    t2 = pd.Series([False] * n, index=df.index)
+    for t in non_ic_targets:
+        cq_col = f"{t} Cq"
+        notif_col = f"{t} Notifications"
 
-if f'{target_3} Cq' in df.columns:
-    t3 = _has_value(df[f'{target_3} Cq'])
-else:
-    t3 = pd.Series([False] * n, index=df.index)
+        # Consider a target 'detected' if it has a non-missing Cq or a notification indicating detection/mutation/pos
+        has_cq = (cq_col in row.index and pd.notna(row[cq_col]))
+        has_notif = False
+        if notif_col in row.index and isinstance(row[notif_col], str):
+            low_notif = row[notif_col].lower()
+            # simple substring checks (case-insensitive)
+            if any(k in low_notif for k in ('detect', 'mutation', 'pos', 'positive')):
+                has_notif = True
+        if has_cq or has_notif:
+            detected.append(t)
 
-# Build a mask of rows where SampleType == 'Regular'.
-# If SampleType column is missing, treat no rows as Regular (so nothing is applied).
-if 'SampleType' in df.columns:
-    regular_mask = (df['SampleType'] == 'Regular')
-    # ensure same index and boolean dtype
-    regular_mask = pd.Series(regular_mask.values, index=df.index)
-    # Also create mask for PositiveControl samples and NegativeControl samples
-    positive_mask = pd.Series((df['SampleType'] == 'PositiveControl').values, index=df.index)
-    negative_mask = pd.Series((df['SampleType'] == 'Negative control').values, index=df.index)
+    parts = []
+    if non_ic_targets:
+        if detected:
+            parts.append(", ".join(detected) + " detected")
+
+        # Report not-detected targets (those non-IC targets for which we found no evidence)
+        not_detected = [t for t in non_ic_targets if t not in detected]
+        if not_detected:
+            parts.append(", ".join(not_detected) + " not detected")
+    else:
+        parts.append("No targets available")
+
+    # Add IC status if an IC-like target exists
+    if ic_candidates:
+        ic_detected = False
+        for ic in ic_candidates:
+            ic_cq = f"{ic} Cq"
+            ic_notif = f"{ic} Notifications"
+            if (ic_cq in row.index and pd.notna(row[ic_cq])):
+                ic_detected = True
+                break
+            if ic_notif in row.index and isinstance(row[ic_notif], str):
+                low_ic_notif = row[ic_notif].lower()
+                if any(k in low_ic_notif for k in ('detect', 'pos', 'positive')):
+                    ic_detected = True
+                    break
+                ic_detected = True
+                break
+        parts.append("IC detected" if ic_detected else "IC not detected")
+
+    return ", ".join(parts)
+
+# Populate the Overall Result column using the interpretation function
+if 'Overall Result' not in df.columns:
+    df.insert(3, 'Overall Result', '')
+df['Overall Result'] = df.apply(interpret_row, axis=1)
 
 
-else:
-    regular_mask = pd.Series([False] * n, index=df.index)
-    positive_mask = pd.Series([False] * n, index=df.index)
-    negative_mask = pd.Series([False] * n, index=df.index)
-
-# Prepare default empty result/overall series and apply rules vectorised
-# Use df.index so later boolean masks align correctly with these Series
-overall_series = pd.Series([''] * n, index=df.index)
-
-# Rule A: Only apply to Regular samples: t1 AND t2 AND t3 -> Positive, mutation detected
-mask1 = regular_mask & t1 & t2 & t3
-overall_series.loc[mask1] = "M. genitalium, 23S rRNA mutation detected."
-
-# Rule B: Only apply to Regular samples
-mask2 = regular_mask & t1 & (~t2) & t3
-overall_series.loc[mask2] = "M. genitalium detected, 23S rRNA mutation not detected."
-
-# Rule C: Only apply to Regular samples
-mask3 = regular_mask & (~t1) & (~t2) & t3
-overall_series.loc[mask3] = "M. genitalium not detected. IC valid"
-
-# Rule D: Only apply to Regular samples: IC invalid
-mask4 = regular_mask & (~t3)
-overall_series.loc[mask4] = "IC invalid"
-
-# ==================== Positive Control ========================
-
-# Rule E: Positive Control is valid if t1 is detected
-mask5 = positive_mask & t1
-overall_series.loc[mask5] = "Positive Control valid."
-
-# Rule F: Positive Control is invalid if t1 is not detected
-mask6 = positive_mask & (~t1)
-overall_series.loc[mask6] = "Positive Control invalid."
-
-# Assign computed values back into the main output dataframe
-df['Overall Result'] = overall_series.values
 
 # ========================================================================
 # ============================= END HERE =================================

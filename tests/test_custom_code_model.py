@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from models.custom_code_model import custom_code_model
 
 
@@ -23,6 +24,5 @@ def test_custom_code_forced_non_dataframe():
     df = pd.DataFrame({"a": [1]})
     # code that sets df to a non-DataFrame should trigger the ValueError branch
     code = "df = 5"
-    out = custom_code_model(df, code)
-    # On error the function shows an error and returns None
-    assert out is None
+    with pytest.raises(ValueError, match="The code must result in 'df' being a pandas DataFrame"):
+        custom_code_model(df, code)

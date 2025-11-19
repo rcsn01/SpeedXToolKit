@@ -7,11 +7,23 @@ def produce_output_view(df):
     """Display all columns with checkboxes and allow user to select which ones to keep."""
     try:
         # Create main dialog
-        root = ctk.CTk()  # Or use ctk.CTkToplevel() if this is a popup in an existing Tkinter app
+        root = ctk.CTkToplevel()
         root.title("Output Selection")
         root.geometry("500x500")
         # Use centralized panel/dialog colors
         root.configure(fg_color=PanelStyles.PREVIEW.get("fg_color", TkinterDialogStyles.DIALOG_BG))
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -25,10 +37,8 @@ def produce_output_view(df):
             result["selected_columns"] = selected
             # Closing the window
             root.destroy()
-            root.quit()  # (Optional: `destroy()` is usually enough to exit mainloop)
 
         def on_cancel():
-            root.quit()
             root.destroy()
 
         # Instruction label
@@ -54,8 +64,7 @@ def produce_output_view(df):
                 scrollable_frame,
                 text=col,
                 variable=var,
-                text_color=TkinterDialogStyles.CHECKBOX_FG,
-                anchor='w'
+                text_color=TkinterDialogStyles.CHECKBOX_FG
             )
             cb.pack(fill='x', anchor='w', pady=2)
             checkbox_vars[col] = var
@@ -94,7 +103,7 @@ def produce_output_view(df):
             font=default.get("font"),
         ).grid(row=0, column=1, padx=10)
 
-        root.mainloop()
+        root.wait_window()
 
         if result["confirmed"]:
             rstring = ", ".join(result["selected_columns"])

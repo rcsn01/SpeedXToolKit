@@ -1,21 +1,13 @@
-from views.ctk_dialogs import messagebox
-
-
 def drop_column_model(df, drop_input):
     """Drop specific columns from the DataFrame."""
-    try:
-        # If input is a string, convert it to a list (for backward compatibility)
-        if isinstance(drop_input, str):
-            drop_input = [col.strip() for col in drop_input.split(",")]
+    # If input is a string, convert it to a list (for backward compatibility)
+    if isinstance(drop_input, str):
+        drop_input = [col.strip() for col in drop_input.split(",")]
 
-        columns_to_drop = [col for col in drop_input if col in df.columns]
+    columns_to_drop = [col for col in drop_input if col in df.columns]
 
-        if not columns_to_drop:
-            print("No valid columns found to drop.")
-            return df  # Return original DataFrame if no valid columns to drop
+    if not columns_to_drop:
+        # print("No valid columns found to drop.") # Optional: raise warning
+        return df  # Return original DataFrame if no valid columns to drop
 
-        return df.drop(columns=columns_to_drop)
-
-    except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
-        return df  # Return original DataFrame on error
+    return df.drop(columns=columns_to_drop)

@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from models.remove_emtpy_rows_model import remove_empty_rows_model
 
 
@@ -21,6 +22,6 @@ def test_remove_empty_rows_no_column():
 
 
 def test_remove_empty_rows_invalid_input():
-    # Passing None should go through error handling and return None
-    out = remove_empty_rows_model(None, "col")
-    assert out is None
+    # Passing None should go through error handling and raise TypeError
+    with pytest.raises(TypeError, match="df must be a pandas DataFrame"):
+        remove_empty_rows_model(None, "col")
