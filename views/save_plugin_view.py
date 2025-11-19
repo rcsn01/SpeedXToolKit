@@ -40,8 +40,10 @@ def save_plugin_view():
         target_name.grid(row=0, column=1, padx=5, sticky="ew")
 
         canceled = {"value": False}
+        result = {"name": None}
 
         def on_confirm():
+            result["name"] = target_name.get().strip()
             root.destroy()
 
         def on_cancel():
@@ -57,11 +59,9 @@ def save_plugin_view():
 
         if canceled["value"]:
             return None
-        name = target_name.get().strip()
-        return name or None
+        return result["name"] or None
     finally:
         try:
             root.destroy()
         except Exception:
             pass
-# ...existing

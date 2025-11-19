@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import sys
 import os
-from PIL import Image, ImageTk
 sys.setrecursionlimit(2000)
 
 from views.main_view import MainView
