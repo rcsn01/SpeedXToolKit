@@ -43,7 +43,7 @@ metadata: dict[str, str] = {"File Name": "Filename(s)",
                             "":""}
 
 # Manually kept columns (preserve user's explicit selection order)
-manual_keep = ['Sample ID', 'AssayResultTargetCode', 'Outcome', 'SampleType', 'Assay', 
+manual_keep = ['Sample ID', 'AssayResultTargetCode', 'Outcome', 'SampleTypeName', 'Assay', 
                'Target_1_wells', #used to map wells
          'Target_1', 'Target_1_result', 'Target_1_cq',
          'Target_2', 'Target_2_result', 'Target_2_cq',
@@ -127,18 +127,23 @@ else:
 
 # Build a mask of rows where SampleType == 'Regular'.
 # If SampleType column is missing, treat no rows as Regular (so nothing is applied).
-if 'SampleType' in df.columns:
-    regular_mask = (df['SampleType'] == 'Regular')
+if 'SampleTypeName' in df.columns:
+    regular_mask = (df['SampleTypeName'] == 'Regular')
     # ensure same index and boolean dtype
     regular_mask = pd.Series(regular_mask.values, index=df.index)
-    # Also create mask for PositiveControl samples and a combined apply mask
-    positive_mask = pd.Series((df['SampleType'] == 'PositiveControl').values, index=df.index)
-    positive_mask = pd.Series((df['SampleType'] == 'Negative control').values, index=df.index)
+    # Positive/Negative controls: use substring match (case-insensitive)
+    positive_mask = df['SampleTypeName'].str.contains(r'positive', case=False, na=False)
+    positive_mask = pd.Series(positive_mask.values, index=df.index)
+
+    negative_mask = pd.Series((df['SampleTypeName'] == 'Negative control').values, index=df.index)
+    no_template_mask = pd.Series((df['SampleTypeName'] == 'No template control').values, index=df.index)
 
 
 else:
     regular_mask = pd.Series([False] * n, index=df.index)
     positive_mask = pd.Series([False] * n, index=df.index)
+    negative_mask = pd.Series([False] * n, index=df.index)
+    no_template_mask = pd.Series([False] * n, index=df.index)
 
 # Prepare default empty result/overall series and apply rules vectorised
 # Use df.index so later boolean masks align correctly with these Series
@@ -161,21 +166,45 @@ result_series.loc[mask3] = "Negative"
 overall_series.loc[mask3] = "M. genitalium not detected. IC valid"
 
 # Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
-mask6 = regular_mask & (~t3)
-result_series.loc[mask6] = "Invalid"
-overall_series.loc[mask6] = "IC invalid"
+mask4 = regular_mask & (~t3)
+result_series.loc[mask4] = "Invalid"
+overall_series.loc[mask4] = "IC invalid"
 
 # ==================== Positive Control ========================
 
 # Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
-mask6 = positive_mask & t1
-result_series.loc[mask6] = "Positive"
-overall_series.loc[mask6] = "Positive Control valid."
+mask5 = positive_mask & t1
+result_series.loc[mask5] = "Positive"
+overall_series.loc[mask5] = "Positive Control valid."
 
 # Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
 mask6 = positive_mask & (~t1)
 result_series.loc[mask6] = "Negative"
 overall_series.loc[mask6] = "Positive Control invalid."
+
+# ==================== negative Control ========================
+
+# Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
+mask7 = negative_mask & (~t1) & (~t2) & t3
+result_series.loc[mask7] = "Positive"
+overall_series.loc[mask7] = "Negative Control valid."
+
+# Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
+mask8 = negative_mask & (t1 | t2 | (~t3))
+result_series.loc[mask8] = "Negative"
+overall_series.loc[mask8] = "Negative Control invalid."
+
+# ==================== no template Control ========================
+
+# Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
+mask9 = no_template_mask & (~t1) & (~t2) & (~t3)
+result_series.loc[mask9] = "Positive"
+overall_series.loc[mask9] = "No Template Control valid."
+
+# Rule 6: Only apply to Regular samples: t1 AND t2 AND (NOT t3) -> Positive, mutation detected, IC invalid
+mask10 = no_template_mask & (t1 | t2 | t3)
+result_series.loc[mask10] = "Negative"
+overall_series.loc[mask10] = "No Template Control invalid."
 
 # Assign computed values back into the main output dataframe
 main_df['Result'] = result_series.values
