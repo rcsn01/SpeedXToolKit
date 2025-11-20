@@ -208,6 +208,15 @@ def load_file_view(file_path):
     cache_dir = os.path.join(os.path.dirname(__file__), "file_cache")
     os.makedirs(cache_dir, exist_ok=True)
 
+    # Clean up old cache files
+    for f in os.listdir(cache_dir):
+        fp = os.path.join(cache_dir, f)
+        try:
+            if os.path.isfile(fp):
+                os.unlink(fp)
+        except Exception as e:
+            print(f"Failed to delete cache file {fp}: {e}")
+
     # Handle CSV directly where possible (avoids conversion to XLS which can change empty cells/encodings)
     converted_path = None
     if file_path.lower().endswith(".csv"):
