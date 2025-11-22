@@ -73,64 +73,58 @@ class ButtonStyles:
     """Reusable button style configurations"""
     
     # Default toolbar button style - Used for: Save, Load, Clear buttons in toolbar
-    # Edit width/height to resize buttons, corner_radius to change roundness
-    # Edit fg_color (background), hover_color (on mouse over), text_color
     DEFAULT = {
         "width": 100,            # Button width in pixels
         "height": 30,            # Button height in pixels
         "corner_radius": 8,      # Roundness of corners (0 = square, higher = rounder)
-        "fg_color": "white",     # Background color (changes for dark mode)
-        "hover_color": "#f0f0f0", # Color when mouse hovers over
-        "text_color": "black",   # Text color (changes for dark mode)
-    "font": AppFonts.BODY    # Font style
+        "fg_color": ("white", "#404040"),     # (Light, Dark)
+        "hover_color": ("#f0f0f0", "#505050"), # (Light, Dark)
+        "text_color": ("black", "white"),   # (Light, Dark)
+        "font": AppFonts.BODY    # Font style
     }
     
     # Sidebar transform button style - Used for: Transform operation buttons
-    # Edit these values to change sidebar button appearance
     SIDEBAR = {
         "width": 120,
         "height": 30,
         "corner_radius": 8,
-        "fg_color": "white",
-        "hover_color": "#f0f0f0",
-        "text_color": "black",
-    "font": AppFonts.BODY
+        "fg_color": ("white", "#404040"),
+        "hover_color": ("#f0f0f0", "#505050"),
+        "text_color": ("black", "white"),
+        "font": AppFonts.BODY
     }
     
     # Sidebar toggle button style - Used for: Expand/collapse sidebar button
-    # Small square button, edit size for larger/smaller toggle
     TOGGLE = {
         "width": 30,
         "height": 30,
         "corner_radius": 6,
-        "fg_color": "white",
-        "hover_color": "#c0c0c0",
-    "font": AppFonts.BODY
+        "fg_color": ("white", "#404040"),
+        "hover_color": ("#c0c0c0", "#505050"),
+        "font": AppFonts.BODY
     }
     
     # Toolbar toggle button (alternate style) - Used for: Various toolbar toggles
     TOGGLE_ALT = {
         "width": 10,
         "corner_radius": 8,
-        "fg_color": "white",
-        "hover_color": "#b1b1b1",
-    "font": AppFonts.BODY
+        "fg_color": ("white", "#404040"),
+        "hover_color": ("#b1b1b1", "#505050"),
+        "font": AppFonts.BODY
     }
     
     # Plugin panel buttons - Used for: Apply/Refresh buttons in plugin panel
-    # Edit these to change plugin control button appearance
     PLUGIN = {
         "width": 70,
         "height": 30,
         "corner_radius": 8,
-        "fg_color": "white",
-        "hover_color": "#f0f0f0",
-        "text_color": "black",
-    "font": AppFonts.BODY
+        "fg_color": ("white", "#404040"),
+        "hover_color": ("#f0f0f0", "#505050"),
+        "text_color": ("black", "white"),
+        "font": AppFonts.BODY
     }
     
     # Primary action button - Used for: Apply in settings, confirm dialogs
-    # Uses brand colors (BLUE/PURPLE) for prominent call-to-action buttons
     PRIMARY = {
         "width": 100,
         "height": 30,
@@ -138,54 +132,12 @@ class ButtonStyles:
         "fg_color": AppColors.BLUE,     # Brand blue - makes it stand out
         "hover_color": AppColors.PURPLE, # Changes to purple on hover
         "text_color": "white",
-    "font": AppFonts.BODY
+        "font": AppFonts.BODY
     }
     
     # ========================================================================
-    # THEME SWITCHING METHODS - Automatically updates buttons for dark/light mode
-    # Don't edit these unless you want custom dark mode colors
+    # THEME SWITCHING METHODS - REMOVED (Handled automatically by CTk tuples)
     # ========================================================================
-    @staticmethod
-    def update_for_dark_mode():
-        """Update button styles for dark mode - Auto-called when switching to dark mode"""
-        ButtonStyles.DEFAULT["fg_color"] = "#404040"
-        ButtonStyles.DEFAULT["hover_color"] = "#505050"
-        ButtonStyles.DEFAULT["text_color"] = "white"
-        
-        ButtonStyles.SIDEBAR["fg_color"] = "#404040"
-        ButtonStyles.SIDEBAR["hover_color"] = "#505050"
-        ButtonStyles.SIDEBAR["text_color"] = "white"
-        
-        ButtonStyles.TOGGLE["fg_color"] = "#404040"
-        ButtonStyles.TOGGLE["hover_color"] = "#505050"
-        
-        ButtonStyles.TOGGLE_ALT["fg_color"] = "#404040"
-        ButtonStyles.TOGGLE_ALT["hover_color"] = "#505050"
-        
-        ButtonStyles.PLUGIN["fg_color"] = "#404040"
-        ButtonStyles.PLUGIN["hover_color"] = "#505050"
-        ButtonStyles.PLUGIN["text_color"] = "white"
-    
-    @staticmethod
-    def update_for_light_mode():
-        """Update button styles for light mode - Auto-called when switching to light mode"""
-        ButtonStyles.DEFAULT["fg_color"] = "white"
-        ButtonStyles.DEFAULT["hover_color"] = "#f0f0f0"
-        ButtonStyles.DEFAULT["text_color"] = "black"
-        
-        ButtonStyles.SIDEBAR["fg_color"] = "white"
-        ButtonStyles.SIDEBAR["hover_color"] = "#f0f0f0"
-        ButtonStyles.SIDEBAR["text_color"] = "black"
-        
-        ButtonStyles.TOGGLE["fg_color"] = "white"
-        ButtonStyles.TOGGLE["hover_color"] = "#c0c0c0"
-        
-        ButtonStyles.TOGGLE_ALT["fg_color"] = "white"
-        ButtonStyles.TOGGLE_ALT["hover_color"] = "#b1b1b1"
-        
-        ButtonStyles.PLUGIN["fg_color"] = "white"
-        ButtonStyles.PLUGIN["hover_color"] = "#f0f0f0"
-        ButtonStyles.PLUGIN["text_color"] = "black"
 
 
 # ============================================================================
@@ -196,68 +148,38 @@ class PanelStyles:
     """Panel/Frame style configurations"""
     
     # Header panel - Top section with SpeedXToolKit logo
-    # Edit height to make header taller/shorter, fg_color for background
     HEADER = {
-        "fg_color": AppColors.WHITE,  # Background color
+        "fg_color": (AppColors.WHITE, "#1a1a1a"),  # (Light, Dark)
         "height": 50                  # Height in pixels
     }
     
     # Toolbar panel - Contains Save, Load, Clear buttons
-    # Edit height and fg_color to change toolbar appearance
     TOOLBAR = {
-        "fg_color": AppColors.LIGHT_BLUE,  # Light blue background
+        "fg_color": (AppColors.LIGHT_BLUE, "#2b2b2b"),  # (Light, Dark)
         "height": 50,                      # Height in pixels
         "corner_radius": 0                 # 0 = square corners
     }
     
     # Sidebar panel - Left side with transformation buttons
-    # Edit width to make sidebar wider/narrower
     SIDEBAR = {
-        "fg_color": AppColors.LIGHT_BLUE,  # Matches toolbar color
+        "fg_color": (AppColors.LIGHT_BLUE, "#2b2b2b"),  # (Light, Dark)
         "width": 220                       # Width in pixels
     }
     
     # Sidebar menu - Inner menu container
     SIDEBAR_MENU = {
-        "fg_color": AppColors.LIGHT_BLUE,
+        "fg_color": (AppColors.LIGHT_BLUE, "#2b2b2b"),
         "width": 200
     }
     
     # Preview panel - Right side showing data preview
-    # Edit fg_color to change preview background
     PREVIEW = {
-        "fg_color": AppColors.WHITE  # White background for data viewing
+        "fg_color": (AppColors.WHITE, "#2b2b2b")  # (Light, Dark)
     }
     
     # ========================================================================
-    # THEME SWITCHING - Updates toolbar and sidebar colors for dark/light mode
-    # EDIT THESE to change toolbar/sidebar colors in DARK MODE
+    # THEME SWITCHING - REMOVED (Handled automatically by CTk tuples)
     # ========================================================================
-    @staticmethod
-    def update_for_dark_mode():
-        """Update panel styles for dark mode - Auto-called when switching to dark mode
-        
-        EDIT THESE VALUES to change toolbar and sidebar colors in dark mode:
-        - TOOLBAR fg_color: Background color of top toolbar (default: dark gray #2b2b2b)
-        - SIDEBAR fg_color: Background color of left sidebar (default: dark gray #2b2b2b)
-        - SIDEBAR_MENU fg_color: Background of sidebar menu (default: dark gray #2b2b2b)
-        - HEADER fg_color: Background of header (default: darker gray #1a1a1a)
-        - PREVIEW fg_color: Background of preview panel (default: dark gray #2b2b2b)
-        """
-        PanelStyles.TOOLBAR["fg_color"] = "#2b2b2b"      # Dark gray toolbar
-        PanelStyles.SIDEBAR["fg_color"] = "#2b2b2b"      # Dark gray sidebar
-        PanelStyles.SIDEBAR_MENU["fg_color"] = "#2b2b2b" # Dark gray sidebar menu
-        PanelStyles.HEADER["fg_color"] = "#1a1a1a"       # Darker gray header
-        PanelStyles.PREVIEW["fg_color"] = "#2b2b2b"      # Dark gray preview
-    
-    @staticmethod
-    def update_for_light_mode():
-        """Update panel styles for light mode - Auto-called when switching to light mode"""
-        PanelStyles.TOOLBAR["fg_color"] = AppColors.LIGHT_BLUE  # Light blue toolbar
-        PanelStyles.SIDEBAR["fg_color"] = AppColors.LIGHT_BLUE  # Light blue sidebar
-        PanelStyles.SIDEBAR_MENU["fg_color"] = AppColors.LIGHT_BLUE
-        PanelStyles.HEADER["fg_color"] = AppColors.WHITE        # White header
-        PanelStyles.PREVIEW["fg_color"] = AppColors.WHITE       # White preview
 
 
 # ============================================================================

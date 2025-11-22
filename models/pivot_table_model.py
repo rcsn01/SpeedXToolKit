@@ -1,4 +1,3 @@
-from views.ctk_dialogs import messagebox
 import pandas as pd
 
 def pivot_table_model(df, target, value):
@@ -11,8 +10,7 @@ def pivot_table_model(df, target, value):
     # but we reject entries that are non-numeric *and* not originally NaN
     # (for example strings like 'N/A').
     if value not in df.columns:
-        messagebox.showerror("Error", f"Column '{value}' not found in the data.")
-        return df
+        raise ValueError(f"Column '{value}' not found in the data.")
     # Work on a copy to avoid mutating the caller's DataFrame
     df = df.copy()
 
@@ -34,11 +32,9 @@ def pivot_table_model(df, target, value):
     if invalid_mask.any():
         bad_vals = pd.Series(df.loc[invalid_mask, value].unique())
         sample = bad_vals.head(5).tolist()
-        messagebox.showerror(
-            "Error",
+        raise ValueError(
             f"Non-numeric values present in '{value}': {sample}. Convert or remove them before pivoting."
         )
-        return df
 
     # Replace the column with the coerced numeric values (NaNs preserved)
     df[value] = coerced
@@ -46,16 +42,12 @@ def pivot_table_model(df, target, value):
     # Determine index columns by excluding target and value columns
     index_columns = [col for col in df.columns if col not in [target, value]]
 
-    try:
-        # Use groupby + unstack instead of pivot_table so rows where all
-        # aggregated values are NaN are preserved. groupby(...).first()
-        # will pick the first (possibly NaN) value for duplicate groups.
-        grouped = df.groupby(index_columns + [target], dropna=False)[value].first()
-        df_pivot = grouped.unstack(target)
+    # Use groupby + unstack instead of pivot_table so rows where all
+    # aggregated values are NaN are preserved. groupby(...).first()
+    # will pick the first (possibly NaN) value for duplicate groups.
+    grouped = df.groupby(index_columns + [target], dropna=False)[value].first()
+    df_pivot = grouped.unstack(target)
 
-        # Reset index to turn the index columns back into regular columns
-        df_pivot = df_pivot.reset_index()
-        return df_pivot
-    except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
-        return df
+    # Reset index to turn the index columns back into regular columns
+    df_pivot = df_pivot.reset_index()
+    return df_pivot

@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import sys
 import os
-from PIL import Image, ImageTk
 sys.setrecursionlimit(2000)
 
 from views.main_view import MainView
@@ -20,7 +19,7 @@ class XLSProcessorApp(ctk.CTk):
         ctk.set_appearance_mode(appearance_mode)
         ctk.set_default_color_theme(AppConfig.COLOR_THEME)
         # Call the internal method to update all colors/styles
-        SettingsDialog._update_colors_for_mode(None, appearance_mode)
+        SettingsDialog._update_colors_for_mode(appearance_mode)
 
     # Set application icon (window and taskbar)
         icon_png_path = os.path.join(os.path.dirname(__file__), "assets", "pearl.png")

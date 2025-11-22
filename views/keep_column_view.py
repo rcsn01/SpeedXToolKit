@@ -5,10 +5,22 @@ from styles import TkinterDialogStyles, AppColors, AppFonts, ButtonStyles
 def keep_column_view(df):
     """Display all columns with checkboxes and allow user to select which ones to keep."""
     try:
-        root = ctk.CTk()  # Or use ctk.CTkToplevel() if this is a popup in an existing Tkinter app
+        root = ctk.CTkToplevel()
         root.title("Keep Columns")
         root.geometry("460x420")
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -22,7 +34,6 @@ def keep_column_view(df):
             result["selected_columns"] = selected
             # Closing the window
             root.destroy()
-            root.quit()  # (Optional: `destroy()` is usually enough to exit mainloop)
 
         # Instruction label (use centralized fonts/colors)
         ctk.CTkLabel(root, text="Select the columns you want to keep:",
@@ -45,7 +56,6 @@ def keep_column_view(df):
 
         # Confirm/Cancel buttons
         def on_cancel():
-            root.quit()
             root.destroy()
 
         button_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
@@ -53,7 +63,7 @@ def keep_column_view(df):
         ctk.CTkButton(button_frame, text="Confirm", command=on_confirm, **ButtonStyles.DEFAULT).grid(row=0, column=0, padx=TkinterDialogStyles.BUTTON_PADDING)
         ctk.CTkButton(button_frame, text="Cancel", command=on_cancel, **ButtonStyles.DEFAULT).grid(row=0, column=1, padx=TkinterDialogStyles.BUTTON_PADDING)
 
-        root.mainloop()
+        root.wait_window()
 
         if result["confirmed"]:
             rstring = ", ".join(result["selected_columns"])

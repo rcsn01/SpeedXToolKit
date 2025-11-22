@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from models.delta_calculation_model import delta_calculation_model
 
 
@@ -17,7 +18,5 @@ def test_delta_calculation_basic_and_output_update():
 
 def test_delta_missing_column_returns_tuple():
     df = pd.DataFrame({"A": [1]})
-    res = delta_calculation_model(df, "A", "missing", 0)
-    # When a column is missing the function returns (df, None)
-    assert isinstance(res, tuple)
-    assert res[1] is None
+    with pytest.raises(ValueError, match="One or both specified columns not found in DataFrame"):
+        delta_calculation_model(df, "A", "missing", 0)

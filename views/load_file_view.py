@@ -208,6 +208,15 @@ def load_file_view(file_path):
     cache_dir = os.path.join(os.path.dirname(__file__), "file_cache")
     os.makedirs(cache_dir, exist_ok=True)
 
+    # Clean up old cache files
+    for f in os.listdir(cache_dir):
+        fp = os.path.join(cache_dir, f)
+        try:
+            if os.path.isfile(fp):
+                os.unlink(fp)
+        except Exception as e:
+            print(f"Failed to delete cache file {fp}: {e}")
+
     # Handle CSV directly where possible (avoids conversion to XLS which can change empty cells/encodings)
     converted_path = None
     if file_path.lower().endswith(".csv"):
@@ -237,10 +246,22 @@ def load_file_view(file_path):
         showerror("Header Detection Failed", "Could not auto-detect a header row. Please verify the file format.")
         return None, None, None
 
-    root = ctk.CTk()
+    root = ctk.CTkToplevel()
     root.title("Header Row Preview")
     root.geometry("1200x700")
     root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+
+    # Ensure window is on top and modal
+    root.lift()
+    root.focus_force()
+    root.grab_set()
+    try:
+        if hasattr(ctk, "_get_ancestor_window"):
+            parent = ctk._get_ancestor_window()
+            if parent:
+                root.transient(parent)
+    except Exception:
+        pass
 
     df_truncated = format_dataframe(df, max_length=20)
 
@@ -278,13 +299,11 @@ def load_file_view(file_path):
 
             result["header_row"] = user_header_row
             result["keep_input"] = selected_headers
-            root.quit()
             root.destroy()
         except ValueError:
             showerror("Invalid Input", "Please select valid header.")
 
     def on_cancel():
-        root.quit()
         root.destroy()
 
     # Buttons
@@ -294,7 +313,7 @@ def load_file_view(file_path):
     ctk.CTkButton(button_frame, text="Confirm", command=on_confirm, **ButtonStyles.DEFAULT).grid(row=0, column=0, padx=10)
     ctk.CTkButton(button_frame, text="Cancel", command=on_cancel, **ButtonStyles.DEFAULT).grid(row=0, column=1, padx=10)
 
-    root.mainloop()
+    root.wait_window()
 
     return df, result["header_row"], result["keep_input"]
 

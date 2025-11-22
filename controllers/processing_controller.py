@@ -11,40 +11,49 @@ from views.ctk_dialogs import messagebox
 def drop_column(df, store):
     """Drop a selected column and record the action in store['functions']."""
     view_result = drop_column_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return None, store
     df, input = view_result
-    processed_df = drop_column_model(df, input)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["drop_column_model", input])
-        return processed_df, store
+    try:
+        processed_df = drop_column_model(df, input)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["drop_column_model", input])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to drop column: {e}")
     return None, store
 
 def rename_column(df, store):
     """Rename a column and log the action."""
     view_result = rename_column_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return None, store
     df, target_name, new_name = view_result
-    processed_df = rename_column_model(df, target_name, new_name)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["rename_column_model", target_name, new_name])
-        return processed_df, store
+    try:
+        processed_df = rename_column_model(df, target_name, new_name)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["rename_column_model", target_name, new_name])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to rename column: {e}")
     return None, store
 
 def pivot_table(df, store):
     """Create a pivot table and log the action."""
     view_result = pivot_table_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return None, store
     df, target_name, new_name = view_result
-    processed_df = pivot_table_model(df, target_name, new_name)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["pivot_table_model", target_name, new_name])
-        return processed_df, store
+    try:
+        processed_df = pivot_table_model(df, target_name, new_name)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["pivot_table_model", target_name, new_name])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to create pivot table: {e}")
     return None, store
 
 def delta_calculation(df, store):
@@ -53,67 +62,82 @@ def delta_calculation(df, store):
         messagebox.showwarning("Missing Output Column", "Please generate output before using delta calculation.")
         return df, store
     view_result = delta_calculation_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return df, store
     df, var1, vaf2, delta = view_result
-    processed_df = delta_calculation_model(df, var1, vaf2, delta)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["delta_calculation_model", var1, vaf2, delta])
-        return processed_df, store
+    try:
+        processed_df = delta_calculation_model(df, var1, vaf2, delta)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["delta_calculation_model", var1, vaf2, delta])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to calculate delta: {e}")
     return None, store
 
 def produce_output(df, store):
     """Produce output column and log the action."""
     view_result = produce_output_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return None, store
     df, var1 = view_result
-    processed_df = produce_output_model(df, var1)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["produce_output_model", var1])
-        return processed_df, store
+    try:
+        processed_df = produce_output_model(df, var1)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["produce_output_model", var1])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to produce output: {e}")
     return None, store
 
 def keep_column(df, store):
     """Keep only selected columns and log the action."""
     view_result = keep_column_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return None, store
     df, input = view_result
-    processed_df = keep_column_model(df, input)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["keep_column_model", input])
-        return processed_df, store
+    try:
+        processed_df = keep_column_model(df, input)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["keep_column_model", input])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to keep columns: {e}")
     return None, store
 
 def custom_code(df, store):
     """Open custom code view, execute code, and log the action."""
     view_result = custom_code_view()
-    if not view_result:
+    if not view_result or not view_result.get("confirmed"):
         return None, store
     code = view_result["code"]
-    processed_df = custom_code_model(df, code)
-    if isinstance(processed_df, pd.DataFrame):
-        if 'functions' in store:
-            store['functions'].append(["custom_code_model", code])
-        return processed_df, store
+    try:
+        processed_df = custom_code_model(df, code)
+        if isinstance(processed_df, pd.DataFrame):
+            if 'functions' in store:
+                store['functions'].append(["custom_code_model", code])
+            return processed_df, store
+    except Exception as e:
+        messagebox.showerror("Error", f"Custom code execution failed: {e}")
     return None, store
 
 def remove_empty_rows(df, store):
     """Remove empty rows based on user-selected column and log the action."""
     view_result = remove_empty_rows_view(df)
-    if not view_result:
+    if not view_result or view_result[0] is None:
         return None, store
     df, target_name = view_result
     if isinstance(target_name, str) and isinstance(df, pd.DataFrame):
-        processed_df = remove_empty_rows_model(df, target_name)
-        if isinstance(processed_df, pd.DataFrame):
-            if 'functions' in store:
-                store['functions'].append(["remove_empty_rows_model", target_name])
-            return processed_df, store
+        try:
+            processed_df = remove_empty_rows_model(df, target_name)
+            if isinstance(processed_df, pd.DataFrame):
+                if 'functions' in store:
+                    store['functions'].append(["remove_empty_rows_model", target_name])
+                return processed_df, store
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to remove empty rows: {e}")
         return None, store
 
 #=====================================================================
@@ -238,7 +262,8 @@ def apply_plugin(df, plugin):
             if func and isinstance(rebuilt_df, pd.DataFrame):
                 rebuilt_df = func(rebuilt_df, *params)
         except Exception as e:
-            print(f"[Preset Replay] Failed on {entry}: {e}")
+            messagebox.showerror("Plugin Error", f"Failed on step {entry}: {e}")
+            # print(f"[Preset Replay] Failed on {entry}: {e}")
             continue
 
     if isinstance(rebuilt_df, pd.DataFrame):

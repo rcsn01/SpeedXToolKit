@@ -214,13 +214,24 @@ def manage_plugin_view(tuple_list):
     def on_cancel():
         nonlocal selected_tuple
         selected_tuple = None
-        root.quit()
         root.destroy()
 
     # Create the main window
-    root = ctk.CTk()
+    root = ctk.CTkToplevel()
     root.title("Manage Plugins")
     root.configure(fg_color=PanelStyles.PREVIEW.get("fg_color", TkinterDialogStyles.DIALOG_BG))
+
+    # Ensure window is on top and modal
+    root.lift()
+    root.focus_force()
+    root.grab_set()
+    try:
+        if hasattr(ctk, "_get_ancestor_window"):
+            parent = ctk._get_ancestor_window()
+            if parent:
+                root.transient(parent)
+    except Exception:
+        pass
 
     # Create a label
     if tuple_list:
@@ -331,7 +342,7 @@ def manage_plugin_view(tuple_list):
     close_button.grid(row=0, column=3, padx=5)
 
     # Run the GUI
-    root.mainloop()
+    root.wait_window()
 
     if selected_tuple:
         print("This is from manage plugin view: " + str(selected_tuple[0]))

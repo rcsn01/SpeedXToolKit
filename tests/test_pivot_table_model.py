@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from models.pivot_table_model import pivot_table_model
 
 
@@ -20,13 +21,12 @@ def test_pivot_table_invalid_non_numeric():
         {"id": 1, "category": "Y", "value": "bad"},
     ])
     # When non-numeric values that are not missing-like are present, the
-    # function returns the original DataFrame (and shows an error).
-    out = pivot_table_model(df, target="category", value="value")
-    # Because 'bad' is non-numeric and not missing, expect original df returned
-    assert list(out.columns) == list(df.columns)
+    # function raises ValueError
+    with pytest.raises(ValueError, match="Non-numeric values present"):
+        pivot_table_model(df, target="category", value="value")
 
 
 def test_pivot_table_missing_value_column_returns_original():
     df = pd.DataFrame([{"id": 1, "category": "X", "val": "10"}])
-    out = pivot_table_model(df, target="category", value="value")
-    assert list(out.columns) == list(df.columns)
+    with pytest.raises(ValueError, match="Column 'value' not found in the data"):
+        pivot_table_model(df, target="category", value="value")

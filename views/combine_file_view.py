@@ -66,11 +66,23 @@ def combine_file_view():
             return None
 
         """Display all columns with checkboxes and allow user to select which ones to keep."""
-        root = ctk.CTk()
+        root = ctk.CTkToplevel()
         root.title("Combine Files - Select Join Columns")
         root.geometry("520x560")
         # Use centralized panel/dialog colors
         root.configure(fg_color=PanelStyles.PREVIEW.get("fg_color", TkinterDialogStyles.DIALOG_BG))
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         result = {"confirmed": False, "selected_columns": []}
         checkbox_vars = {}
@@ -83,10 +95,8 @@ def combine_file_view():
             result["confirmed"] = True
             result["selected_columns"] = selected
             root.destroy()
-            root.quit()
 
         def on_cancel():
-            root.quit()
             root.destroy()
 
         # File info display
@@ -171,7 +181,7 @@ def combine_file_view():
             font=default.get("font"),
         ).grid(row=0, column=1, padx=10)
 
-        root.mainloop()
+        root.wait_window()
 
         if result["confirmed"]:
             return pd.merge(df1, df2, on=result["selected_columns"])

@@ -68,28 +68,36 @@ class HeaderPanel(ctk.CTkFrame):
         self._load_logo()
     
     def _load_logo(self):
-        """Try to load and display logo, using dark mode logo if needed"""
+        """Try to load and display logo using CTkImage"""
         try:
-            # Detect dark mode
-            is_dark = AppColors.WHITE == "#1a1a1a" or AppColors.BLACK == "#ffffff"
-            logo_file = "logo-darkmode.png" if is_dark else "logo.png"
-            logo_path = get_resource_path(f"assets/{logo_file}")
-            if logo_path.exists():
-                # Use PIL to load and resize image for consistent behavior across platforms
-                img = Image.open(logo_path)
-                # Resize to roughly one third using integer math to mimic subsample
-                try:
-                    new_size = (max(1, img.width // 3), max(1, img.height // 3))
-                    img = img.resize(new_size, Image.LANCZOS)
-                except Exception:
-                    # If image doesn't expose width/height, skip resizing
-                    pass
-                logo_img = ImageTk.PhotoImage(img)
-                self.logo_label = ctk.CTkLabel(self, image=logo_img, text="")
-                self.logo_label.image = logo_img  # Keep reference
+            light_path = get_resource_path("assets/logo.png")
+            dark_path = get_resource_path("assets/logo-darkmode.png")
+            
+            light_img = None
+            dark_img = None
+            size = None
+
+            if light_path.exists():
+                light_img = Image.open(light_path)
+                if size is None:
+                     size = (max(1, light_img.width // 3), max(1, light_img.height // 3))
+            
+            if dark_path.exists():
+                dark_img = Image.open(dark_path)
+                if size is None:
+                     size = (max(1, dark_img.width // 3), max(1, dark_img.height // 3))
+
+            if light_img or dark_img:
+                # Fallback if one is missing
+                if not light_img: light_img = dark_img
+                if not dark_img: dark_img = light_img
+                
+                logo_image = ctk.CTkImage(light_image=light_img, dark_image=dark_img, size=size)
+                
+                self.logo_label = ctk.CTkLabel(self, image=logo_image, text="")
                 self.logo_label.pack(side="right", padx=(6, 8), pady=8)
+                
         except Exception:
-            # If loading fails, silently continue without logo
             pass
     
     def update_title(self, new_title):

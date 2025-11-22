@@ -11,17 +11,30 @@ python -m venv .venv
 ```
 source .venv/bin/activate
 ```
-pip install -r requirements.txt
+
+# Install dependencies (uses pyproject.toml)
+pip install .
+
+# For development (editable mode with dev dependencies)
+pip install -e .[dev]
 
 ## Running
 ```
 python main.py
 ```
 
+## Testing
+To run the test suite, ensure you have installed the dev dependencies (`pip install -e .[dev]`).
+
+Run tests using pytest:
+```bash
+pytest
+```
+
 ## Building Executable (PyInstaller)
 Example spec/command (adjust name):
 ```
-pyinstaller --onefile --windowed --add-data "assets;assets" --name Pearl-3.6 --icon=assets/pearl.ico main.py
+pyinstaller --onefile --windowed --add-data "assets;assets" --name Pearl-3.5.2 --icon=assets/pearl.ico main.py
 ```
 Recommended additions:
 - Hidden imports if wildcard imports confuse analysis:

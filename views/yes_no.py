@@ -7,10 +7,22 @@ import numpy as np
 def yes_no_gui(question):
     """Load Excel file and allow the user to confirm the header row."""
     try:
-        root = ctk.CTk()
+        root = ctk.CTkToplevel()
         root.title(question)
         root.geometry("1000x700")
         root.configure(fg_color=TkinterDialogStyles.DIALOG_BG)
+
+        # Ensure window is on top and modal
+        root.lift()
+        root.focus_force()
+        root.grab_set()
+        try:
+            if hasattr(ctk, "_get_ancestor_window"):
+                parent = ctk._get_ancestor_window()
+                if parent:
+                    root.transient(parent)
+        except Exception:
+            pass
 
         # Create the main frame
         first_frame = ctk.CTkFrame(root, fg_color=TkinterDialogStyles.FRAME_BG)
@@ -37,13 +49,11 @@ def yes_no_gui(question):
             try:
                 result["confirmed"] = True
                 result["target_name"] = target_name.get()
-                root.quit()
                 root.destroy()
             except ValueError:
                 showerror("Invalid Input", "Please enter a valid integer for the header row.")
 
         def on_cancel():
-            root.quit()
             root.destroy()
 
         # Buttons
@@ -64,7 +74,7 @@ def yes_no_gui(question):
         ).grid(row=0, column=1, padx=10)
 
         # Run the window
-        root.mainloop()
+        root.wait_window()
 
 
         if result.get("confirmed"):

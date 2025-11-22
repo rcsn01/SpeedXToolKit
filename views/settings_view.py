@@ -136,7 +136,8 @@ class SettingsDialog(ctk.CTkToplevel):
         
         self.destroy()
     
-    def _update_colors_for_mode(self, mode):
+    @staticmethod
+    def _update_colors_for_mode(mode):
         """Update AppColors and ButtonStyles based on the selected appearance mode"""
         if mode.lower() == "dark":
             # Dark mode colors
@@ -145,12 +146,6 @@ class SettingsDialog(ctk.CTkToplevel):
             AppColors.WHITE = "#1a1a1a"  # Dark background
             AppColors.BLACK = "#ffffff"  # Light text
             AppColors.MEDIUM_GRAY = "#b0b0b0"  # Lighter gray for dark mode
-            
-            # Update button styles for dark mode
-            ButtonStyles.update_for_dark_mode()
-            
-            # Update panel styles for dark mode (toolbar and sidebar colors)
-            PanelStyles.update_for_dark_mode()
             
             # Update listbox styles for dark mode
             ListboxStyles.update_for_dark_mode()
@@ -167,12 +162,6 @@ class SettingsDialog(ctk.CTkToplevel):
             AppColors.WHITE = "#FFFFFF"
             AppColors.BLACK = "#000000"
             AppColors.MEDIUM_GRAY = "#949494"
-            
-            # Update button styles for light mode
-            ButtonStyles.update_for_light_mode()
-            
-            # Update panel styles for light mode (toolbar and sidebar colors)
-            PanelStyles.update_for_light_mode()
             
             # Update listbox styles for light mode
             ListboxStyles.update_for_light_mode()

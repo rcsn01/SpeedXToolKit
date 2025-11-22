@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from models.rename_column_model import rename_column_model
 
 
@@ -16,12 +17,12 @@ def test_rename_column_noop_and_conflict():
     out = rename_column_model(df, "a", "a")
     assert out.equals(df)
 
-    # conflict when new name exists should return None
-    conflict = rename_column_model(df, "a", "b")
-    assert conflict is None
+    # conflict when new name exists should raise ValueError
+    with pytest.raises(ValueError, match="already exists"):
+        rename_column_model(df, "a", "b")
 
 
 def test_rename_column_invalid_df():
-    # non-dataframe passed should return None
-    res = rename_column_model(None, "a", "b")
-    assert res is None
+    # non-dataframe passed should raise ValueError
+    with pytest.raises(ValueError, match="Invalid DataFrame provided"):
+        rename_column_model(None, "a", "b")
