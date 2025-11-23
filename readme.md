@@ -35,6 +35,7 @@ pytest
 Example spec/command (adjust name):
 ```
 pyinstaller --onefile --windowed --add-data "assets;assets" --name Pearl-3.5.2 --icon=assets/pearl.ico main.py
+python package_release.py
 ```
 Recommended additions:
 - Hidden imports if wildcard imports confuse analysis:
