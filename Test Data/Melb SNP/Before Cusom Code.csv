@@ -1,0 +1,29 @@
+Sample ID,AssayCode,Target_1,Target_1_wells,Target_1_result,Target_2,Target_2_wells,Target_2_result,Target_3,Target_3_wells,Target_3_result
+Pb,ResistancePlus MG (LC480),MgPa,A1,Detected,23S rRNA mutation,A1,Detected,IC,A1,Not detected
+Pb,ResistancePlus MG (LC480),MgPa,A1,Detected,23S rRNA mutation,A1,Detected,IC,A1,Not detected
+Sample 1MG,ResistancePlus MG (LC480),MgPa,A2,Detected,23S rRNA mutation,A2,Detected,IC,A2,Detected
+Sample 1MG,ResistancePlus MG (LC480),MgPa,A2,Detected,23S rRNA mutation,A2,Detected,IC,A2,Detected
+Sample 2MG,ResistancePlus MG (LC480),MgPa,B2,Not detected,23S rRNA mutation,B2,Not detected,IC,B2,Not detected
+Sample 2MG,ResistancePlus MG (LC480),MgPa,B2,Not detected,23S rRNA mutation,B2,Not detected,IC,B2,Not detected
+Sample 3MG,ResistancePlus MG (LC480),MgPa,C2,Detected,23S rRNA mutation,C2,Detected,IC,C2,Detected
+Sample 3MG,ResistancePlus MG (LC480),MgPa,C2,Detected,23S rRNA mutation,C2,Detected,IC,C2,Detected
+Sample 4MG,ResistancePlus MG (LC480),MgPa,D2,Detected,23S rRNA mutation,D2,Detected,IC,D2,Detected
+Sample 4MG,ResistancePlus MG (LC480),MgPa,D2,Detected,23S rRNA mutation,D2,Detected,IC,D2,Detected
+Sample 5MG,ResistancePlus MG (LC480),MgPa,E2,Not detected,23S rRNA mutation,E2,Not detected,IC,E2,Detected
+Sample 5MG,ResistancePlus MG (LC480),MgPa,E2,Not detected,23S rRNA mutation,E2,Not detected,IC,E2,Detected
+Sample 6MG,ResistancePlus MG (LC480),MgPa,F2,Detected,23S rRNA mutation,F2,Not detected,IC,F2,Detected
+Sample 6MG,ResistancePlus MG (LC480),MgPa,F2,Detected,23S rRNA mutation,F2,Not detected,IC,F2,Detected
+Pa,ResistancePlus MG (LC480),MgPa,B1,Detected,23S rRNA mutation,B1,Detected,IC,B1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,B1,Detected,23S rRNA mutation,B1,Detected,IC,B1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,C1,Detected,23S rRNA mutation,C1,Detected,IC,C1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,C1,Detected,23S rRNA mutation,C1,Detected,IC,C1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,D1,Detected,23S rRNA mutation,D1,Detected,IC,D1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,D1,Detected,23S rRNA mutation,D1,Detected,IC,D1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,E1,Detected,23S rRNA mutation,E1,Detected,IC,E1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,E1,Detected,23S rRNA mutation,E1,Detected,IC,E1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,F1,Detected,23S rRNA mutation,F1,Detected,IC,F1,Not detected
+Pa,ResistancePlus MG (LC480),MgPa,F1,Detected,23S rRNA mutation,F1,Detected,IC,F1,Not detected
+Nb,ResistancePlus MG (LC480),MgPa,G1,Not detected,23S rRNA mutation,G1,Not detected,IC,G1,Not detected
+Nb,ResistancePlus MG (LC480),MgPa,G1,Not detected,23S rRNA mutation,G1,Not detected,IC,G1,Not detected
+Na,ResistancePlus MG (LC480),MgPa,H1,Not detected,23S rRNA mutation,H1,Not detected,IC,H1,Detected
+Na,ResistancePlus MG (LC480),MgPa,H1,Not detected,23S rRNA mutation,H1,Not detected,IC,H1,Detected
