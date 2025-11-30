@@ -1,0 +1,136 @@
+SpeeDxToolKit (Pearl)
+Copyright (c) 2025 [SpeeDx]
+
+This software includes third-party open-source components.
+The following notices are provided for attribution and informational purposes only.
+You must not remove or alter these notices when redistributing this software.
+
+-------------------------------------------------------------------------------
+NumPy
+-------------------------------------------------------------------------------
+This product includes software developed by the NumPy community.
+
+Copyright (c) 2005-2025, NumPy Developers.
+All rights reserved.
+
+Licensed under the BSD 3-Clause License.
+https://numpy.org
+https://numpy.org/doc/stable/license.html
+
+-------------------------------------------------------------------------------
+pandas
+-------------------------------------------------------------------------------
+This product includes software developed by the pandas project and its contributors.
+
+Portions of this software are copyright (c) 2008-2025, AQR Capital Management, LLC,
+and the pandas development team.
+
+Licensed under the BSD 3-Clause License.
+https://pandas.pydata.org
+https://pandas.pydata.org/pandas-docs/stable/getting_started/overview.html#license
+
+-------------------------------------------------------------------------------
+openpyxl
+-------------------------------------------------------------------------------
+This product includes software developed by the openpyxl project.
+
+openpyxl is distributed under the MIT/Apache-2.0 dual license.
+
+Copyright (c) 2010-2025 openpyxl authors.
+All rights reserved.
+
+MIT License and Apache License, Version 2.0.
+https://foss.heptapod.net/openpyxl/openpyxl
+
+-------------------------------------------------------------------------------
+et_xmlfile
+-------------------------------------------------------------------------------
+This product includes software developed by the et_xmlfile project.
+
+et_xmlfile is licensed under the MIT License.
+https://github.com/openpyxl/et_xmlfile
+
+-------------------------------------------------------------------------------
+tzdata
+-------------------------------------------------------------------------------
+This product includes data from the IANA Time Zone Database distributed via the
+Python tzdata package.
+
+tzdata is licensed under the Apache License, Version 2.0.
+https://github.com/python/tzdata
+
+-------------------------------------------------------------------------------
+Pillow
+-------------------------------------------------------------------------------
+This product includes software developed by the Pillow project.
+
+Portions of this software are based on the Python Imaging Library (PIL).
+
+Pillow is licensed under the Historical Permission Notice and Disclaimer (HPND).
+https://python-pillow.org
+https://pillow.readthedocs.io/en/stable/about.html#license
+
+-------------------------------------------------------------------------------
+python-dateutil
+-------------------------------------------------------------------------------
+This product includes software developed by the dateutil project.
+
+python-dateutil is licensed under the BSD 3-Clause License.
+https://dateutil.readthedocs.io/en/stable/
+https://github.com/dateutil/dateutil
+
+-------------------------------------------------------------------------------
+pytz
+-------------------------------------------------------------------------------
+This product includes software developed by the pytz project.
+
+pytz is licensed under the MIT License.
+https://pythonhosted.org/pytz/
+https://github.com/stub42/pytz
+
+-------------------------------------------------------------------------------
+xlrd
+-------------------------------------------------------------------------------
+This product includes software developed by the xlrd project.
+
+xlrd is licensed under a BSD-style license.
+https://github.com/python-excel/xlrd
+
+-------------------------------------------------------------------------------
+xlwt
+-------------------------------------------------------------------------------
+This product includes software developed by the xlwt project.
+
+xlwt is licensed under a BSD-style license.
+https://github.com/python-excel/xlwt
+
+-------------------------------------------------------------------------------
+chardet
+-------------------------------------------------------------------------------
+This product includes software developed by the chardet project.
+
+chardet is licensed under the LGPL-2.1-or-later license.
+https://github.com/chardet/chardet
+
+-------------------------------------------------------------------------------
+customtkinter
+-------------------------------------------------------------------------------
+This product includes software developed by the CustomTkinter project.
+
+customtkinter is licensed under the MIT License.
+https://github.com/TomSchimansky/CustomTkinter
+
+-------------------------------------------------------------------------------
+Other Notices
+-------------------------------------------------------------------------------
+This software may include additional transitive dependencies that are
+distributed under their own respective open-source licenses. For the complete
+and up-to-date list of dependencies and license texts, please refer to:
+
+- The project’s SBOM (Software Bill of Materials).
+- The source distributions of the respective packages on PyPI or their
+  project home pages.
+
+Nothing in this NOTICE file modifies the terms of the underlying licenses.
+The full text of each license is available from the respective project’s
+distribution or website.

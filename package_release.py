@@ -10,6 +10,7 @@ def package_release():
     DIST_DIR = ROOT_DIR / "dist"
     PLUGINS_DIR = ROOT_DIR / "plugins"
     LATEST_DIR = ROOT_DIR / "latest"
+    NOTICE_FILE = ROOT_DIR / "notice.txt"
     ZIP_NAME = "latest_release.zip"
 
     print(f"--- Starting Packaging Process ---")
@@ -39,6 +40,14 @@ def package_release():
     dest_exe = LATEST_DIR / latest_exe.name
     shutil.copy2(latest_exe, dest_exe)
     print(f"Found and copied latest executable: {latest_exe.name}")
+
+    # 3b. Copy notice.txt for license/attribution compliance
+    if NOTICE_FILE.exists():
+        dest_notice = LATEST_DIR / NOTICE_FILE.name
+        shutil.copy2(NOTICE_FILE, dest_notice)
+        print(f"Copied notice file to: {dest_notice}")
+    else:
+        print(f"Warning: '{NOTICE_FILE.name}' not found. NOTICE will not be included in the release.")
 
     # 4. Copy plugins
     # We create a 'plugins' subfolder inside 'latest' to maintain structure
